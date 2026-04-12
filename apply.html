@@ -479,6 +479,10 @@
 </div>
 
 <script>
+// ── Google Apps Script URL ─────────────────────────
+// Code.gs 배포 후 아래 URL을 교체하세요
+const SCRIPT_URL = 'YOUR_SCRIPT_URL';
+
 let currentStep = 1;
 let formData = {};
 
@@ -557,7 +561,7 @@ function toggleAll(cb) {
   document.querySelectorAll('.agree-check').forEach(c => c.checked = cb.checked);
 }
 
-function submitForm() {
+async function submitForm() {
   const agree1 = document.getElementById('agree1').checked;
   const agree2 = document.getElementById('agree2').checked;
   if (!agree1 || !agree2) {
@@ -565,23 +569,46 @@ function submitForm() {
     return;
   }
 
-  // 제출 애니메이션
   const btn = document.querySelector('.btn-submit');
   btn.textContent = '신청 처리 중...';
   btn.disabled = true;
 
-  setTimeout(() => {
-    document.getElementById('step3').classList.remove('active');
-    document.getElementById('success').style.display = 'block';
-    // progress all done
-    ['pc1','pc2','pc3'].forEach(id => {
-      document.getElementById(id).className = 'prog-circle done';
-    });
-    ['pl1','pl2'].forEach(id => {
-      document.getElementById(id).className = 'prog-line done';
-    });
-    window.scrollTo({top: 0, behavior: 'smooth'});
-  }, 1200);
+  // 폼 데이터 수집
+  const biz  = document.querySelector('input[name="biz"]:checked');
+  const tier = document.querySelector('input[name="tier"]:checked');
+  const payload = {
+    name:    document.getElementById('name').value.trim(),
+    phone:   document.getElementById('phone').value.trim(),
+    email:   document.getElementById('email').value.trim(),
+    sns:     document.getElementById('sns').value.trim(),
+    biz:     biz  ? biz.value  : '',
+    tier:    tier ? tier.value : '5-9',
+    channel: (document.getElementById('channel') || {}).value || '',
+    msg:     (document.getElementById('msg')     || {}).value || ''
+  };
+
+  // Google Sheets 저장 (no-cors: 응답 불필요, 전송만)
+  if (SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL') {
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode:   'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch(e) { /* 네트워크 오류 시 무시 */ }
+  }
+
+  // 성공 화면 전환
+  document.getElementById('step3').classList.remove('active');
+  document.getElementById('success').style.display = 'block';
+  ['pc1','pc2','pc3'].forEach(id => {
+    document.getElementById(id).className = 'prog-circle done';
+  });
+  ['pl1','pl2'].forEach(id => {
+    document.getElementById(id).className = 'prog-line done';
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function shareURL() {

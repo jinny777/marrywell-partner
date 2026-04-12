@@ -404,6 +404,7 @@ tr:hover td{background:#FAFAFF;}
     <div class="topbar">
       <div class="page-title" id="page-title">대시보드</div>
       <div class="topbar-right">
+        <span id="sync-indicator" style="font-size:11px;color:var(--gray);cursor:pointer" onclick="loadFromSheet()" title="클릭하여 새로고침">⏳ 로딩 중</span>
         <div class="tb-badge date-badge" id="today-date"></div>
         <button class="logout-btn" onclick="doLogout()">로그아웃</button>
       </div>
@@ -681,6 +682,10 @@ tr:hover td{background:#FAFAFF;}
 <div class="toast" id="toast"></div>
 
 <script>
+// ── Google Apps Script URL ─────────────────────────
+// Code.gs 배포 후 아래 URL을 교체하세요
+const SCRIPT_URL = 'YOUR_SCRIPT_URL';
+
 // ── 데이터 ─────────────────────────────────────────
 const SEED = [
   {id:1,name:'김지원',email:'jiwon@naver.com',phone:'010-1234-5678',biz:'웨딩홀',tier:'5-9',channel:'직접 방문 영업',msg:'',date:'2025-04-01',status:'active',code:'MW-A1B2',referrals:7,payback:35},
@@ -711,6 +716,53 @@ let currentSearch = '';
 
 function savePartners(){ localStorage.setItem('mw_partners', JSON.stringify(partners)); }
 
+// ── 구글 시트 연동 ──────────────────────────────────
+async function loadFromSheet() {
+  if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_SCRIPT_URL') return;
+
+  const indicator = document.getElementById('sync-indicator');
+  if (indicator) { indicator.textContent = '🔄 동기화 중...'; indicator.style.color = 'var(--warn)'; }
+
+  try {
+    const res  = await fetch(SCRIPT_URL + '?action=list');
+    const data = await res.json();
+
+    if (Array.isArray(data) && data.length > 0) {
+      partners = data.map(p => ({
+        id:        p.id   || p._row,
+        name:      p.name || '',
+        email:     p.email || '',
+        phone:     p.phone || '',
+        sns:       p.sns  || '',
+        biz:       p.biz  || '',
+        tier:      p.tier || '5-9',
+        channel:   p.channel || '',
+        msg:       p.msg  || '',
+        date:      p.date || '',
+        status:    p.status || 'pending',
+        code:      p.code || '',
+        referrals: parseInt(p.referrals) || 0,
+        payback:   parseInt(p.payback)   || 0
+      }));
+      savePartners();
+      updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
+      if (indicator) { indicator.textContent = '✓ 실시간 연동'; indicator.style.color = 'var(--ok)'; }
+    }
+  } catch(e) {
+    if (indicator) { indicator.textContent = '⚠ 오프라인 (로컬 데이터)'; indicator.style.color = 'var(--err)'; }
+  }
+}
+
+async function pushStatusToSheet(id, status, code) {
+  if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_SCRIPT_URL') return;
+  try {
+    let url = SCRIPT_URL + '?action=update&id=' + id;
+    if (status) url += '&status=' + encodeURIComponent(status);
+    if (code)   url += '&code='   + encodeURIComponent(code);
+    await fetch(url);
+  } catch(e) { /* 오프라인 시 무시 — 로컬에는 이미 반영됨 */ }
+}
+
 // ── 로그인 ────────────────────────────────────────
 function doLogin(){
   const id = document.getElementById('login-id').value;
@@ -730,7 +782,7 @@ function doLogout(){
 }
 
 // ── 초기화 ────────────────────────────────────────
-function initApp(){
+async function initApp(){
   document.getElementById('today-date').textContent = new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
   updateStats();
   renderRecentTable();
@@ -738,6 +790,14 @@ function initApp(){
   renderPaybackTable();
   renderChecklist();
   renderMonthChart();
+
+  // 구글 시트에서 최신 데이터 로드
+  await loadFromSheet();
+
+  // 창이 포커스될 때마다 새로고침 (다른 탭에서 신청이 들어올 경우)
+  window.addEventListener('focus', loadFromSheet);
+  // 30초마다 자동 새로고침
+  setInterval(loadFromSheet, 30000);
 }
 
 function updateStats(){
@@ -888,6 +948,7 @@ function changeStatus(id, status){
   savePartners();
   updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
   toast(`${p.name} 님 상태가 [${STATUS_MAP[status]}]으로 변경되었습니다.`);
+  pushStatusToSheet(id, status, null); // 구글 시트 동기화
 }
 
 function issueCode(id){
@@ -899,6 +960,7 @@ function issueCode(id){
   savePartners();
   updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
   toast(`${p.name} 님에게 코드 [${code}]가 발급되었습니다.`);
+  pushStatusToSheet(id, p.status, code); // 구글 시트 동기화
 }
 
 function filterPartners(f, el){
