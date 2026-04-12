@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파트너 신청 — MARRYWELL 파트너스</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@600;700;800;900&display=swap');
+  :root{
+    --p:#4B3BC7;--pd:#3A2DA0;--pl:#6C5CE7;
+    --pale:#EEF0FF;--ac:#A29BFE;--gold:#F4C430;
+    --dark:#14082A;--mid:#2D1B69;
+    --text:#1A1A2E;--gray:#6C757D;
+    --bg:#F8F9FF;--white:#fff;
+    --err:#EF4444;--ok:#16A34A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+  /* NAV */
+  nav{
+    background:rgba(20,8,42,.97);
+    padding:0 5%;height:60px;
+    display:flex;align-items:center;justify-content:space-between;
+    border-bottom:1px solid rgba(162,155,254,.15);
+  }
+  .nav-logo{font-family:'Montserrat',sans-serif;font-size:17px;font-weight:900;color:#fff;letter-spacing:2px;text-decoration:none;}
+  .nav-logo span{color:var(--ac);}
+  .nav-back{font-size:13px;color:rgba(255,255,255,.5);text-decoration:none;}
+  .nav-back:hover{color:var(--ac);}
+
+  /* PAGE HEADER */
+  .page-header{
+    background:linear-gradient(140deg,var(--dark),var(--mid) 60%,var(--p));
+    padding:52px 5% 44px;text-align:center;
+    position:relative;overflow:hidden;
+  }
+  .page-header::before{
+    content:'';position:absolute;top:-80px;right:-80px;
+    width:360px;height:360px;border-radius:50%;
+    background:radial-gradient(circle,rgba(162,155,254,.12) 0%,transparent 65%);
+  }
+  .ph-kicker{
+    font-family:'Montserrat',sans-serif;
+    font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+    color:var(--ac);margin-bottom:12px;position:relative;z-index:2;
+  }
+  .page-header h1{
+    font-size:32px;font-weight:900;color:#fff;
+    margin-bottom:8px;position:relative;z-index:2;
+  }
+  .page-header h1 span{color:var(--gold);}
+  .page-header p{
+    font-size:14px;color:rgba(255,255,255,.6);
+    position:relative;z-index:2;
+  }
+
+  /* FORM CONTAINER */
+  .form-wrap{
+    max-width:620px;margin:0 auto;
+    padding:48px 24px 72px;
+  }
+
+  /* PROGRESS */
+  .progress{
+    display:flex;align-items:center;justify-content:center;
+    gap:0;margin-bottom:40px;
+  }
+  .prog-step{
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    flex:1;
+  }
+  .prog-circle{
+    width:36px;height:36px;border-radius:50%;
+    font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .3s;
+  }
+  .prog-circle.done{background:var(--p);color:#fff;}
+  .prog-circle.active{background:var(--gold);color:var(--text);box-shadow:0 0 0 4px rgba(244,196,48,.25);}
+  .prog-circle.todo{background:#E5E5F5;color:var(--gray);}
+  .prog-label{font-size:10px;color:var(--gray);font-weight:500;white-space:nowrap;}
+  .prog-line{flex:1;height:2px;background:#E5E5F5;margin-bottom:22px;transition:background .3s;}
+  .prog-line.done{background:var(--p);}
+
+  /* FORM CARD */
+  .form-card{
+    background:var(--white);border-radius:20px;
+    padding:36px 32px;
+    box-shadow:0 4px 32px rgba(75,59,199,.08);
+    border-top:4px solid var(--pl);
+    display:none;
+  }
+  .form-card.active{display:block;}
+  .form-card h2{
+    font-size:20px;font-weight:800;color:var(--text);
+    margin-bottom:6px;
+  }
+  .form-card .step-desc{
+    font-size:13px;color:var(--gray);margin-bottom:28px;line-height:1.6;
+  }
+
+  /* FORM ELEMENTS */
+  .field{margin-bottom:20px;}
+  .field label{
+    display:block;font-size:12px;font-weight:700;
+    color:var(--text);margin-bottom:7px;
+    display:flex;align-items:center;gap:5px;
+  }
+  .field label .req{color:var(--err);font-size:13px;}
+  .field input,.field select,.field textarea{
+    width:100%;padding:13px 16px;
+    border:1.5px solid #E0E0F0;border-radius:12px;
+    font-size:14px;font-family:'Noto Sans KR',sans-serif;
+    color:var(--text);background:var(--bg);
+    outline:none;transition:border-color .15s,box-shadow .15s;
+    -webkit-appearance:none;
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{
+    border-color:var(--pl);
+    box-shadow:0 0 0 3px rgba(108,92,231,.12);
+    background:var(--white);
+  }
+  .field textarea{resize:vertical;min-height:90px;}
+  .field .hint{font-size:11px;color:var(--gray);margin-top:5px;}
+  .field .err-msg{font-size:11px;color:var(--err);margin-top:5px;display:none;}
+  .field.error input,.field.error select,.field.error textarea{border-color:var(--err);}
+  .field.error .err-msg{display:block;}
+
+  /* 2-COL GRID */
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+  /* RADIO GROUP */
+  .radio-group{display:flex;flex-wrap:wrap;gap:8px;}
+  .radio-btn{
+    padding:8px 16px;border-radius:100px;
+    border:1.5px solid #E0E0F0;
+    font-size:12px;font-weight:500;color:var(--gray);
+    cursor:pointer;transition:all .15s;
+    user-select:none;
+  }
+  .radio-btn:hover{border-color:var(--pl);color:var(--p);}
+  .radio-btn.sel{
+    background:var(--pale);border-color:var(--pl);
+    color:var(--p);font-weight:700;
+  }
+  .radio-group input[type=radio]{display:none;}
+
+  /* TIER CARDS */
+  .tier-select{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .tier-opt{
+    border:2px solid #E0E0F0;border-radius:14px;
+    padding:16px 10px;text-align:center;cursor:pointer;
+    transition:all .15s;
+  }
+  .tier-opt:hover{border-color:var(--pl);}
+  .tier-opt.sel{border-color:var(--p);background:var(--pale);}
+  .tier-opt input{display:none;}
+  .tier-opt .to-name{font-size:12px;font-weight:800;color:var(--p);margin-bottom:4px;}
+  .tier-opt .to-amt{font-family:'Montserrat',sans-serif;font-size:20px;font-weight:900;color:var(--text);}
+  .tier-opt .to-cond{font-size:10px;color:var(--gray);margin-top:2px;}
+  .tier-opt.sel .to-name,.tier-opt.sel .to-amt{color:var(--pd);}
+
+  /* AGREE */
+  .agree-box{
+    background:var(--bg);border-radius:12px;
+    padding:16px 18px;margin-bottom:16px;
+  }
+  .agree-item{
+    display:flex;align-items:flex-start;gap:10px;
+    padding:8px 0;border-bottom:1px solid #EEE;
+    cursor:pointer;
+  }
+  .agree-item:last-child{border-bottom:none;}
+  .agree-item input[type=checkbox]{
+    width:18px;height:18px;flex-shrink:0;
+    accent-color:var(--p);margin-top:1px;cursor:pointer;
+  }
+  .agree-text{font-size:12px;color:var(--text);line-height:1.6;}
+  .agree-text .bold{font-weight:700;}
+  .agree-text .link{color:var(--p);text-decoration:underline;cursor:pointer;}
+
+  /* BUTTONS */
+  .btn-row{display:flex;gap:10px;margin-top:28px;}
+  .btn-prev{
+    padding:14px 28px;border-radius:100px;
+    border:1.5px solid #E0E0F0;
+    background:transparent;color:var(--gray);
+    font-size:14px;font-weight:600;
+    cursor:pointer;font-family:'Noto Sans KR',sans-serif;
+    transition:border-color .15s;
+  }
+  .btn-prev:hover{border-color:var(--pl);color:var(--p);}
+  .btn-next{
+    flex:1;padding:14px;border-radius:100px;
+    background:var(--p);color:#fff;border:none;
+    font-size:14px;font-weight:700;
+    cursor:pointer;font-family:'Noto Sans KR',sans-serif;
+    transition:background .15s,transform .1s;
+  }
+  .btn-next:hover{background:var(--pd);transform:translateY(-1px);}
+  .btn-submit{
+    flex:1;padding:14px;border-radius:100px;
+    background:var(--gold);color:var(--text);border:none;
+    font-size:15px;font-weight:800;
+    cursor:pointer;font-family:'Noto Sans KR',sans-serif;
+    transition:transform .1s,box-shadow .15s;
+  }
+  .btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(244,196,48,.35);}
+
+  /* SUMMARY CARD */
+  .summary-card{
+    background:var(--pale);border-radius:14px;
+    padding:20px 18px;margin-bottom:20px;
+  }
+  .summary-card h4{font-size:13px;font-weight:700;color:var(--pd);margin-bottom:12px;}
+  .summary-row{
+    display:flex;justify-content:space-between;
+    font-size:12px;padding:5px 0;
+    border-bottom:1px solid rgba(75,59,199,.08);
+  }
+  .summary-row:last-child{border-bottom:none;}
+  .summary-row .key{color:var(--gray);}
+  .summary-row .val{font-weight:600;color:var(--text);}
+
+  /* SUCCESS */
+  .success-screen{
+    display:none;text-align:center;
+    padding:48px 24px;
+  }
+  .success-ico{font-size:64px;margin-bottom:20px;}
+  .success-screen h2{font-size:26px;font-weight:900;color:var(--text);margin-bottom:10px;}
+  .success-screen h2 span{color:var(--p);}
+  .success-screen p{font-size:14px;color:var(--gray);line-height:1.8;margin-bottom:28px;}
+  .success-info{
+    background:var(--pale);border-radius:16px;
+    padding:20px 24px;text-align:left;margin-bottom:24px;
+  }
+  .success-info h4{font-size:13px;font-weight:700;color:var(--p);margin-bottom:10px;}
+  .success-info ul{list-style:none;}
+  .success-info ul li{
+    font-size:12px;color:var(--text);
+    padding:5px 0;display:flex;align-items:center;gap:8px;
+  }
+  .success-info ul li::before{content:'✓';color:var(--pl);font-weight:900;}
+  .success-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .s-btn-home{
+    background:var(--p);color:#fff;
+    font-weight:700;font-size:13px;
+    padding:12px 28px;border-radius:100px;
+    text-decoration:none;display:inline-block;
+  }
+  .s-btn-share{
+    border:1.5px solid var(--pl);color:var(--p);
+    font-weight:600;font-size:13px;
+    padding:11px 24px;border-radius:100px;
+    background:transparent;cursor:pointer;
+    font-family:'Noto Sans KR',sans-serif;
+  }
+
+  @media(max-width:500px){
+    .field-row{grid-template-columns:1fr;}
+    .tier-select{grid-template-columns:1fr;}
+    .form-wrap{padding:32px 16px 60px;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">MARRY<span>WELL</span></a>
+  <a href="index.html" class="nav-back">← 프로그램 소개</a>
+</nav>
+
+<div class="page-header">
+  <div class="ph-kicker">Partner Application</div>
+  <h1>파트너 <span>신청서</span></h1>
+  <p>3분이면 완료됩니다. 신청 후 24시간 내 전용 코드를 드립니다.</p>
+</div>
+
+<div class="form-wrap">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress">
+    <div class="prog-step">
+      <div class="prog-circle active" id="pc1">1</div>
+      <div class="prog-label">기본 정보</div>
+    </div>
+    <div class="prog-line" id="pl1"></div>
+    <div class="prog-step">
+      <div class="prog-circle todo" id="pc2">2</div>
+      <div class="prog-label">업체 정보</div>
+    </div>
+    <div class="prog-line" id="pl2"></div>
+    <div class="prog-step">
+      <div class="prog-circle todo" id="pc3">3</div>
+      <div class="prog-label">확인 및 동의</div>
+    </div>
+  </div>
+
+  <!-- STEP 1: 기본 정보 -->
+  <div class="form-card active" id="step1">
+    <h2>기본 정보</h2>
+    <p class="step-desc">신청자 본인의 정보를 입력해 주세요.</p>
+
+    <div class="field-row">
+      <div class="field" id="f-name">
+        <label>이름 <span class="req">*</span></label>
+        <input type="text" id="name" placeholder="홍길동">
+        <div class="err-msg">이름을 입력해주세요.</div>
+      </div>
+      <div class="field" id="f-phone">
+        <label>연락처 <span class="req">*</span></label>
+        <input type="tel" id="phone" placeholder="010-0000-0000">
+        <div class="err-msg">연락처를 입력해주세요.</div>
+      </div>
+    </div>
+
+    <div class="field" id="f-email">
+      <label>이메일 <span class="req">*</span></label>
+      <input type="email" id="email" placeholder="example@email.com">
+      <div class="hint">파트너 코드와 안내 메일을 보내드립니다.</div>
+      <div class="err-msg">올바른 이메일을 입력해주세요.</div>
+    </div>
+
+    <div class="field">
+      <label>SNS 또는 채널 (선택)</label>
+      <input type="text" id="sns" placeholder="인스타그램, 블로그, 유튜브 등 링크">
+      <div class="hint">소개 채널이 있으시면 입력해 주세요.</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-next" onclick="goStep(2)">다음 단계 →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: 업체 정보 -->
+  <div class="form-card" id="step2">
+    <h2>업체 정보</h2>
+    <p class="step-desc">소개할 업체 유형과 예상 규모를 알려주세요.</p>
+
+    <div class="field">
+      <label>소개 예정 업체 유형 <span class="req">*</span></label>
+      <div class="radio-group" id="biz-type">
+        <label class="radio-btn" onclick="selRadio(this,'biz-type')">
+          <input type="radio" name="biz" value="웨딩홀">웨딩홀 / 예식장
+        </label>
+        <label class="radio-btn" onclick="selRadio(this,'biz-type')">
+          <input type="radio" name="biz" value="플래너">웨딩플래너
+        </label>
+        <label class="radio-btn" onclick="selRadio(this,'biz-type')">
+          <input type="radio" name="biz" value="스튜디오">스튜디오
+        </label>
+        <label class="radio-btn" onclick="selRadio(this,'biz-type')">
+          <input type="radio" name="biz" value="드레스">드레스샵
+        </label>
+        <label class="radio-btn" onclick="selRadio(this,'biz-type')">
+          <input type="radio" name="biz" value="여행사">허니문 여행사
+        </label>
+        <label class="radio-btn" onclick="selRadio(this,'biz-type')">
+          <input type="radio" name="biz" value="청첩장">청첩장 업체
+        </label>
+        <label class="radio-btn" onclick="selRadio(this,'biz-type')">
+          <input type="radio" name="biz" value="기타">기타
+        </label>
+      </div>
+      <div class="err-msg" id="biz-err">업체 유형을 선택해주세요.</div>
+    </div>
+
+    <div class="field">
+      <label>월 예상 소개 건수 <span class="req">*</span></label>
+      <div class="tier-select" id="tier-sel">
+        <label class="tier-opt" onclick="selTier(this,'1-4')">
+          <input type="radio" name="tier" value="1-4">
+          <div class="to-name">Basic</div>
+          <div class="to-amt">3만원</div>
+          <div class="to-cond">월 1–4건</div>
+        </label>
+        <label class="tier-opt sel" onclick="selTier(this,'5-9')">
+          <input type="radio" name="tier" value="5-9" checked>
+          <div class="to-name">Silver</div>
+          <div class="to-amt">5만원</div>
+          <div class="to-cond">월 5–9건</div>
+        </label>
+        <label class="tier-opt" onclick="selTier(this,'10+')">
+          <input type="radio" name="tier" value="10+">
+          <div class="to-name">Gold</div>
+          <div class="to-amt">7만원</div>
+          <div class="to-cond">월 10건+</div>
+        </label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>소개 방법 / 채널</label>
+      <select id="channel">
+        <option value="">선택해주세요</option>
+        <option>직접 방문 영업</option>
+        <option>지인 네트워크</option>
+        <option>SNS / 온라인</option>
+        <option>전화 / 이메일</option>
+        <option>기타</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>추가 메시지 (선택)</label>
+      <textarea id="message" placeholder="궁금한 점이나 하고 싶은 말씀을 자유롭게 작성해 주세요."></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-prev" onclick="goStep(1)">← 이전</button>
+      <button class="btn-next" onclick="goStep(3)">다음 단계 →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: 확인 및 동의 -->
+  <div class="form-card" id="step3">
+    <h2>확인 및 동의</h2>
+    <p class="step-desc">입력하신 내용을 확인하고 약관에 동의해주세요.</p>
+
+    <div class="summary-card">
+      <h4>📋 신청 내용 요약</h4>
+      <div class="summary-row"><span class="key">이름</span><span class="val" id="s-name">—</span></div>
+      <div class="summary-row"><span class="key">연락처</span><span class="val" id="s-phone">—</span></div>
+      <div class="summary-row"><span class="key">이메일</span><span class="val" id="s-email">—</span></div>
+      <div class="summary-row"><span class="key">업체 유형</span><span class="val" id="s-biz">—</span></div>
+      <div class="summary-row"><span class="key">예상 등급</span><span class="val" id="s-tier">—</span></div>
+    </div>
+
+    <div class="agree-box">
+      <label class="agree-item">
+        <input type="checkbox" id="agree-all" onchange="toggleAll(this)">
+        <div class="agree-text"><span class="bold">전체 동의</span></div>
+      </label>
+      <label class="agree-item">
+        <input type="checkbox" class="agree-check" id="agree1">
+        <div class="agree-text">[필수] <span class="bold">파트너스 운영 약관</span>에 동의합니다.</div>
+      </label>
+      <label class="agree-item">
+        <input type="checkbox" class="agree-check" id="agree2">
+        <div class="agree-text">[필수] <span class="bold">개인정보 수집 및 이용</span>에 동의합니다.</div>
+      </label>
+      <label class="agree-item">
+        <input type="checkbox" class="agree-check" id="agree3">
+        <div class="agree-text">[선택] 마케팅 정보 수신에 동의합니다.</div>
+      </label>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-prev" onclick="goStep(2)">← 이전</button>
+      <button class="btn-submit" onclick="submitForm()">🎉 파트너 신청 완료하기</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="success">
+    <div class="success-ico">🎊</div>
+    <h2>신청이 완료되었습니다!<br><span>환영합니다!</span></h2>
+    <p>
+      입력하신 이메일로 24시간 내에<br>
+      <strong>전용 파트너 코드와 안내 메일</strong>을 보내드립니다.
+    </p>
+    <div class="success-info">
+      <h4>📌 다음 단계</h4>
+      <ul>
+        <li>이메일로 파트너 코드 수령 (24시간 내)</li>
+        <li>파트너 대시보드 접속 링크 안내</li>
+        <li>전담 매니저 배정 및 온보딩 안내</li>
+        <li>마케팅 자료 패키지 발송</li>
+      </ul>
+    </div>
+    <div class="success-btns">
+      <a href="index.html" class="s-btn-home">메인으로 돌아가기</a>
+      <button class="s-btn-share" onclick="shareURL()">🔗 프로그램 공유하기</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentStep = 1;
+let formData = {};
+
+function goStep(n) {
+  if (n > currentStep && !validateStep(currentStep)) return;
+  if (n === 3) fillSummary();
+
+  document.getElementById('step' + currentStep).classList.remove('active');
+  document.getElementById('step' + n).classList.add('active');
+
+  // progress update
+  for (let i = 1; i <= 3; i++) {
+    const c = document.getElementById('pc' + i);
+    c.className = 'prog-circle ' + (i < n ? 'done' : i === n ? 'active' : 'todo');
+    if (i < 3) {
+      const l = document.getElementById('pl' + i);
+      l.className = 'prog-line ' + (i < n ? 'done' : '');
+    }
+  }
+  currentStep = n;
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function validateStep(step) {
+  if (step === 1) {
+    let ok = true;
+    const name  = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+
+    setErr('f-name',  !name);
+    setErr('f-phone', !phone);
+    setErr('f-email', !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+    if (!name || !phone || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) ok = false;
+    return ok;
+  }
+  if (step === 2) {
+    const biz = document.querySelector('input[name="biz"]:checked');
+    const errEl = document.getElementById('biz-err');
+    if (!biz) { errEl.style.display = 'block'; return false; }
+    errEl.style.display = 'none';
+    return true;
+  }
+  return true;
+}
+
+function setErr(id, hasErr) {
+  const el = document.getElementById(id);
+  if (hasErr) el.classList.add('error');
+  else el.classList.remove('error');
+}
+
+function selRadio(el, group) {
+  document.querySelectorAll('#' + group + ' .radio-btn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('biz-err').style.display = 'none';
+}
+
+function selTier(el, val) {
+  document.querySelectorAll('#tier-sel .tier-opt').forEach(t => t.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function fillSummary() {
+  document.getElementById('s-name').textContent  = document.getElementById('name').value;
+  document.getElementById('s-phone').textContent = document.getElementById('phone').value;
+  document.getElementById('s-email').textContent = document.getElementById('email').value;
+  const biz = document.querySelector('input[name="biz"]:checked');
+  document.getElementById('s-biz').textContent   = biz ? biz.value : '—';
+  const tier = document.querySelector('input[name="tier"]:checked');
+  const tierMap = {'1-4':'Basic (월 1-4건 · 3만원/건)', '5-9':'Silver (월 5-9건 · 5만원/건)', '10+':'Gold (월 10건+ · 7만원/건)'};
+  document.getElementById('s-tier').textContent  = tier ? tierMap[tier.value] : '—';
+}
+
+function toggleAll(cb) {
+  document.querySelectorAll('.agree-check').forEach(c => c.checked = cb.checked);
+}
+
+function submitForm() {
+  const agree1 = document.getElementById('agree1').checked;
+  const agree2 = document.getElementById('agree2').checked;
+  if (!agree1 || !agree2) {
+    alert('필수 약관에 동의해주세요.');
+    return;
+  }
+
+  // 제출 애니메이션
+  const btn = document.querySelector('.btn-submit');
+  btn.textContent = '신청 처리 중...';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    document.getElementById('step3').classList.remove('active');
+    document.getElementById('success').style.display = 'block';
+    // progress all done
+    ['pc1','pc2','pc3'].forEach(id => {
+      document.getElementById(id).className = 'prog-circle done';
+    });
+    ['pl1','pl2'].forEach(id => {
+      document.getElementById(id).className = 'prog-line done';
+    });
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }, 1200);
+}
+
+function shareURL() {
+  const url = 'https://jinny777.github.io/marrywell-partner/';
+  if (navigator.share) {
+    navigator.share({title: 'MARRYWELL 파트너스', text: '소개만 해도 수익이 생깁니다!', url});
+  } else {
+    navigator.clipboard.writeText(url).then(() => alert('링크가 복사되었습니다!'));
+  }
+}
+</script>
+</body>
+</html>
