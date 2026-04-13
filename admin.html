@@ -791,6 +791,9 @@ async function initApp(){
   renderChecklist();
   renderMonthChart();
 
+  // 로드 직후 미처리 신청 체크
+  checkPendingApplication();
+
   // 구글 시트에서 최신 데이터 로드
   await loadFromSheet();
 
@@ -1038,22 +1041,38 @@ function exportPayback(){
 }
 
 // ── apply.html에서 넘어온 신규 신청 처리 ─────────
-window.addEventListener('storage', e=>{
-  if(e.key==='mw_new_application' && e.newValue){
-    const data = JSON.parse(e.newValue);
-    const newId = Math.max(...partners.map(p=>p.id))+1;
+function processNewApplication(raw) {
+  try {
+    const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (!data || !data.name) return;
+    const newId = partners.length ? Math.max(...partners.map(p => Number(p.id) || 0)) + 1 : 1;
     partners.push({
-      id:newId, name:data.name, email:data.email, phone:data.phone,
-      biz:data.biz, tier:data.tier||'5-9', channel:data.channel||'',
-      msg:data.msg||'', date:new Date().toLocaleDateString('ko-KR'),
-      status:'pending', code:'', referrals:0, payback:0
+      id: newId, name: data.name, email: data.email || '', phone: data.phone || '',
+      sns: data.sns || '', biz: data.biz || '', tier: data.tier || '5-9',
+      channel: data.channel || '', msg: data.msg || '',
+      date: data.date || new Date().toLocaleDateString('ko-KR'),
+      status: 'pending', code: '', referrals: 0, payback: 0
     });
     savePartners();
     updateStats(); renderRecentTable(); renderPartnerTable();
     localStorage.removeItem('mw_new_application');
-    toast(`새 파트너 신청: ${data.name} 님`);
+    toast('새 파트너 신청: ' + data.name + ' 님');
+  } catch(e) {}
+}
+
+// 다른 탭에서 apply.html이 제출될 때 실시간 감지
+window.addEventListener('storage', e => {
+  if (e.key === 'mw_new_application' && e.newValue) {
+    processNewApplication(e.newValue);
   }
 });
+
+// 페이지 로드 / 포커스 시 미처리 신청 체크 (admin보다 apply가 먼저 열린 경우)
+function checkPendingApplication() {
+  const pending = localStorage.getItem('mw_new_application');
+  if (pending) processNewApplication(pending);
+}
+window.addEventListener('focus', checkPendingApplication);
 </script>
 </body>
 </html>

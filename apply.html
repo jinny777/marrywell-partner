@@ -587,7 +587,12 @@ async function submitForm() {
     msg:     (document.getElementById('msg')     || {}).value || ''
   };
 
-  // Google Sheets 저장 (no-cors: 응답 불필요, 전송만)
+  // 1) localStorage 저장 → 같은 브라우저의 admin.html에서 즉시 감지
+  payload.date = new Date().toLocaleDateString('ko-KR');
+  payload.status = 'pending';
+  localStorage.setItem('mw_new_application', JSON.stringify(payload));
+
+  // 2) Google Sheets 저장 (URL 설정 시 외부 기기에서도 확인 가능)
   if (SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL') {
     try {
       await fetch(SCRIPT_URL, {
