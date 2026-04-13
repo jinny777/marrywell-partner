@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARRYWELL 파트너스 — 소개 수익 프로그램</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@600;700;800;900&display=swap');
+
+  :root {
+    --p:    #4B3BC7;
+    --pd:   #3A2DA0;
+    --pl:   #6C5CE7;
+    --pale: #EEF0FF;
+    --ac:   #A29BFE;
+    --gold: #F4C430;
+    --goldd:#D4A800;
+    --dark: #14082A;
+    --mid:  #2D1B69;
+    --text: #1A1A2E;
+    --gray: #6C757D;
+    --lgray:#F4F4FC;
+    --white:#FFFFFF;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family:'Noto Sans KR', sans-serif;
+    background:#DCDCEC;
+    color:var(--text);
+  }
+
+  /* ── A4 세로 ── */
+  .page {
+    width: 794px;
+    min-height: 1123px;
+    margin: 40px auto;
+    background: var(--white);
+    box-shadow: 0 16px 60px rgba(75,59,199,.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ════════ HEADER ════════ */
+  .hd {
+    background: linear-gradient(140deg, var(--dark) 0%, var(--mid) 50%, var(--p) 100%);
+    padding: 44px 52px 36px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .hd::before {
+    content:'';
+    position:absolute; top:-120px; right:-120px;
+    width:420px; height:420px; border-radius:50%;
+    background:radial-gradient(circle, rgba(162,155,254,.14) 0%, transparent 65%);
+    pointer-events:none;
+  }
+  .hd::after {
+    content:'';
+    position:absolute; bottom:-80px; left:120px;
+    width:280px; height:280px; border-radius:50%;
+    background:radial-gradient(circle, rgba(75,59,199,.2) 0%, transparent 65%);
+    pointer-events:none;
+  }
+
+  /* 왼쪽 골드 바 */
+  .hd-bar {
+    position:absolute; left:0; top:0;
+    width:6px; height:100%;
+    background:var(--gold);
+  }
+
+  .hd-top {
+    display:flex; align-items:flex-start;
+    justify-content:space-between; margin-bottom:28px;
+    position:relative; z-index:2;
+  }
+  .logo {
+    font-family:'Montserrat',sans-serif;
+    font-size:18px; font-weight:900;
+    color:var(--white); letter-spacing:2px;
+  }
+  .logo span { color:var(--ac); }
+  .hd-badge {
+    background:var(--gold); color:var(--text);
+    font-size:10px; font-weight:800;
+    padding:5px 14px; border-radius:100px;
+    letter-spacing:1px; text-transform:uppercase;
+  }
+
+  .hd-kicker {
+    font-family:'Montserrat',sans-serif;
+    font-size:10px; font-weight:700;
+    letter-spacing:3px; text-transform:uppercase;
+    color:var(--ac); margin-bottom:14px;
+    display:flex; align-items:center; gap:10px;
+    position:relative; z-index:2;
+  }
+  .hd-kicker::before {
+    content:''; width:28px; height:2px;
+    background:var(--gold); border-radius:2px;
+  }
+
+  .hd-title {
+    font-size:36px; font-weight:900;
+    line-height:1.15; letter-spacing:-0.5px;
+    color:var(--white); margin-bottom:10px;
+    position:relative; z-index:2;
+  }
+  .hd-title .gold {
+    background:linear-gradient(90deg, var(--gold), #FFE066);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+
+  .hd-sub {
+    font-size:14px; color:rgba(255,255,255,.65);
+    line-height:1.7; margin-bottom:26px;
+    position:relative; z-index:2;
+    max-width:580px;
+  }
+
+  /* 타겟 업체 태그들 */
+  .target-row {
+    display:flex; flex-wrap:wrap; gap:8px;
+    position:relative; z-index:2;
+  }
+  .target-tag {
+    padding:6px 14px;
+    border:1.5px solid rgba(162,155,254,.4);
+    border-radius:100px;
+    font-size:11px; font-weight:500;
+    color:rgba(255,255,255,.8);
+  }
+  .target-tag.hi {
+    background:rgba(162,155,254,.2);
+    border-color:rgba(162,155,254,.6);
+    color:var(--white); font-weight:700;
+  }
+
+  /* ════════ 3-STEP FLOW ════════ */
+  .flow-section {
+    background:var(--gold);
+    padding:28px 52px;
+    flex-shrink:0;
+  }
+  .flow-title {
+    font-family:'Montserrat',sans-serif;
+    font-size:11px; font-weight:800;
+    letter-spacing:2px; text-transform:uppercase;
+    color:var(--pd); margin-bottom:18px;
+  }
+  .flow-row {
+    display:flex; align-items:center; gap:0;
+  }
+  .flow-step {
+    flex:1;
+    background:rgba(255,255,255,.35);
+    border-radius:12px;
+    padding:16px 14px;
+    text-align:center;
+    position:relative;
+  }
+  .flow-num {
+    font-family:'Montserrat',sans-serif;
+    font-size:10px; font-weight:900;
+    color:var(--pd); letter-spacing:1px;
+    margin-bottom:8px;
+  }
+  .flow-ico { font-size:26px; margin-bottom:8px; }
+  .flow-label {
+    font-size:12px; font-weight:700;
+    color:var(--pd); margin-bottom:4px;
+  }
+  .flow-desc { font-size:10px; color:rgba(58,45,160,.7); line-height:1.5; }
+  .flow-arrow {
+    font-size:20px; color:var(--pd);
+    font-weight:900; margin:0 6px;
+    flex-shrink:0;
+  }
+
+  /* ════════ PAYBACK TABLE ════════ */
+  .payback-section {
+    background:var(--lgray);
+    padding:32px 52px;
+    flex-shrink:0;
+  }
+  .sec-label {
+    font-family:'Montserrat',sans-serif;
+    font-size:9px; font-weight:800;
+    letter-spacing:3px; text-transform:uppercase;
+    color:var(--p); margin-bottom:8px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .sec-label::before {
+    content:''; width:20px; height:2px;
+    background:var(--p); border-radius:2px;
+  }
+  .sec-title {
+    font-size:20px; font-weight:800;
+    color:var(--text); margin-bottom:4px;
+  }
+  .sec-sub {
+    font-size:12px; color:var(--gray);
+    margin-bottom:20px; line-height:1.6;
+  }
+
+  /* 티어 카드 3개 */
+  .tier-row {
+    display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+  }
+  .tier {
+    border-radius:14px; padding:20px 16px;
+    text-align:center; position:relative;
+    overflow:hidden;
+  }
+  .tier.basic  { background:var(--white); border:1.5px solid #E0E0F0; }
+  .tier.plus   { background:var(--pale);  border:1.5px solid var(--ac); }
+  .tier.gold   {
+    background:linear-gradient(135deg, var(--pd), var(--p));
+    border:none;
+  }
+  .tier-badge {
+    display:inline-block;
+    font-size:9px; font-weight:800;
+    letter-spacing:1.5px; text-transform:uppercase;
+    padding:3px 10px; border-radius:100px;
+    margin-bottom:12px;
+  }
+  .tier.basic  .tier-badge { background:#E8E8F8; color:var(--gray); }
+  .tier.plus   .tier-badge { background:var(--p); color:var(--white); }
+  .tier.gold   .tier-badge { background:var(--gold); color:var(--text); }
+
+  .tier-cond {
+    font-size:11px; color:var(--gray); margin-bottom:10px; line-height:1.5;
+  }
+  .tier.gold .tier-cond { color:rgba(255,255,255,.65); }
+  .tier.plus .tier-cond { color:var(--pd); }
+
+  .tier-amount {
+    font-family:'Montserrat',sans-serif;
+    font-size:30px; font-weight:900;
+    line-height:1; margin-bottom:4px;
+  }
+  .tier.basic  .tier-amount { color:var(--p); }
+  .tier.plus   .tier-amount { color:var(--pd); }
+  .tier.gold   .tier-amount { color:var(--gold); }
+
+  .tier-unit { font-size:11px; color:var(--gray); }
+  .tier.gold .tier-unit { color:rgba(255,255,255,.6); }
+  .tier.plus .tier-unit { color:var(--gray); }
+
+  .tier-perks {
+    margin-top:12px; list-style:none; text-align:left;
+  }
+  .tier-perks li {
+    font-size:10px; color:var(--gray);
+    padding:4px 0; border-bottom:1px solid rgba(0,0,0,.05);
+    display:flex; align-items:center; gap:6px;
+  }
+  .tier-perks li:last-child { border-bottom:none; }
+  .tier-perks li::before { content:'✓'; color:var(--pl); font-weight:900; font-size:10px; }
+  .tier.gold .tier-perks li { color:rgba(255,255,255,.75); border-bottom-color:rgba(255,255,255,.1); }
+  .tier.gold .tier-perks li::before { color:var(--gold); }
+
+  /* ════════ 파트너 혜택 ════════ */
+  .benefit-section {
+    background:var(--white);
+    padding:28px 52px;
+    flex-shrink:0;
+  }
+  .benefit-grid {
+    display:grid; grid-template-columns:repeat(4,1fr); gap:10px;
+    margin-top:16px;
+  }
+  .benefit-card {
+    background:var(--lgray);
+    border-radius:12px; padding:16px 12px;
+    text-align:center;
+    border-top:3px solid var(--pl);
+  }
+  .benefit-ico { font-size:22px; margin-bottom:8px; }
+  .benefit-title { font-size:11px; font-weight:700; color:var(--text); margin-bottom:4px; }
+  .benefit-desc  { font-size:10px; color:var(--gray); line-height:1.5; }
+
+  /* ════════ HOW TO JOIN ════════ */
+  .join-section {
+    background:var(--pale);
+    padding:24px 52px;
+    flex-shrink:0;
+  }
+  .join-steps {
+    display:flex; align-items:center; gap:0; margin-top:14px;
+  }
+  .join-step {
+    flex:1; display:flex; align-items:center; gap:10px;
+  }
+  .join-num {
+    width:28px; height:28px; border-radius:50%;
+    background:var(--p); color:var(--white);
+    font-family:'Montserrat',sans-serif;
+    font-size:11px; font-weight:900;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .join-text strong { font-size:11px; color:var(--pd); display:block; font-weight:700; }
+  .join-text span   { font-size:10px; color:var(--gray); }
+  .join-divider {
+    width:30px; height:1px; background:var(--ac);
+    flex-shrink:0; margin:0 6px;
+  }
+
+  /* ════════ CTA FOOTER ════════ */
+  .cta {
+    background:linear-gradient(140deg, var(--dark) 0%, var(--mid) 60%, var(--p) 100%);
+    padding:28px 52px;
+    display:flex; align-items:center; justify-content:space-between;
+    position:relative; overflow:hidden;
+    flex:1;
+  }
+  .cta::before {
+    content:'';
+    position:absolute; top:-60px; right:-60px;
+    width:240px; height:240px; border-radius:50%;
+    background:radial-gradient(circle, rgba(162,155,254,.12) 0%, transparent 65%);
+  }
+  .cta-left { position:relative; z-index:2; }
+  .cta-headline {
+    font-size:19px; font-weight:900;
+    color:var(--white); line-height:1.25; margin-bottom:6px;
+  }
+  .cta-headline .gold { color:var(--gold); }
+  .cta-desc { font-size:11px; color:rgba(255,255,255,.55); line-height:1.6; }
+
+  .cta-right {
+    display:flex; flex-direction:column;
+    align-items:flex-end; gap:10px;
+    position:relative; z-index:2;
+  }
+  .cta-btn {
+    background:var(--gold); color:var(--text);
+    font-weight:800; font-size:13px;
+    padding:12px 28px; border-radius:100px;
+    text-decoration:none; white-space:nowrap;
+    display:inline-block;
+  }
+  .cta-url { font-size:11px; color:rgba(255,255,255,.45); }
+
+  @media print {
+    body { background:white; }
+    .page { margin:0; box-shadow:none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── HEADER ── -->
+  <div class="hd">
+    <div class="hd-bar"></div>
+    <div class="hd-top">
+      <div class="logo">MARRY<span>WELL</span></div>
+      <div class="hd-badge">Partner Program</div>
+    </div>
+    <div class="hd-kicker">소개 수익 파트너스 프로그램</div>
+    <div class="hd-title">
+      소개만 해도<br>
+      <span class="gold">수익이 생깁니다.</span>
+    </div>
+    <div class="hd-sub">
+      메리웰을 업체에 소개하고, 고객이 구매할 때마다 건당 페이백을 받으세요.<br>
+      별도 투자 없이 네트워크만으로 만들어지는 새로운 수익원입니다.
+    </div>
+    <div class="target-row">
+      <div class="target-tag hi">📍 추천 파트너 업종</div>
+      <div class="target-tag">웨딩홀</div>
+      <div class="target-tag">웨딩플래너</div>
+      <div class="target-tag">스튜디오</div>
+      <div class="target-tag">드레스샵</div>
+      <div class="target-tag">허니문 여행사</div>
+      <div class="target-tag">청첩장 업체</div>
+      <div class="target-tag">뷰티샵</div>
+    </div>
+  </div>
+
+  <!-- ── 3-STEP FLOW ── -->
+  <div class="flow-section">
+    <div class="flow-title">How It Works — 3단계로 끝납니다</div>
+    <div class="flow-row">
+      <div class="flow-step">
+        <div class="flow-num">STEP 01</div>
+        <div class="flow-ico">🤝</div>
+        <div class="flow-label">업체 소개</div>
+        <div class="flow-desc">파트너 코드로<br>업체에 메리웰 소개</div>
+      </div>
+      <div class="flow-arrow">›</div>
+      <div class="flow-step">
+        <div class="flow-num">STEP 02</div>
+        <div class="flow-ico">💍</div>
+        <div class="flow-label">고객 구매</div>
+        <div class="flow-desc">업체 고객(예비 신혼부부)이<br>메리웰 서비스 구매</div>
+      </div>
+      <div class="flow-arrow">›</div>
+      <div class="flow-step">
+        <div class="flow-num">STEP 03</div>
+        <div class="flow-ico">💰</div>
+        <div class="flow-label">페이백 지급</div>
+        <div class="flow-desc">구매 확인 후<br>익월 정산 자동 지급</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 페이백 티어 ── -->
+  <div class="payback-section">
+    <div class="sec-label">Payback Structure</div>
+    <div class="sec-title">실적에 따라 더 많이 드립니다</div>
+    <div class="sec-sub">월 소개 건수가 늘수록 건당 페이백 금액이 올라갑니다. 누적 실적은 이월됩니다.</div>
+    <div class="tier-row">
+
+      <div class="tier basic">
+        <div class="tier-badge">Basic</div>
+        <div class="tier-cond">월 1 – 4건</div>
+        <div class="tier-amount">3만원</div>
+        <div class="tier-unit">/ 건당 지급</div>
+        <ul class="tier-perks">
+          <li>파트너 전용 코드 발급</li>
+          <li>실시간 소개 현황 대시보드</li>
+          <li>익월 15일 정산</li>
+        </ul>
+      </div>
+
+      <div class="tier plus">
+        <div class="tier-badge">Silver</div>
+        <div class="tier-cond">월 5 – 9건</div>
+        <div class="tier-amount">5만원</div>
+        <div class="tier-unit">/ 건당 지급</div>
+        <ul class="tier-perks">
+          <li>Basic 혜택 전체 포함</li>
+          <li>전용 마케팅 자료 제공</li>
+          <li>전담 파트너 매니저 배정</li>
+        </ul>
+      </div>
+
+      <div class="tier gold">
+        <div class="tier-badge">Gold</div>
+        <div class="tier-cond">월 10건 이상</div>
+        <div class="tier-amount">7만원</div>
+        <div class="tier-unit">/ 건당 지급</div>
+        <ul class="tier-perks">
+          <li>Silver 혜택 전체 포함</li>
+          <li>분기 보너스 별도 지급</li>
+          <li>공식 Gold 파트너 인증</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── 파트너 혜택 ── -->
+  <div class="benefit-section">
+    <div class="sec-label">Partner Benefits</div>
+    <div class="sec-title">파트너가 되면 이런 혜택이 있습니다</div>
+    <div class="benefit-grid">
+      <div class="benefit-card">
+        <div class="benefit-ico">📊</div>
+        <div class="benefit-title">실시간 대시보드</div>
+        <div class="benefit-desc">소개 현황·수익 통계 실시간 확인</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-ico">🎯</div>
+        <div class="benefit-title">전용 마케팅 자료</div>
+        <div class="benefit-desc">브로셔·링크·SNS 콘텐츠 무상 제공</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-ico">🔒</div>
+        <div class="benefit-title">투명한 정산</div>
+        <div class="benefit-desc">구매 즉시 적립, 익월 15일 자동 지급</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-ico">🏆</div>
+        <div class="benefit-title">우수 파트너 인증</div>
+        <div class="benefit-desc">Gold 달성 시 공식 인증 및 추가 보너스</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 가입 방법 ── -->
+  <div class="join-section">
+    <div class="sec-label">How to Start</div>
+    <div class="sec-title" style="font-size:16px; margin-bottom:0;">지금 바로 시작하세요</div>
+    <div class="join-steps">
+      <div class="join-step">
+        <div class="join-num">1</div>
+        <div class="join-text">
+          <strong>파트너 신청</strong>
+          <span>웹사이트에서 무료 신청</span>
+        </div>
+      </div>
+      <div class="join-divider"></div>
+      <div class="join-step">
+        <div class="join-num">2</div>
+        <div class="join-text">
+          <strong>코드 발급</strong>
+          <span>24시간 내 전용 코드 지급</span>
+        </div>
+      </div>
+      <div class="join-divider"></div>
+      <div class="join-step">
+        <div class="join-num">3</div>
+        <div class="join-text">
+          <strong>업체 소개 시작</strong>
+          <span>코드 공유 후 소개 활동</span>
+        </div>
+      </div>
+      <div class="join-divider"></div>
+      <div class="join-step">
+        <div class="join-num">4</div>
+        <div class="join-text">
+          <strong>수익 수령</strong>
+          <span>익월 15일 자동 정산 지급</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CTA ── -->
+  <div class="cta">
+    <div class="cta-left">
+      <div class="cta-headline">
+        지금 파트너 신청하고<br>
+        <span class="gold">첫 소개부터 수익을 시작하세요.</span>
+      </div>
+      <div class="cta-desc">
+        참여 비용 없음 &nbsp;·&nbsp; 최소 실적 조건 없음 &nbsp;·&nbsp; 언제든 탈퇴 가능
+      </div>
+    </div>
+    <div class="cta-right">
+      <a href="https://www.marrywell.co.kr" class="cta-btn">파트너 신청하기 →</a>
+      <div class="cta-url">www.marrywell.co.kr</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
