@@ -687,15 +687,6 @@ tr:hover td{background:#FAFAFF;}
 const SCRIPT_URL = 'YOUR_SCRIPT_URL';
 
 // ── 데이터 ─────────────────────────────────────────
-const SEED = [
-  {id:1,name:'김지원',email:'jiwon@naver.com',phone:'010-1234-5678',biz:'웨딩홀',tier:'5-9',channel:'직접 방문 영업',msg:'',date:'2025-04-01',status:'active',code:'MW-A1B2',referrals:7,payback:35},
-  {id:2,name:'이수현',email:'suhyun@gmail.com',phone:'010-2345-6789',biz:'웨딩플래너',tier:'10+',channel:'지인 네트워크',msg:'여러 커플과 연결되어 있습니다.',date:'2025-04-03',status:'gold',code:'MW-C3D4',referrals:12,payback:84},
-  {id:3,name:'박민준',email:'minjun@kakao.com',phone:'010-3456-7890',biz:'스튜디오',tier:'1-4',channel:'SNS / 온라인',msg:'',date:'2025-04-07',status:'approved',code:'MW-E5F6',referrals:2,payback:6},
-  {id:4,name:'최유나',email:'yuna@naver.com',phone:'010-4567-8901',biz:'드레스샵',tier:'5-9',channel:'지인 네트워크',msg:'드레스샵 2곳 운영 중입니다.',date:'2025-04-09',status:'active',code:'MW-G7H8',referrals:5,payback:25},
-  {id:5,name:'정한솔',email:'hansol@gmail.com',phone:'010-5678-9012',biz:'청첩장 업체',tier:'1-4',channel:'기타',msg:'',date:'2025-04-10',status:'pending',code:'',referrals:0,payback:0},
-  {id:6,name:'강서연',email:'seoyeon@naver.com',phone:'010-6789-0123',biz:'허니문 여행사',tier:'5-9',channel:'SNS / 온라인',msg:'인스타그램 팔로워 2만명입니다.',date:'2025-04-11',status:'pending',code:'',referrals:0,payback:0},
-  {id:7,name:'윤도현',email:'dohyun@kakao.com',phone:'010-7890-1234',biz:'웨딩홀',tier:'10+',channel:'직접 방문 영업',msg:'',date:'2025-04-12',status:'review',code:'',referrals:0,payback:0},
-];
 
 const TIER_MAP = {'1-4':'Basic','5-9':'Silver','10+':'Gold'};
 const TIER_RATE = {'1-4':3,'5-9':5,'10+':7};
@@ -710,7 +701,7 @@ const STATUS_CLASS = {
 const CHECKLIST_L = ['파트너 신청 접수 확인','신청 확인 이메일 발송','관리자 검토 및 승인','파트너 코드 생성 및 발급','코드 발급 이메일 발송'];
 const CHECKLIST_R = ['전담 매니저 배정 (Silver+)','온보딩 가이드 이메일 발송','마케팅 자료 패키지 제공 (브로셔, SNS 콘텐츠)','파트너 대시보드 접속 링크 안내','첫 소개 활동 여부 확인 (D+3)'];
 
-let partners = JSON.parse(localStorage.getItem('mw_partners') || 'null') || [...SEED];
+let partners = JSON.parse(localStorage.getItem('mw_partners') || 'null') || [];
 let currentFilter = 'all';
 let currentSearch = '';
 
@@ -768,6 +759,13 @@ function doLogin(){
   const id = document.getElementById('login-id').value;
   const pw = document.getElementById('login-pw').value;
   if(id==='admin' && pw==='marrywell2025'){
+    // 기존 데모 데이터가 localStorage에 남아있으면 초기화
+    const stored = JSON.parse(localStorage.getItem('mw_partners') || '[]');
+    const demoIds = [1,2,3,4,5,6,7];
+    const hasDemoOnly = stored.length > 0 && stored.every(p => demoIds.includes(p.id));
+    if (hasDemoOnly) localStorage.removeItem('mw_partners');
+    partners = JSON.parse(localStorage.getItem('mw_partners') || '[]');
+
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='block';
     initApp();
