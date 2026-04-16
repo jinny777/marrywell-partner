@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>파트너 신청 — MARRYWELL 파트너스</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('_J5MvthpGTIyRcr0y');</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@600;700;800;900&display=swap');
   :root{
@@ -592,7 +594,21 @@ async function submitForm() {
   payload.status = 'pending';
   localStorage.setItem('mw_new_application', JSON.stringify(payload));
 
-  // 2) Google Sheets 저장 (URL 설정 시 외부 기기에서도 확인 가능)
+  // 2) EmailJS 알림 이메일 발송
+  try {
+    await emailjs.send('service_2qnpx8i', 'template_z904kd6', {
+      applicant_name:  payload.name,
+      applicant_phone: payload.phone,
+      applicant_email: payload.email,
+      biz_type:        payload.biz,
+      tier:            payload.tier,
+      channel:         payload.channel,
+      message:         payload.msg,
+      date:            payload.date
+    });
+  } catch(e) { /* 이메일 실패 시 신청은 계속 진행 */ }
+
+  // 3) Google Sheets 저장 (URL 설정 시 외부 기기에서도 확인 가능)
   if (SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL') {
     try {
       await fetch(SCRIPT_URL, {
