@@ -391,9 +391,20 @@ tr:hover td{background:#FAFAFF;}
       <a class="sb-item" onclick="showPage('payback')">
         <span class="sb-ico">💰</span> 페이백 현황
       </a>
+      <div class="sb-section">콘텐츠 관리</div>
+      <a class="sb-item" onclick="showPage('materials')">
+        <span class="sb-ico">📂</span> 마케팅 자료 관리
+      </a>
+      <a class="sb-item" onclick="showPage('referrals')">
+        <span class="sb-ico">📋</span> 고객 명단 현황
+        <span class="sb-badge" id="referrals-badge" style="display:none">0</span>
+      </a>
       <div class="sb-section">설정</div>
+      <a class="sb-item" href="partner.html" target="_blank">
+        <span class="sb-ico">👤</span> 파트너 포털
+      </a>
       <a class="sb-item" href="index.html" target="_blank">
-        <span class="sb-ico">🌐</span> 파트너 페이지
+        <span class="sb-ico">🌐</span> 파트너 소개 페이지
       </a>
     </nav>
     <div class="sb-footer">v1.0 · MARRYWELL © 2025</div>
@@ -663,9 +674,142 @@ tr:hover td{background:#FAFAFF;}
         </div>
       </div>
 
+      <!-- ════ PAGE: MATERIALS ════ -->
+      <div class="page" id="page-materials">
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header">
+            <div class="card-title">📂 마케팅 자료 관리</div>
+            <div class="card-actions">
+              <button class="btn-primary" onclick="openAddMaterialModal()">+ 자료 등록</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th><th>자료명</th><th>카테고리</th><th>형식</th>
+                  <th>열람 등급</th><th>등록일</th><th>노출</th><th>액션</th>
+                </tr>
+              </thead>
+              <tbody id="mat-admin-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ PAGE: REFERRALS ════ -->
+      <div class="page" id="page-referrals">
+        <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);">
+          <div class="stat-card purple">
+            <div class="stat-label">총 접수 고객</div>
+            <div class="stat-num" id="rf-total">0</div>
+            <div class="stat-change" style="color:rgba(255,255,255,.5);font-size:11px;">누적</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">이번 달 신규</div>
+            <div class="stat-num" id="rf-month" style="color:var(--warn)">0</div>
+            <div class="stat-change" style="color:var(--gray);font-size:11px;">명</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">구매 전환</div>
+            <div class="stat-num" id="rf-purchased" style="color:var(--ok)">0</div>
+            <div class="stat-change" style="color:var(--gray);font-size:11px;">명</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">전환율</div>
+            <div class="stat-num" id="rf-rate" style="color:var(--p)">0%</div>
+            <div class="stat-change" style="color:var(--gray);font-size:11px;">접수→구매</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📋 전체 고객 명단</div>
+            <div class="card-actions">
+              <div class="filter-tabs" id="rf-filter-tabs">
+                <button class="ftab active" onclick="filterReferrals('all',this)">전체</button>
+                <button class="ftab" onclick="filterReferrals('submitted',this)">접수됨</button>
+                <button class="ftab" onclick="filterReferrals('contacted',this)">연락중</button>
+                <button class="ftab" onclick="filterReferrals('purchased',this)">구매완료</button>
+                <button class="ftab" onclick="filterReferrals('settled',this)">정산완료</button>
+              </div>
+              <div class="search-box">
+                <span class="search-ico">🔍</span>
+                <input type="text" id="rf-search" placeholder="파트너명, 고객명 검색..." oninput="renderReferralsTable()">
+              </div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th><th>파트너</th><th>고객명</th><th>업체 유형</th>
+                  <th>제출일</th><th>상태</th><th>메모</th><th>상태 변경</th>
+                </tr>
+              </thead>
+              <tbody id="referrals-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div><!-- /content -->
   </div><!-- /main -->
 </div><!-- /app -->
+
+<!-- ── 자료 등록 모달 ── -->
+<div class="modal-overlay" id="mat-modal-overlay" onclick="closeMatModal(event)">
+  <div class="modal" id="mat-modal">
+    <div class="modal-header">
+      <h3 id="mat-modal-title">마케팅 자료 등록</h3>
+      <button class="modal-close" onclick="closeMatModalDirect()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div style="grid-column:1/-1;">
+          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:6px;">자료명 <span style="color:var(--err)">*</span></label>
+          <input id="mat-title" style="width:100%;padding:10px 14px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;background:#FAFAFF;" placeholder="예: 고객 배포용 브로셔 v2">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:6px;">카테고리 <span style="color:var(--err)">*</span></label>
+          <select id="mat-category" style="width:100%;padding:10px 14px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;background:#FAFAFF;">
+            <option value="brochure">브로셔</option>
+            <option value="flyer">플라이어</option>
+            <option value="partner">파트너 전용</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:6px;">파일 형식 <span style="color:var(--err)">*</span></label>
+          <select id="mat-filetype" style="width:100%;padding:10px 14px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;background:#FAFAFF;">
+            <option value="html">HTML</option>
+            <option value="pptx">PPTX</option>
+            <option value="pdf">PDF</option>
+          </select>
+        </div>
+        <div style="grid-column:1/-1;">
+          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:6px;">파일 URL / 경로 <span style="color:var(--err)">*</span></label>
+          <input id="mat-url" style="width:100%;padding:10px 14px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;background:#FAFAFF;" placeholder="예: materials/MARRYWELL_brochure.html">
+          <div style="font-size:11px;color:var(--gray);margin-top:4px;">저장소 내 상대경로 또는 외부 URL 입력</div>
+        </div>
+        <div style="grid-column:1/-1;">
+          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:6px;">설명</label>
+          <input id="mat-desc" style="width:100%;padding:10px 14px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;background:#FAFAFF;" placeholder="자료에 대한 간단한 설명 (선택)">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:700;display:block;margin-bottom:6px;">열람 등급</label>
+          <select id="mat-visible" style="width:100%;padding:10px 14px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;background:#FAFAFF;">
+            <option value="all">전체 (Basic 포함)</option>
+            <option value="silver">Silver 이상</option>
+            <option value="gold">Gold 전용</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div style="padding:16px 24px;border-top:1px solid #F0F0F8;display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn-primary" onclick="saveMaterial()">등록하기</button>
+      <button class="btn-sm btn-view" onclick="closeMatModalDirect()" style="padding:8px 16px;">취소</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── MODAL ── -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
@@ -814,11 +958,19 @@ function showPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
-  const titles = {dashboard:'대시보드',partners:'파트너 목록',process:'처리 프로세스',payback:'페이백 현황'};
+  const titles = {
+    dashboard:'대시보드', partners:'파트너 목록',
+    process:'처리 프로세스', payback:'페이백 현황',
+    materials:'마케팅 자료 관리', referrals:'고객 명단 현황'
+  };
   document.getElementById('page-title').textContent = titles[name]||name;
-  event && event.currentTarget && document.querySelectorAll('.sb-item').forEach(i=>{
-    if(i.getAttribute('onclick')&&i.getAttribute('onclick').includes(name)) i.classList.add('active');
-  });
+  if(event && event.currentTarget) {
+    document.querySelectorAll('.sb-item').forEach(i=>{
+      if(i.getAttribute('onclick')&&i.getAttribute('onclick').includes(name)) i.classList.add('active');
+    });
+  }
+  if(name==='materials') loadAdminMaterials();
+  if(name==='referrals') loadAdminReferrals();
 }
 
 // ── TABLE ROW ─────────────────────────────────────
@@ -1030,6 +1182,243 @@ function exportPayback(){
   a.download = 'payback_'+new Date().toISOString().slice(0,7)+'.csv';
   a.click();
   toast('정산 내역이 CSV로 다운로드되었습니다.');
+}
+
+// ═══════════════════════════════════════════════
+//  마케팅 자료 관리
+// ═══════════════════════════════════════════════
+let adminMaterials = JSON.parse(localStorage.getItem('mw_materials') || 'null') || [];
+let matAdminLoaded = false;
+
+function saveMaterials(){ localStorage.setItem('mw_materials', JSON.stringify(adminMaterials)); }
+
+const CAT_LABEL   = {brochure:'브로셔', flyer:'플라이어', partner:'파트너 전용'};
+const VIS_LABEL   = {all:'전체', silver:'Silver+', gold:'Gold 전용'};
+const TYPE_BADGE  = {html:'<span style="background:#DCFCE7;color:#14532D;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;">HTML</span>',
+                     pptx:'<span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;">PPTX</span>',
+                     pdf :'<span style="background:#FEE2E2;color:#7F1D1D;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;">PDF</span>'};
+
+async function loadAdminMaterials(){
+  if(matAdminLoaded) return;
+  if(SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL'){
+    try{
+      const res  = await fetch(`${SCRIPT_URL}?action=materials&tier=gold&token=${encodeURIComponent('mw_admin_2025')}`);
+      const data = await res.json();
+      if(Array.isArray(data)){ adminMaterials = data; saveMaterials(); }
+    }catch(e){}
+  } else if(!adminMaterials.length){
+    // 데모 초기 데이터
+    adminMaterials = [
+      {id:1,title:'메리웰 브로셔',category:'brochure',fileType:'html',url:'materials/MARRYWELL_brochure.html',description:'고객 상담용 브로셔',visibleTo:'all',uploadedAt:'2026-04-01',active:true},
+      {id:2,title:'고객 배포용 플라이어',category:'flyer',fileType:'html',url:'materials/MARRYWELL_flyer_v2.html',description:'고객용 1페이지 플라이어',visibleTo:'all',uploadedAt:'2026-04-01',active:true},
+    ];
+    saveMaterials();
+  }
+  matAdminLoaded = true;
+  renderAdminMaterials();
+}
+
+function renderAdminMaterials(){
+  const tbody = document.getElementById('mat-admin-tbody');
+  if(!adminMaterials.length){
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="ico">📭</div><p>등록된 자료가 없습니다.<br>"+ 자료 등록" 버튼으로 추가하세요.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = adminMaterials.map((m,i)=>`
+    <tr>
+      <td style="color:var(--gray);font-size:12px">${i+1}</td>
+      <td><div class="td-name">${m.title}</div><div class="td-sub">${m.url||''}</div></td>
+      <td><span style="font-size:12px;color:var(--p);font-weight:600;">${CAT_LABEL[m.category]||m.category}</span></td>
+      <td>${TYPE_BADGE[m.fileType]||m.fileType}</td>
+      <td><span style="font-size:12px;">${VIS_LABEL[m.visibleTo]||m.visibleTo}</span></td>
+      <td style="font-size:12px;color:var(--gray)">${String(m.uploadedAt||'').slice(0,10)}</td>
+      <td>
+        <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;">
+          <input type="checkbox" ${m.active?'checked':''} onchange="toggleAdminMaterial(${m.id},this.checked)"
+            style="width:16px;height:16px;accent-color:var(--p);cursor:pointer;">
+          <span style="font-size:11px;color:${m.active?'var(--ok)':'var(--gray)'}">${m.active?'노출':'숨김'}</span>
+        </label>
+      </td>
+      <td>
+        <div class="actions">
+          ${m.fileType==='html'?`<a class="btn-sm btn-view" href="${m.url}" target="_blank">미리보기</a>`:''}
+          <button class="btn-sm btn-reject" onclick="deleteAdminMaterial(${m.id})">삭제</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function openAddMaterialModal(){
+  ['mat-title','mat-url','mat-desc'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('mat-category').value = 'brochure';
+  document.getElementById('mat-filetype').value = 'html';
+  document.getElementById('mat-visible').value  = 'all';
+  document.getElementById('mat-modal-overlay').classList.add('open');
+}
+function closeMatModal(e){ if(e.target===document.getElementById('mat-modal-overlay')) closeMatModalDirect(); }
+function closeMatModalDirect(){ document.getElementById('mat-modal-overlay').classList.remove('open'); }
+
+async function saveMaterial(){
+  const title    = document.getElementById('mat-title').value.trim();
+  const url      = document.getElementById('mat-url').value.trim();
+  const category = document.getElementById('mat-category').value;
+  const fileType = document.getElementById('mat-filetype').value;
+  const desc     = document.getElementById('mat-desc').value.trim();
+  const visible  = document.getElementById('mat-visible').value;
+
+  if(!title){ toast('자료명을 입력하세요.'); return; }
+  if(!url)  { toast('파일 URL 또는 경로를 입력하세요.'); return; }
+
+  const newItem = {
+    id: Date.now(), title, category, fileType,
+    url, description:desc, visibleTo:visible,
+    uploadedAt: new Date().toISOString().slice(0,10), active: true
+  };
+
+  if(SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL'){
+    try{
+      await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'addMaterial',token:'mw_admin_2025',...newItem})});
+    }catch(e){}
+  }
+
+  adminMaterials.push(newItem);
+  saveMaterials();
+  renderAdminMaterials();
+  closeMatModalDirect();
+  toast(`"${title}" 자료가 등록되었습니다.`);
+}
+
+async function toggleAdminMaterial(id, active){
+  const m = adminMaterials.find(x=>x.id===id);
+  if(!m) return;
+  m.active = active;
+  saveMaterials();
+  renderAdminMaterials();
+  if(SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL'){
+    try{ await fetch(`${SCRIPT_URL}?action=toggleMaterial&id=${id}&active=${active}&token=mw_admin_2025`); }catch(e){}
+  }
+  toast(`자료를 ${active?'노출':'숨김'} 처리했습니다.`);
+}
+
+async function deleteAdminMaterial(id){
+  if(!confirm('이 자료를 삭제하시겠습니까?')) return;
+  const idx = adminMaterials.findIndex(x=>x.id===id);
+  if(idx===-1) return;
+  const title = adminMaterials[idx].title;
+  adminMaterials.splice(idx,1);
+  saveMaterials();
+  renderAdminMaterials();
+  if(SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL'){
+    try{ await fetch(`${SCRIPT_URL}?action=deleteMaterial&id=${id}&token=mw_admin_2025`); }catch(e){}
+  }
+  toast(`"${title}" 자료가 삭제되었습니다.`);
+}
+
+// ═══════════════════════════════════════════════
+//  고객 명단 현황
+// ═══════════════════════════════════════════════
+let allReferrals    = [];
+let rfLoaded        = false;
+let currentRfFilter = 'all';
+
+async function loadAdminReferrals(){
+  if(rfLoaded) return;
+  if(SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL'){
+    try{
+      const res  = await fetch(`${SCRIPT_URL}?action=allReferrals&token=mw_admin_2025`);
+      const data = await res.json();
+      if(Array.isArray(data)){ allReferrals = data; }
+    }catch(e){}
+  } else {
+    // 데모 데이터
+    allReferrals = [
+      {id:1,partnerCode:'MW-DEMO',partnerName:'홍길동',customerName:'김민지',customerPhone:'010-1234-5678',bizType:'스튜디오',submittedAt:'2026-04-10',status:'purchased',memo:''},
+      {id:2,partnerCode:'MW-DEMO',partnerName:'홍길동',customerName:'이수연',customerPhone:'010-2345-6789',bizType:'드레스',submittedAt:'2026-04-08',status:'contacted',memo:''},
+      {id:3,partnerCode:'MW-DEMO',partnerName:'홍길동',customerName:'박지영',customerPhone:'010-3456-7890',bizType:'메이크업',submittedAt:'2026-04-05',status:'purchased',memo:''},
+      {id:4,partnerCode:'MW-ABCD',partnerName:'이영희',customerName:'최은아',customerPhone:'010-4567-8901',bizType:'스튜디오',submittedAt:'2026-04-12',status:'submitted',memo:''},
+      {id:5,partnerCode:'MW-ABCD',partnerName:'이영희',customerName:'정수빈',customerPhone:'010-5678-9012',bizType:'예식장',submittedAt:'2026-04-11',status:'contacted',memo:''},
+    ];
+  }
+  rfLoaded = true;
+  renderReferralsStats();
+  renderReferralsTable();
+}
+
+function renderReferralsStats(){
+  const total     = allReferrals.length;
+  const now       = new Date();
+  const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const month     = allReferrals.filter(r=>r.submittedAt&&r.submittedAt.startsWith(thisMonth)).length;
+  const purchased = allReferrals.filter(r=>r.status==='purchased'||r.status==='settled').length;
+  const rate      = total ? Math.round(purchased/total*100) : 0;
+  document.getElementById('rf-total').textContent     = total;
+  document.getElementById('rf-month').textContent     = month;
+  document.getElementById('rf-purchased').textContent = purchased;
+  document.getElementById('rf-rate').textContent      = rate + '%';
+  // 뱃지
+  const badge = document.getElementById('referrals-badge');
+  const newCount = allReferrals.filter(r=>r.status==='submitted').length;
+  badge.textContent = newCount;
+  badge.style.display = newCount > 0 ? 'inline' : 'none';
+}
+
+function filterReferrals(status, btn){
+  currentRfFilter = status;
+  document.querySelectorAll('#rf-filter-tabs .ftab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderReferralsTable();
+}
+
+const RF_STATUS_MAP = {submitted:'접수됨',contacted:'연락중',purchased:'구매완료',settled:'정산완료'};
+const RF_STATUS_CLS = {submitted:'s-pending',contacted:'s-review',purchased:'s-approved',settled:'s-active'};
+
+function renderReferralsTable(){
+  const search = (document.getElementById('rf-search')?.value||'').toLowerCase();
+  let list = currentRfFilter==='all' ? allReferrals : allReferrals.filter(r=>r.status===currentRfFilter);
+  if(search) list = list.filter(r=>
+    (r.partnerName||'').toLowerCase().includes(search)||
+    (r.customerName||'').toLowerCase().includes(search)||
+    (r.partnerCode||'').toLowerCase().includes(search));
+
+  const tbody = document.getElementById('referrals-tbody');
+  if(!list.length){
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="ico">📋</div><p>명단이 없습니다.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map((r,i)=>`
+    <tr>
+      <td style="color:var(--gray);font-size:12px">${i+1}</td>
+      <td>
+        <div class="td-name">${r.partnerName||'-'}</div>
+        <div class="td-sub">${r.partnerCode||''}</div>
+      </td>
+      <td class="td-name">${r.customerName||'-'}</td>
+      <td style="font-size:12px">${r.bizType||'-'}</td>
+      <td style="font-size:12px;color:var(--gray)">${(r.submittedAt||'').slice(0,10)}</td>
+      <td><span class="status ${RF_STATUS_CLS[r.status]||'s-pending'}">${RF_STATUS_MAP[r.status]||r.status}</span></td>
+      <td style="font-size:12px;color:var(--gray);max-width:120px;overflow:hidden;text-overflow:ellipsis">${r.memo||'-'}</td>
+      <td>
+        <select onchange="changeReferralStatus(${r.id},this.value)"
+          style="padding:5px 8px;border:1.5px solid #E0E0F0;border-radius:8px;font-size:11px;font-family:'Noto Sans KR',sans-serif;background:#FAFAFF;">
+          <option value="submitted"  ${r.status==='submitted' ?'selected':''}>접수됨</option>
+          <option value="contacted"  ${r.status==='contacted' ?'selected':''}>연락중</option>
+          <option value="purchased"  ${r.status==='purchased' ?'selected':''}>구매완료</option>
+          <option value="settled"    ${r.status==='settled'   ?'selected':''}>정산완료</option>
+        </select>
+      </td>
+    </tr>`).join('');
+}
+
+async function changeReferralStatus(id, status){
+  const r = allReferrals.find(x=>Number(x.id)===Number(id));
+  if(!r) return;
+  r.status = status;
+  renderReferralsStats();
+  renderReferralsTable();
+  if(SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL'){
+    try{ await fetch(`${SCRIPT_URL}?action=updateReferral&id=${id}&status=${status}&token=mw_admin_2025`); }catch(e){}
+  }
+  toast(`${r.customerName} 고객 상태가 [${RF_STATUS_MAP[status]}]로 변경되었습니다.`);
 }
 
 // ── apply.html에서 넘어온 신규 신청 처리 ─────────
