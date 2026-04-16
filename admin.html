@@ -759,13 +759,7 @@ function doLogin(){
   const id = document.getElementById('login-id').value;
   const pw = document.getElementById('login-pw').value;
   if(id==='admin' && pw==='marrywell2025'){
-    // 기존 데모 데이터가 localStorage에 남아있으면 초기화
-    const stored = JSON.parse(localStorage.getItem('mw_partners') || '[]');
-    const demoIds = [1,2,3,4,5,6,7];
-    const hasDemoOnly = stored.length > 0 && stored.every(p => demoIds.includes(p.id));
-    if (hasDemoOnly) localStorage.removeItem('mw_partners');
     partners = JSON.parse(localStorage.getItem('mw_partners') || '[]');
-
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='block';
     initApp();

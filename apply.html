@@ -584,7 +584,7 @@ async function submitForm() {
     biz:     biz  ? biz.value  : '',
     tier:    tier ? tier.value : '5-9',
     channel: (document.getElementById('channel') || {}).value || '',
-    msg:     (document.getElementById('msg')     || {}).value || ''
+    msg:     (document.getElementById('message') || {}).value || ''
   };
 
   // 1) localStorage 저장 → 같은 브라우저의 admin.html에서 즉시 감지
