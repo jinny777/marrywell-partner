@@ -498,9 +498,9 @@ tr:hover td{background:#FAFAFF;}
       <!-- ════ PAGE: PARTNERS ════ -->
       <div class="page" id="page-partners">
         <div class="card">
-          <div class="card-header">
-            <div class="card-title">파트너 목록</div>
-            <div class="card-actions">
+          <div class="card-header" style="flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;align-items:center;gap:12px;flex:1;flex-wrap:wrap;">
+              <div class="card-title">파트너 목록</div>
               <div class="filter-tabs" id="filter-tabs">
                 <button class="ftab active" onclick="filterPartners('all',this)">전체</button>
                 <button class="ftab" onclick="filterPartners('pending',this)">신청대기</button>
@@ -508,10 +508,13 @@ tr:hover td{background:#FAFAFF;}
                 <button class="ftab" onclick="filterPartners('active',this)">활성화</button>
                 <button class="ftab" onclick="filterPartners('gold',this)">Gold</button>
               </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
               <div class="search-box">
                 <span class="search-ico">🔍</span>
                 <input type="text" id="search-input" placeholder="이름, 이메일 검색..." oninput="searchPartners()">
               </div>
+              <button class="btn-primary" onclick="openAddPartnerModal()" style="white-space:nowrap;flex-shrink:0;">+ 파트너 추가</button>
             </div>
           </div>
           <div class="table-wrap">
@@ -872,7 +875,10 @@ tr:hover td{background:#FAFAFF;}
                 <label style="font-size:11px;font-weight:600;color:var(--gray);display:block;margin-bottom:4px;">생성된 링크</label>
                 <div id="gen-link-box" style="background:var(--pale);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--p);word-break:break-all;min-height:36px;"></div>
               </div>
-              <button onclick="copyGenLink()" class="btn-sm btn-approve" style="width:100%;padding:10px;">🔗 링크 복사</button>
+              <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px;">
+                <button onclick="copyGenLink()" class="btn-sm btn-approve" style="padding:10px;">🔗 링크 복사</button>
+                <button onclick="shortenGenLink()" id="shorten-btn" class="btn-sm" style="padding:10px;background:var(--pale);color:var(--p);border:1.5px solid var(--ac);border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">✂️ URL 단축</button>
+              </div>
               <div style="margin-top:10px;">
                 <label style="font-size:11px;font-weight:600;color:var(--gray);display:block;margin-bottom:6px;">📱 SMS 문자 내용</label>
                 <textarea id="gen-sms" readonly style="width:100%;height:80px;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:12px;resize:none;background:#FAFAFE;color:var(--text);"></textarea>
@@ -886,49 +892,43 @@ tr:hover td{background:#FAFAFF;}
 
       <!-- ════ PAGE: EMAIL SEND ════ -->
       <div class="page" id="page-email-send">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+        <div style="display:grid;grid-template-columns:320px 1fr 1fr;gap:16px;align-items:start;">
 
-          <!-- 왼쪽: 수신자 선택 -->
-          <div class="card">
+          <!-- ① 수신자 선택 -->
+          <div class="card" style="position:sticky;top:20px;">
             <div class="card-header">
-              <div class="card-title">👥 수신자 선택</div>
-              <div class="card-actions" style="gap:8px;">
-                <button class="btn-sm btn-approve" onclick="emailSelectAll(true)">전체 선택</button>
-                <button class="btn-sm btn-reject" onclick="emailSelectAll(false)">전체 해제</button>
+              <div class="card-title">👥 수신자</div>
+              <div class="card-actions" style="gap:6px;">
+                <button class="btn-sm btn-approve" onclick="emailSelectAll(true)">전체</button>
+                <button class="btn-sm btn-reject" onclick="emailSelectAll(false)">해제</button>
               </div>
             </div>
-            <!-- 필터 -->
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
-              <button class="ftab active" onclick="emailFilterPartners('all',this)" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1.5px solid #E0E0F0;background:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">전체</button>
-              <button class="ftab" onclick="emailFilterPartners('active',this)" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1.5px solid #E0E0F0;background:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">활성 파트너</button>
-              <button class="ftab" onclick="emailFilterPartners('approved',this)" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1.5px solid #E0E0F0;background:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">승인 완료</button>
-              <button class="ftab" onclick="emailFilterPartners('pending',this)" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1.5px solid #E0E0F0;background:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">승인 대기</button>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+              <button class="ftab active" onclick="emailFilterPartners('all',this)" style="font-size:11px;padding:4px 10px;border-radius:100px;border:1.5px solid #E0E0F0;background:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">전체</button>
+              <button class="ftab" onclick="emailFilterPartners('active',this)" style="font-size:11px;padding:4px 10px;border-radius:100px;border:1.5px solid #E0E0F0;background:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">활성</button>
+              <button class="ftab" onclick="emailFilterPartners('approved',this)" style="font-size:11px;padding:4px 10px;border-radius:100px;border:1.5px solid #E0E0F0;background:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">승인</button>
+              <button class="ftab" onclick="emailFilterPartners('pending',this)" style="font-size:11px;padding:4px 10px;border-radius:100px;border:1.5px solid #E0E0F0;background:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">대기</button>
             </div>
-            <div id="email-partner-list" style="max-height:440px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;"></div>
-            <div style="margin-top:12px;padding:10px 12px;background:var(--pale);border-radius:10px;font-size:12px;color:var(--p);font-weight:600;" id="email-selected-count">선택된 수신자: 0명</div>
+            <div id="email-partner-list" style="max-height:480px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;"></div>
+            <div style="margin-top:10px;padding:8px 12px;background:var(--pale);border-radius:10px;font-size:12px;color:var(--p);font-weight:600;" id="email-selected-count">선택된 수신자: 0명</div>
           </div>
 
-          <!-- 오른쪽: 이메일 작성 -->
+          <!-- ② 이메일 작성 -->
           <div>
-
-            <!-- EmailJS 템플릿 설정 -->
-            <div id="email-setup-card" class="card" style="margin-bottom:16px;border-left:4px solid var(--gold);">
+            <!-- EmailJS 설정 -->
+            <div id="email-setup-card" class="card" style="margin-bottom:14px;border-left:4px solid var(--gold);">
               <div class="card-header"><div class="card-title">⚙️ EmailJS 템플릿 설정</div></div>
-              <div style="font-size:12px;color:var(--gray);line-height:1.7;margin-bottom:12px;">
-                파트너에게 직접 발송하려면 EmailJS에 전용 템플릿이 필요합니다.<br>
-                아래 절차로 만든 후 Template ID를 입력하세요.
-              </div>
-              <details style="margin-bottom:12px;">
-                <summary style="font-size:12px;font-weight:700;color:var(--p);cursor:pointer;margin-bottom:8px;">📋 템플릿 만드는 방법 보기</summary>
+              <details style="margin-bottom:10px;">
+                <summary style="font-size:12px;font-weight:700;color:var(--p);cursor:pointer;">📋 HTML 이메일 템플릿 만드는 방법</summary>
                 <ol style="font-size:12px;color:var(--text);line-height:2;padding-left:18px;margin-top:8px;">
-                  <li><a href="https://dashboard.emailjs.com/admin/templates" target="_blank" style="color:var(--p);">dashboard.emailjs.com/admin/templates</a> 접속</li>
-                  <li>Create New Template 클릭</li>
-                  <li><b>To Email</b> 필드에 <code style="background:#F0F0F8;padding:1px 5px;border-radius:4px;">{{to_email}}</code> 입력</li>
-                  <li><b>Subject</b> 필드에 <code style="background:#F0F0F8;padding:1px 5px;border-radius:4px;">{{subject}}</code> 입력</li>
-                  <li><b>Content</b>에 아래 내용 붙여넣기:<br>
-                    <code style="background:#F0F0F8;padding:4px 8px;border-radius:4px;display:block;margin-top:4px;white-space:pre-wrap;">안녕하세요, {{to_name}}님!&#10;&#10;{{message}}&#10;&#10;MARRYWELL 파트너스팀</code>
+                  <li><a href="https://dashboard.emailjs.com/admin/templates" target="_blank" style="color:var(--p);">EmailJS Templates</a> → Create New Template</li>
+                  <li><b>To Email:</b> <code style="background:#F0F0F8;padding:1px 5px;border-radius:4px;">{{to_email}}</code></li>
+                  <li><b>Subject:</b> <code style="background:#F0F0F8;padding:1px 5px;border-radius:4px;">{{subject}}</code></li>
+                  <li><b>Content 탭 → HTML 모드</b>로 변경 후 입력:<br>
+                    <code style="background:#F0F0F8;padding:3px 8px;border-radius:4px;display:inline-block;margin-top:4px;">{{{html_body}}}</code>
+                    <span style="font-size:11px;color:var(--err);margin-left:4px;">(중괄호 3개 ← 중요)</span>
                   </li>
-                  <li>Save 후 Template ID 복사</li>
+                  <li>Save → Template ID 복사 후 아래에 입력</li>
                 </ol>
               </details>
               <div style="display:flex;gap:8px;align-items:center;">
@@ -941,11 +941,10 @@ tr:hover td{background:#FAFAFF;}
               <div id="email-tpl-status" style="font-size:11px;margin-top:6px;color:var(--gray);">템플릿 ID를 입력하고 저장하세요.</div>
             </div>
 
-            <div class="card" style="margin-bottom:16px;">
-              <div class="card-header"><div class="card-title">✉️ 이메일 작성</div></div>
-
-              <div style="margin-bottom:12px;">
-                <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:6px;">템플릿 선택</label>
+            <div class="card" style="margin-bottom:14px;">
+              <div class="card-header"><div class="card-title">✉️ 메시지 작성</div></div>
+              <div style="margin-bottom:10px;">
+                <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:5px;">내용 템플릿</label>
                 <select id="email-template-sel" onchange="applyEmailTemplate()" style="width:100%;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;">
                   <option value="custom">직접 작성</option>
                   <option value="welcome">파트너 환영 안내</option>
@@ -953,24 +952,22 @@ tr:hover td{background:#FAFAFF;}
                   <option value="payback">페이백 정산 안내</option>
                 </select>
               </div>
-
-              <div style="margin-bottom:12px;">
-                <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:6px;">제목 <span style="color:var(--err)">*</span></label>
+              <div style="margin-bottom:10px;">
+                <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:5px;">제목 <span style="color:var(--err)">*</span></label>
                 <input id="email-subject" type="text" placeholder="이메일 제목을 입력하세요"
                   style="width:100%;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;"
-                  onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'">
+                  onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'"
+                  oninput="updateEmailPreview()">
               </div>
-
-              <div style="margin-bottom:16px;">
-                <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:6px;">본문 <span style="color:var(--err)">*</span></label>
-                <textarea id="email-body" rows="10" placeholder="이메일 내용을 입력하세요.&#10;&#10;{{name}} — 수신자 이름으로 자동 치환됩니다."
+              <div style="margin-bottom:10px;">
+                <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:5px;">담당자 안내 메시지 <span style="color:var(--gray);font-weight:400;">(선택)</span></label>
+                <textarea id="email-body" rows="6" placeholder="파트너에게 전달할 안내 메시지를 입력하세요. (비워두면 표시 안 됨)"
                   style="width:100%;padding:10px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;resize:vertical;line-height:1.7;"
-                  onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'"></textarea>
-                <div style="font-size:11px;color:var(--gray);margin-top:4px;">{{name}} = 파트너 이름, {{code}} = 파트너 코드, {{tier}} = 등급</div>
+                  onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'"
+                  oninput="updateEmailPreview()"></textarea>
+                <div style="font-size:11px;color:var(--gray);margin-top:4px;">파트너 코드·이름·등급은 자동으로 표시됩니다.</div>
               </div>
-
-              <div id="email-send-result" style="display:none;margin-bottom:12px;padding:10px 14px;border-radius:10px;font-size:13px;"></div>
-
+              <div id="email-send-result" style="display:none;margin-bottom:10px;padding:10px 14px;border-radius:10px;font-size:13px;"></div>
               <button onclick="sendBulkEmail()" id="email-send-btn"
                 style="width:100%;padding:14px;background:var(--p);color:#fff;border:none;border-radius:100px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:background .15s;"
                 onmouseover="this.style.background='var(--pd)'" onmouseout="this.style.background='var(--p)'">
@@ -981,10 +978,22 @@ tr:hover td{background:#FAFAFF;}
             <!-- 발송 로그 -->
             <div class="card">
               <div class="card-header"><div class="card-title">📋 발송 결과</div></div>
-              <div id="email-log" style="max-height:200px;overflow-y:auto;font-size:12px;color:var(--text);line-height:1.9;">
+              <div id="email-log" style="max-height:160px;overflow-y:auto;font-size:12px;color:var(--text);line-height:1.9;">
                 <span style="color:var(--gray)">발송 결과가 여기에 표시됩니다.</span>
               </div>
             </div>
+          </div>
+
+          <!-- ③ 이메일 미리보기 -->
+          <div class="card" style="position:sticky;top:20px;">
+            <div class="card-header">
+              <div class="card-title">👁 이메일 미리보기</div>
+              <div style="font-size:11px;color:var(--gray);">실제 발송 형태</div>
+            </div>
+            <iframe id="email-preview-frame"
+              style="width:100%;height:620px;border:none;border-radius:8px;border:1px solid #E0E0F0;"
+              srcdoc="<p style='padding:20px;color:#888;font-family:sans-serif;'>제목과 메시지를 입력하면 미리보기가 표시됩니다.</p>">
+            </iframe>
           </div>
 
         </div>
@@ -1420,29 +1429,33 @@ function confirmIssueCode(){
 
 // ── 파트너 승인 안내 이메일 발송 ─────────────────────
 function sendApprovalEmail(p, extraMsg) {
+  const tplId = localStorage.getItem('mw_email_tpl_id') || '';
+  if (!tplId) {
+    toast('이메일 발송 탭에서 EmailJS 템플릿 ID를 먼저 설정해 주세요.', 'err');
+    return;
+  }
+
   const welcomeLink = 'https://partners.marrywell.co.kr/welcome.html'
     + '?code=' + encodeURIComponent(p.code)
     + '&name=' + encodeURIComponent(p.name)
     + '&tier=' + encodeURIComponent(p.tier)
     + (extraMsg ? '&msg=' + encodeURIComponent(extraMsg) : '');
 
-  const tierMap = {'1-4':'Basic (월 1-4건 · 3만원/건)', '5-9':'Silver (월 5-9건 · 5만원/건)', '10+':'Gold (월 10건+ · 7만원/건)'};
   const smsText = `[메리웰파트너스] ${p.name}님 파트너 승인 완료🎉\n파트너코드: ${p.code}\n초기 비밀번호: ${p.code}\n포털 로그인: https://partners.marrywell.co.kr/partner.html\n자료 안내: ${welcomeLink}`;
 
-  emailjs.send('service_2qnpx8i', 'template_welcome', {
-    partner_name:   p.name,
-    partner_email:  p.email,
-    partner_code:   p.code,
-    partner_tier:   tierMap[p.tier] || p.tier,
-    welcome_link:   welcomeLink,
-    extra_message:  extraMsg || '추가 안내사항이 없습니다.',
-    portal_link:    'https://partners.marrywell.co.kr',
+  // welcome.html 디자인 그대로 HTML 이메일 생성
+  const htmlBody = generateEmailHTML(p.name, p.code, p.tier, extraMsg);
+
+  emailjs.send('service_2qnpx8i', tplId, {
+    to_email:  p.email,
+    to_name:   p.name,
+    subject:   `[MARRYWELL] ${p.name}님, 파트너 승인을 축하드립니다! 🎉`,
+    html_body: htmlBody,
   }).then(() => {
-    // SMS 링크 클립보드 복사
     navigator.clipboard.writeText(smsText).catch(()=>{});
     toast(`✉ 이메일 발송 완료 · 📱 SMS 내용 클립보드 복사됨`);
   }).catch(() => {
-    toast(`이메일 발송 실패 — 수동으로 안내해 주세요.`);
+    toast(`이메일 발송 실패 — 수동으로 안내해 주세요.`, 'err');
   });
 }
 
@@ -1925,6 +1938,32 @@ function copyGenLink(){
   navigator.clipboard.writeText(link).then(()=>toast('링크가 복사되었습니다.'));
 }
 
+async function shortenGenLink(){
+  const box = document.getElementById('gen-link-box');
+  const btn = document.getElementById('shorten-btn');
+  const link = box?.textContent?.trim() || '';
+  if(!link || link.includes('입력')) { toast('코드를 먼저 입력해 주세요.','err'); return; }
+  if(link.startsWith('https://is.gd/') || link.startsWith('https://tinyurl.com/')) {
+    navigator.clipboard.writeText(link).then(()=>toast('이미 단축된 링크가 복사되었습니다.'));
+    return;
+  }
+  btn.textContent = '⏳ 단축 중...'; btn.disabled = true;
+  try {
+    const res = await fetch('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(link));
+    if(!res.ok) throw new Error('API 오류');
+    const short = (await res.text()).trim();
+    if(!short.startsWith('http')) throw new Error('응답 오류');
+    box.textContent = short;
+    const smsEl = document.getElementById('gen-sms');
+    if(smsEl) smsEl.value = smsEl.value.replace(link, short);
+    navigator.clipboard.writeText(short).then(()=>toast('단축 링크 복사 완료! ' + short));
+  } catch(e) {
+    toast('URL 단축 실패. 잠시 후 다시 시도해 주세요.','err');
+  } finally {
+    btn.textContent = '✂️ URL 단축'; btn.disabled = false;
+  }
+}
+
 function copySmsText(){
   const sms = (document.getElementById('gen-sms')||{}).value||'';
   if(!sms) return;
@@ -1998,12 +2037,12 @@ MARRYWELL 파트너스 팀`
 };
 
 function initEmailSend(){
-  // 저장된 템플릿 ID 복원
   const saved = localStorage.getItem('mw_email_tpl_id') || '';
   const inp = document.getElementById('email-tpl-id');
   if(inp) inp.value = saved;
   updateEmailTplStatus(saved);
   renderEmailPartnerList();
+  updateEmailPreview();
 }
 
 function saveEmailTemplateId(showToastMsg){
@@ -2101,6 +2140,108 @@ function replaceVars(text, p){
     .replace(/\{\{tier\}\}/g, TIER_LABEL[p.tier] || p.tier || 'Basic');
 }
 
+function generateEmailHTML(name, code, tier, msgBody) {
+  const TIER_MAP = {'1-4':'Basic','5-9':'Silver','10+':'Gold'};
+  const tierLabel = TIER_MAP[tier] || tier || 'Silver';
+  const safeCode = code || 'MW-????';
+  const safeName = name || '파트너님';
+  const extraBlock = msgBody && msgBody.trim() ? `
+    <div style="background:#fffbea;border-left:4px solid #F4C430;border-radius:12px;padding:18px 20px;margin-bottom:20px;">
+      <div style="font-size:11px;font-weight:700;color:#92400E;letter-spacing:1px;margin-bottom:8px;">담당자 안내</div>
+      <p style="font-size:13px;color:#1A1A2E;line-height:1.7;white-space:pre-line;margin:0;">${msgBody.trim()}</p>
+    </div>` : '';
+  const wmSettings = (() => {
+    try { return JSON.parse(localStorage.getItem('mw_welcome_settings')||'{}'); } catch(e){ return {}; }
+  })();
+  const portalUrl = 'https://partners.marrywell.co.kr/partner.html';
+  const applyUrl  = 'https://partners.marrywell.co.kr/apply.html';
+
+  return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>파트너 승인 안내 — MARRYWELL 파트너스</title>
+</head>
+<body style="margin:0;padding:0;background:#F4F4FC;font-family:'Noto Sans KR',Apple SD Gothic Neo,sans-serif;color:#1A1A2E;">
+
+<!-- HERO -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr><td align="center" style="background:linear-gradient(145deg,#14082A 0%,#2D1B69 55%,#4B3BC7 100%);padding:52px 24px 44px;text-align:center;">
+  <div style="font-family:Montserrat,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;color:#A29BFE;margin-bottom:16px;">MARRYWELL PARTNERS</div>
+  <div style="font-size:52px;margin-bottom:16px;">🎉</div>
+  <h1 style="font-size:26px;font-weight:900;color:#fff;margin:0 0 8px;line-height:1.3;">
+    ${safeName} 님,<br><span style="color:#F4C430;">파트너 승인을 축하드립니다!</span>
+  </h1>
+  <p style="font-size:13px;color:rgba(255,255,255,.6);margin:0;">메리웰 공식 파트너가 되신 것을 환영합니다</p>
+</td></tr>
+</table>
+
+<!-- BODY -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;margin:0 auto;">
+<tr><td style="padding:28px 20px 60px;">
+
+  <!-- 파트너 코드 카드 -->
+  <div style="background:#fff;border-radius:20px;padding:28px 24px;margin-bottom:20px;box-shadow:0 4px 24px rgba(75,59,199,.10);text-align:center;border-top:4px solid #F4C430;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#6C757D;margin-bottom:10px;">YOUR PARTNER CODE</div>
+    <div style="font-family:Montserrat,Arial,sans-serif;font-size:34px;font-weight:900;color:#4B3BC7;letter-spacing:4px;background:#EEF0FF;border-radius:12px;padding:14px 24px;display:inline-block;margin-bottom:12px;border:2px dashed #A29BFE;">${safeCode}</div>
+    <br>
+    <span style="display:inline-block;background:#4B3BC7;color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;margin-top:10px;">${tierLabel} 파트너</span>
+  </div>
+
+  ${extraBlock}
+
+  <!-- 다음 단계 -->
+  <div style="background:#fff;border-radius:20px;padding:24px;margin-bottom:16px;box-shadow:0 2px 16px rgba(75,59,199,.06);">
+    <div style="font-size:13px;font-weight:800;color:#1A1A2E;margin-bottom:16px;padding-left:11px;border-left:3px solid #6C5CE7;">다음 단계</div>
+    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+      <tr><td width="28" valign="top" style="padding-bottom:14px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#4B3BC7;color:#fff;font-size:12px;font-weight:800;text-align:center;line-height:28px;">1</div>
+      </td><td style="padding-left:14px;padding-bottom:14px;">
+        <div style="font-size:13px;font-weight:700;color:#1A1A2E;margin-bottom:2px;">파트너 코드 저장</div>
+        <div style="font-size:12px;color:#6C757D;line-height:1.5;">위 코드를 메모해두세요. 고객 소개 시 이 코드를 함께 전달하시면 됩니다.</div>
+      </td></tr>
+      <tr><td width="28" valign="top" style="padding-bottom:14px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#4B3BC7;color:#fff;font-size:12px;font-weight:800;text-align:center;line-height:28px;">2</div>
+      </td><td style="padding-left:14px;padding-bottom:14px;">
+        <div style="font-size:13px;font-weight:700;color:#1A1A2E;margin-bottom:2px;">마케팅 자료 다운로드</div>
+        <div style="font-size:12px;color:#6C757D;line-height:1.5;">아래 자료를 활용해 고객에게 메리웰 서비스를 소개해 주세요.</div>
+      </td></tr>
+      <tr><td width="28" valign="top">
+        <div style="width:28px;height:28px;border-radius:50%;background:#4B3BC7;color:#fff;font-size:12px;font-weight:800;text-align:center;line-height:28px;">3</div>
+      </td><td style="padding-left:14px;">
+        <div style="font-size:13px;font-weight:700;color:#1A1A2E;margin-bottom:2px;">파트너 포털 접속</div>
+        <div style="font-size:12px;color:#6C757D;line-height:1.5;">소개 현황과 페이백 내역을 실시간으로 확인하실 수 있습니다.</div>
+      </td></tr>
+    </table>
+  </div>
+
+  <!-- 포털 버튼 -->
+  <a href="${portalUrl}" style="display:block;width:100%;padding:16px;background:#4B3BC7;color:#fff;border-radius:100px;font-size:15px;font-weight:800;text-align:center;text-decoration:none;margin-bottom:12px;">🚀 파트너 포털 입장하기</a>
+  <a href="${applyUrl}" style="display:block;width:100%;padding:16px;background:transparent;color:#4B3BC7;border:2px solid #4B3BC7;border-radius:100px;font-size:15px;font-weight:800;text-align:center;text-decoration:none;margin-bottom:20px;">파트너 신청 페이지 공유하기</a>
+
+  <!-- 푸터 -->
+  <div style="text-align:center;padding-top:12px;font-size:11px;color:#6C757D;line-height:1.8;">
+    문의: ${wmSettings.email||'partners@marrywell.co.kr'}<br>
+    ${wmSettings.contact||'02-6092-9169 · 카카오톡 @marrywell'}<br>
+    MARRYWELL · AI Wedding Studio · www.marrywell.co.kr
+  </div>
+
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+function updateEmailPreview() {
+  const iframe = document.getElementById('email-preview-frame');
+  if (!iframe) return;
+  const subject = document.getElementById('email-subject')?.value || '';
+  const body    = document.getElementById('email-body')?.value || '';
+  const html = generateEmailHTML('홍길동', 'MW-1234', 'Silver', body);
+  iframe.srcdoc = html;
+}
+
 async function sendBulkEmail(){
   const subject = document.getElementById('email-subject').value.trim();
   const body    = document.getElementById('email-body').value.trim();
@@ -2132,16 +2273,18 @@ async function sendBulkEmail(){
   resultEl.style.display = 'none';
   logEl.innerHTML = '';
 
+  const TIER_MAP = {'1-4':'Basic','5-9':'Silver','10+':'Gold'};
   let ok = 0, fail = 0;
   for(const p of targets){
     const personSubject = replaceVars(subject, p);
     const personBody    = replaceVars(body, p);
+    const htmlBody      = generateEmailHTML(p.name, p.code||'미발급', TIER_MAP[p.tier]||p.tier, personBody);
     try {
       await emailjs.send('service_2qnpx8i', tplId, {
-        to_email: p.email,
-        to_name:  p.name,
-        subject:  personSubject,
-        message:  personBody,
+        to_email:  p.email,
+        to_name:   p.name,
+        subject:   personSubject,
+        html_body: htmlBody,
       });
       ok++;
       logEl.innerHTML += `<div>✅ <strong>${p.name}</strong> (${p.email}) — 발송 완료</div>`;
@@ -2149,7 +2292,7 @@ async function sendBulkEmail(){
       fail++;
       logEl.innerHTML += `<div style="color:var(--err);">❌ <strong>${p.name}</strong> (${p.email}) — 실패: ${e?.text||e}</div>`;
     }
-    await new Promise(r => setTimeout(r, 300)); // API 레이트 제한 방지
+    await new Promise(r => setTimeout(r, 300));
   }
 
   resultEl.style.display = 'block';
@@ -2160,6 +2303,121 @@ async function sendBulkEmail(){
   btn.disabled = false; btn.textContent = '✉️ 이메일 발송하기';
   toast(`${ok}명 이메일 발송 완료`);
 }
+
+// ── 파트너 직접 추가 ──────────────────────────────
+function openAddPartnerModal(){
+  document.getElementById('add-partner-modal').style.display = 'flex';
+  document.getElementById('ap-name').focus();
+}
+function closeAddPartnerModal(){
+  document.getElementById('add-partner-modal').style.display = 'none';
+  document.getElementById('add-partner-form').reset();
+}
+
+function submitAddPartner(){
+  const name    = document.getElementById('ap-name').value.trim();
+  const email   = document.getElementById('ap-email').value.trim();
+  const phone   = document.getElementById('ap-phone').value.trim();
+  const biz     = document.getElementById('ap-biz').value.trim();
+  const tier    = document.getElementById('ap-tier').value;
+  const status  = document.getElementById('ap-status').value;
+  const msg     = document.getElementById('ap-msg').value.trim();
+
+  if(!name){ toast('이름을 입력해 주세요.','err'); document.getElementById('ap-name').focus(); return; }
+
+  const newId = partners.length ? Math.max(...partners.map(p => Number(p.id)||0)) + 1 : 1;
+  const today = new Date().toLocaleDateString('ko-KR');
+
+  // approved/active/gold 상태면 코드 자동 발급
+  let code = '';
+  if(['approved','active','gold'].includes(status)){
+    const prefix = 'MW-';
+    const existing = partners.map(p=>(p.code||'').toUpperCase());
+    let attempt;
+    do { attempt = prefix + Math.random().toString(36).slice(2,6).toUpperCase(); }
+    while(existing.includes(attempt));
+    code = attempt;
+  }
+
+  partners.push({
+    id: newId, name, email, phone, sns:'', biz, tier, channel:'직접추가',
+    msg, date: today, status, code, pw: code||'', referrals:0, payback:0
+  });
+  savePartners();
+  updateStats(); renderRecentTable(); renderPartnerTable();
+  closeAddPartnerModal();
+  toast(`${name} 님이 파트너로 등록되었습니다.`);
+}
 </script>
+
+<!-- ── 파트너 추가 모달 ── -->
+<div id="add-partner-modal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.45);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;padding:32px 28px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.2);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div style="font-size:16px;font-weight:800;color:var(--text);">파트너 직접 추가</div>
+      <button onclick="closeAddPartnerModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--gray);">✕</button>
+    </div>
+    <form id="add-partner-form" onsubmit="event.preventDefault();submitAddPartner();">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:5px;">이름 <span style="color:var(--err);">*</span></label>
+          <input id="ap-name" type="text" placeholder="홍길동"
+            style="width:100%;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;"
+            onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:5px;">연락처</label>
+          <input id="ap-phone" type="text" placeholder="010-0000-0000"
+            style="width:100%;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;"
+            onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'">
+        </div>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:5px;">이메일</label>
+        <input id="ap-email" type="email" placeholder="example@email.com"
+          style="width:100%;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;"
+          onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'">
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:5px;">업체 / 소속</label>
+        <input id="ap-biz" type="text" placeholder="스튜디오명, 드레스샵 등"
+          style="width:100%;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;"
+          onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:5px;">예상 등급</label>
+          <select id="ap-tier" style="width:100%;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;">
+            <option value="1-4">Basic (1–4건)</option>
+            <option value="5-9" selected>Silver (5–9건)</option>
+            <option value="10+">Gold (10+건)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:5px;">초기 상태</label>
+          <select id="ap-status" style="width:100%;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;">
+            <option value="pending">신청대기</option>
+            <option value="approved" selected>승인완료</option>
+            <option value="active">활성화</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:5px;">메모 (관리자용)</label>
+        <textarea id="ap-msg" rows="2" placeholder="특이사항, 소개 경로 등"
+          style="width:100%;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;resize:vertical;"
+          onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'"></textarea>
+        <div style="font-size:11px;color:var(--gray);margin-top:4px;">승인완료·활성화 상태면 파트너 코드가 자동 발급됩니다.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <button type="button" onclick="closeAddPartnerModal()"
+          style="padding:13px;background:#F4F4FC;color:var(--text);border:none;border-radius:100px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">취소</button>
+        <button type="submit"
+          style="padding:13px;background:var(--p);color:#fff;border:none;border-radius:100px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">등록하기</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 </body>
 </html>
