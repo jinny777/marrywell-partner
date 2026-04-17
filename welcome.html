@@ -233,7 +233,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   </a>
 
   <div class="footer">
-    문의: partners@marrywell.co.kr<br>
+    문의: <span id="footer-email">partners@marrywell.co.kr</span><br>
+    <span id="footer-contact">02-6092-9169 · 카카오톡 @marrywell</span><br>
     MARRYWELL · AI Wedding Studio · www.marrywell.co.kr
   </div>
 </div>
@@ -282,6 +283,49 @@ function showToast() {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2200);
 }
+
+// 관리자 페이지에서 실시간 편집 수신
+window.addEventListener('message', function(e) {
+  if (!e.data || e.data.type !== 'updateWelcome') return;
+  const d = e.data;
+
+  if (d.title !== undefined) {
+    const el = document.getElementById('hero-title');
+    if (name) {
+      el.innerHTML = name + ' 님,<br><span>' + d.title + '</span>';
+    } else {
+      // 마지막 어절을 금색 span으로
+      const parts = d.title.split(' ');
+      if (parts.length > 1) {
+        const last = parts.pop();
+        el.innerHTML = parts.join(' ') + '<br><span>' + last + '</span>';
+      } else {
+        el.innerHTML = d.title;
+      }
+    }
+  }
+  if (d.sub !== undefined)
+    document.getElementById('hero-sub').textContent = d.sub;
+
+  if (d.msg !== undefined) {
+    const sec = document.getElementById('extra-msg-section');
+    const txt = document.getElementById('extra-msg-text');
+    if (d.msg.trim()) {
+      sec.style.display = 'block';
+      txt.textContent = d.msg;
+    } else {
+      sec.style.display = 'none';
+    }
+  }
+  if (d.email !== undefined) {
+    const el = document.getElementById('footer-email');
+    if (el) el.textContent = d.email;
+  }
+  if (d.contact !== undefined) {
+    const el = document.getElementById('footer-contact');
+    if (el) el.textContent = d.contact;
+  }
+});
 </script>
 </body>
 </html>

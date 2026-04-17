@@ -792,13 +792,15 @@ tr:hover td{background:#FAFAFF;}
                 <label style="font-size:11px;font-weight:600;color:var(--gray);display:block;margin-bottom:4px;">제목</label>
                 <input id="wm-title" type="text" value="파트너 승인을 축하드립니다!"
                   style="width:100%;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;outline:none;"
-                  onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'">
+                  onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'"
+                  oninput="liveUpdateWelcomePreview()">
               </div>
               <div>
                 <label style="font-size:11px;font-weight:600;color:var(--gray);display:block;margin-bottom:4px;">부제목</label>
                 <input id="wm-sub" type="text" value="메리웰 공식 파트너가 되신 것을 환영합니다"
                   style="width:100%;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;outline:none;"
-                  onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'">
+                  onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'"
+                  oninput="liveUpdateWelcomePreview()">
               </div>
             </div>
 
@@ -808,7 +810,8 @@ tr:hover td{background:#FAFAFF;}
               <textarea id="wm-common-msg" placeholder="모든 파트너에게 공통으로 표시할 안내사항을 입력하세요."
                 style="width:100%;height:90px;padding:10px 12px;border:1.5px solid #E0E0F0;border-radius:10px;
                        font-size:13px;font-family:'Noto Sans KR',sans-serif;resize:vertical;outline:none;line-height:1.6;"
-                onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'"></textarea>
+                onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'"
+                oninput="liveUpdateWelcomePreview()"></textarea>
               <div style="font-size:11px;color:var(--gray);margin-top:6px;">※ 비워두면 표시되지 않습니다. 코드 발급 시 개별 메시지로 덮어쓸 수 있습니다.</div>
             </div>
 
@@ -830,13 +833,15 @@ tr:hover td{background:#FAFAFF;}
                 <label style="font-size:11px;font-weight:600;color:var(--gray);display:block;margin-bottom:4px;">이메일</label>
                 <input id="wm-email" type="text" value="partners@marrywell.co.kr"
                   style="width:100%;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;outline:none;"
-                  onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'">
+                  onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'"
+                  oninput="liveUpdateWelcomePreview()">
               </div>
               <div>
                 <label style="font-size:11px;font-weight:600;color:var(--gray);display:block;margin-bottom:4px;">전화 / 카카오톡</label>
                 <input id="wm-contact" type="text" value="02-6092-9169 · 카카오톡 @marrywell"
                   style="width:100%;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;outline:none;"
-                  onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'">
+                  onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'"
+                  oninput="liveUpdateWelcomePreview()">
               </div>
             </div>
           </div>
@@ -847,7 +852,7 @@ tr:hover td{background:#FAFAFF;}
               <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--p);margin-bottom:12px;">페이지 미리보기</div>
               <iframe id="welcome-preview" src="welcome.html?code=MW-DEMO&name=파트너님&tier=5-9"
                 style="width:100%;height:520px;border:none;border-radius:10px;border:1.5px solid #E0E0F0;"
-                loading="lazy"></iframe>
+                onload="liveUpdateWelcomePreview()"></iframe>
             </div>
             <div style="background:var(--white);border-radius:14px;padding:20px;box-shadow:0 2px 12px rgba(75,59,199,.06);">
               <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--p);margin-bottom:12px;">링크 생성기</div>
@@ -1893,6 +1898,20 @@ function copySmsText(){
   const sms = (document.getElementById('gen-sms')||{}).value||'';
   if(!sms) return;
   navigator.clipboard.writeText(sms).then(()=>toast('SMS 내용이 복사되었습니다.'));
+}
+
+// ── 파트너 안내 페이지 실시간 미리보기 ─────────────────
+function liveUpdateWelcomePreview(){
+  const iframe = document.getElementById('welcome-preview');
+  if(!iframe || !iframe.contentWindow) return;
+  iframe.contentWindow.postMessage({
+    type:    'updateWelcome',
+    title:   (document.getElementById('wm-title')      ||{}).value || '',
+    sub:     (document.getElementById('wm-sub')        ||{}).value || '',
+    msg:     (document.getElementById('wm-common-msg') ||{}).value || '',
+    email:   (document.getElementById('wm-email')      ||{}).value || '',
+    contact: (document.getElementById('wm-contact')    ||{}).value || '',
+  }, '*');
 }
 
 // ═══════════════════════════════════════════════
