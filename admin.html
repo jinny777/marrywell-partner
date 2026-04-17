@@ -893,7 +893,26 @@ tr:hover td{background:#FAFAFF;}
                 <button onclick="copyGenLink()" class="btn-sm btn-approve" style="padding:10px;">🔗 링크 복사</button>
                 <button onclick="shortenGenLink()" id="shorten-btn" class="btn-sm" style="padding:10px;background:var(--pale);color:var(--p);border:1.5px solid var(--ac);border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">✂️ URL 단축</button>
               </div>
-              <div style="margin-top:10px;">
+              <!-- SNS 공유 -->
+              <div style="margin-top:14px;">
+                <label style="font-size:11px;font-weight:600;color:var(--gray);display:block;margin-bottom:8px;">📲 SNS 공유</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <button onclick="shareKakao()" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:#FEE500;color:#3C1E1E;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+                    <img src="https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_medium.png" style="width:18px;height:18px;border-radius:4px;" onerror="this.style.display='none'"> 카카오톡
+                  </button>
+                  <button onclick="shareSms()" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:#34C759;color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+                    💬 문자(SMS)
+                  </button>
+                  <button onclick="shareEmail()" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:#EEF0FF;color:var(--p);border:1.5px solid var(--ac);border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+                    ✉️ 이메일
+                  </button>
+                  <button onclick="openGenLink()" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:#F4F4FC;color:var(--text);border:1.5px solid #E0E0F0;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+                    🌐 미리보기
+                  </button>
+                </div>
+              </div>
+
+              <div style="margin-top:14px;">
                 <label style="font-size:11px;font-weight:600;color:var(--gray);display:block;margin-bottom:6px;">📱 SMS 문자 내용</label>
                 <textarea id="gen-sms" readonly style="width:100%;height:80px;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:12px;resize:none;background:#FAFAFE;color:var(--text);"></textarea>
                 <button onclick="copySmsText()" class="btn-sm btn-view" style="width:100%;margin-top:6px;padding:8px;">📋 SMS 내용 복사</button>
@@ -1293,6 +1312,7 @@ function codeChip(code,id){
 }
 function actionBtns(p){
   let btns = `<button class="btn-sm btn-view" onclick="openModal(${p.id})">상세</button>`;
+  if(p.code) btns += `<button class="btn-sm btn-code" onclick="openWelcomePage(${p.id})" title="안내 페이지 확인">📄 안내</button>`;
   if(p.status==='pending') btns += `<button class="btn-sm btn-approve" onclick="changeStatus(${p.id},'review')">검토</button>`;
   if(p.status==='review')  btns += `<button class="btn-sm btn-approve" onclick="changeStatus(${p.id},'approved')">승인</button>`;
   if(p.status==='approved'&&!p.code) btns += `<button class="btn-sm btn-code" onclick="issueCode(${p.id})">코드발급</button>`;
@@ -1300,6 +1320,16 @@ function actionBtns(p){
   if(p.status!=='rejected'&&p.status!=='gold')
     btns += `<button class="btn-sm btn-reject" onclick="changeStatus(${p.id},'rejected')">거절</button>`;
   return `<div class="actions">${btns}</div>`;
+}
+
+function openWelcomePage(id){
+  const p = partners.find(p=>p.id===id);
+  if(!p||!p.code) return;
+  const url = 'https://partners.marrywell.co.kr/welcome.html'
+    + '?code=' + encodeURIComponent(p.code)
+    + '&name=' + encodeURIComponent(p.name)
+    + '&tier=' + encodeURIComponent(p.tier||'5-9');
+  window.open(url, '_blank');
 }
 
 function renderRecentTable(){
@@ -2031,6 +2061,49 @@ async function shortenGenLink(){
     toast('URL 단축 실패 — 잠시 후 다시 시도해 주세요.', 'err');
   }
   btn.textContent = '✂️ URL 단축'; btn.disabled = false;
+}
+
+function getGenLink(){
+  return (document.getElementById('gen-link-box')||{}).textContent?.trim() || '';
+}
+function getGenName(){
+  return (document.getElementById('gen-name')||{}).value?.trim() || '파트너';
+}
+
+function shareKakao(){
+  const link = getGenLink();
+  if(!link || link.includes('입력')){ toast('코드를 먼저 입력해 주세요.','err'); return; }
+  const name = getGenName();
+  // 카카오톡 공유 — 앱이 있으면 앱으로, 없으면 웹 공유 URL
+  const kakaoUrl = 'https://sharer.kakao.com/talk/friends/picker/link?app_key=KAKAO_APP_KEY&lang=kr&url=' + encodeURIComponent(link);
+  // KakaoTalk 앱 스킴 시도 후 fallback
+  const smsText = encodeURIComponent(`[메리웰파트너스] ${name}님 파트너 승인 완료🎉\n안내 페이지: ${link}`);
+  // 카카오 앱키 없으면 클립보드 복사 + 카톡 직접 붙여넣기 안내
+  navigator.clipboard.writeText(`[메리웰파트너스] ${name}님 파트너 승인 완료🎉\n안내 페이지: ${link}`)
+    .then(()=> toast('카카오톡 전달 내용이 복사됐습니다. 카카오톡을 열어 붙여넣기 해주세요.'));
+}
+
+function shareSms(){
+  const link = getGenLink();
+  if(!link || link.includes('입력')){ toast('코드를 먼저 입력해 주세요.','err'); return; }
+  const name = getGenName();
+  const body = `[메리웰파트너스] ${name}님 파트너 승인 완료🎉\n안내 페이지: ${link}`;
+  window.location.href = 'sms:?body=' + encodeURIComponent(body);
+}
+
+function shareEmail(){
+  const link = getGenLink();
+  if(!link || link.includes('입력')){ toast('코드를 먼저 입력해 주세요.','err'); return; }
+  const name = getGenName();
+  const subject = encodeURIComponent(`[MARRYWELL] ${name}님, 파트너 승인을 축하드립니다!`);
+  const body = encodeURIComponent(`안녕하세요, ${name}님!\n\n메리웰 파트너로 승인되셨습니다.\n아래 안내 페이지에서 파트너 코드와 마케팅 자료를 확인하세요.\n\n${link}\n\n감사합니다.\nMARRYWELL 파트너스 팀`);
+  window.location.href = `mailto:?subject=${subject}&body=${body}`;
+}
+
+function openGenLink(){
+  const link = getGenLink();
+  if(!link || link.includes('입력')){ toast('코드를 먼저 입력해 주세요.','err'); return; }
+  window.open(link, '_blank');
 }
 
 function copySmsText(){
