@@ -856,10 +856,23 @@ async function doLogin(){
   if(!code || !pw){ err.style.display='block'; return; }
 
   if(isDemoMode()){
+    // 1) admin이 발급한 실제 파트너 코드 확인 (같은 브라우저 localStorage)
+    const stored = JSON.parse(localStorage.getItem('mw_partners') || '[]');
+    const found  = stored.find(p => p.code && p.code.toUpperCase() === code);
+    if(found){
+      const validPw = found.pw || found.code; // pw 없으면 코드 자체가 비밀번호
+      if(pw === validPw || pw === found.code){
+        setSession({ code: found.code, name: found.name, tier: found.tier || 'basic', email: found.email || '', pw: validPw });
+        startApp();
+        return;
+      }
+    }
+    // 2) 데모 계정
     if(code === DEMO_PARTNER.code && pw === DEMO_PARTNER.pw){
       setSession(DEMO_PARTNER);
       startApp();
     } else {
+      err.textContent = '파트너 코드 또는 비밀번호가 올바르지 않습니다.\n(초기 비밀번호는 파트너 코드와 동일합니다)';
       err.style.display = 'block';
     }
     return;

@@ -1290,6 +1290,7 @@ function confirmIssueCode(){
   const extraMsg = document.getElementById('issue-extra-msg').value.trim();
   const code = 'MW-' + Math.random().toString(36).substr(2,4).toUpperCase();
   p.code = code;
+  p.pw   = code; // 초기 비밀번호 = 파트너 코드
   if(p.status==='approved') p.status = 'active';
   savePartners();
   updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
@@ -1310,7 +1311,7 @@ function sendApprovalEmail(p, extraMsg) {
     + (extraMsg ? '&msg=' + encodeURIComponent(extraMsg) : '');
 
   const tierMap = {'1-4':'Basic (월 1-4건 · 3만원/건)', '5-9':'Silver (월 5-9건 · 5만원/건)', '10+':'Gold (월 10건+ · 7만원/건)'};
-  const smsText = `[메리웰파트너스] ${p.name}님 파트너 승인 완료🎉\n파트너코드: ${p.code}\n자료 및 포털: ${welcomeLink}`;
+  const smsText = `[메리웰파트너스] ${p.name}님 파트너 승인 완료🎉\n파트너코드: ${p.code}\n초기 비밀번호: ${p.code}\n포털 로그인: https://partners.marrywell.co.kr/partner.html\n자료 안내: ${welcomeLink}`;
 
   emailjs.send('service_2qnpx8i', 'template_welcome', {
     partner_name:   p.name,
