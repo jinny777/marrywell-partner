@@ -2019,37 +2019,43 @@ async function shortenGenLink(){
   const box = document.getElementById('gen-link-box');
   const btn = document.getElementById('shorten-btn');
   const link = box?.textContent?.trim() || '';
-  if(!link || link.includes('입력')) { toast('코드를 먼저 입력해 주세요.','err'); return; }
-  if(/^https:\/\/(tinyurl\.com|is\.gd|cleanuri\.com|bit\.ly)\//.test(link)) {
+  if(!link || link.includes('입력')){ toast('코드를 먼저 입력해 주세요.','err'); return; }
+  if(/^https:\/\/(tinyurl\.com|is\.gd|bit\.ly|cleanuri\.com)\//.test(link)){
     navigator.clipboard.writeText(link).then(()=>toast('이미 단축된 링크가 복사되었습니다.'));
     return;
   }
   btn.textContent = '⏳ 단축 중...'; btn.disabled = true;
 
-  async function tryShorten(apiUrl, extract) {
-    const res = await fetch(apiUrl, { signal: AbortSignal.timeout(8000) });
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const short = await extract(res);
-    if(!short || !short.startsWith('http')) throw new Error('응답 오류');
-    return short;
+  function withTimeout(promise, ms){
+    return Promise.race([promise, new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), ms))]);
   }
 
-  const apis = [
-    // 1차: corsproxy.io → TinyURL
-    () => tryShorten(
-      'https://corsproxy.io/?' + encodeURIComponent('https://tinyurl.com/api-create.php?url=' + encodeURIComponent(link)),
-      r => r.text().then(t => t.trim())
-    ),
-    // 2차: allorigins.win → TinyURL
-    () => tryShorten(
-      'https://api.allorigins.win/get?url=' + encodeURIComponent('https://tinyurl.com/api-create.php?url=' + encodeURIComponent(link)),
-      r => r.json().then(d => (d.contents||'').trim())
-    ),
+  const tinyUrl = 'https://tinyurl.com/api-create.php?url=' + encodeURIComponent(link);
+  const proxies = [
+    // allorigins — JSON 래퍼
+    async () => {
+      const r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(tinyUrl));
+      const d = await r.json();
+      return (d.contents||'').trim();
+    },
+    // corsproxy.io — 텍스트 그대로
+    async () => {
+      const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(tinyUrl));
+      return (await r.text()).trim();
+    },
+    // thingproxy
+    async () => {
+      const r = await fetch('https://thingproxy.freeboard.io/fetch/' + tinyUrl);
+      return (await r.text()).trim();
+    },
   ];
 
   let short = '';
-  for(const api of apis){
-    try { short = await api(); break; } catch(e){ /* 다음 시도 */ }
+  for(const proxy of proxies){
+    try {
+      const result = await withTimeout(proxy(), 7000);
+      if(result && result.startsWith('http')){ short = result; break; }
+    } catch(e){ /* 다음 프록시 시도 */ }
   }
 
   if(short){
@@ -2058,7 +2064,7 @@ async function shortenGenLink(){
     if(smsEl) smsEl.value = smsEl.value.replace(link, short);
     navigator.clipboard.writeText(short).then(()=>toast('단축 링크 복사 완료! ' + short));
   } else {
-    toast('URL 단축 실패 — 잠시 후 다시 시도해 주세요.', 'err');
+    toast('URL 단축 실패 — 네트워크 확인 후 다시 시도해 주세요.', 'err');
   }
   btn.textContent = '✂️ URL 단축'; btn.disabled = false;
 }
