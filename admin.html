@@ -411,6 +411,9 @@ tr:hover td{background:#FAFAFF;}
       <a class="sb-item" onclick="showPage('welcome-mgmt')">
         <span class="sb-ico">📨</span> 파트너 안내 페이지
       </a>
+      <a class="sb-item" onclick="showPage('email-send')">
+        <span class="sb-ico">✉️</span> 이메일 발송
+      </a>
       <div class="sb-section">설정</div>
       <a class="sb-item" href="partner.html" target="_blank">
         <span class="sb-ico">👤</span> 파트너 포털
@@ -876,6 +879,81 @@ tr:hover td{background:#FAFAFF;}
         </div>
       </div><!-- /page-welcome-mgmt -->
 
+      <!-- ════ PAGE: EMAIL SEND ════ -->
+      <div class="page" id="page-email-send">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+
+          <!-- 왼쪽: 수신자 선택 -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">👥 수신자 선택</div>
+              <div class="card-actions" style="gap:8px;">
+                <button class="btn-sm btn-approve" onclick="emailSelectAll(true)">전체 선택</button>
+                <button class="btn-sm btn-reject" onclick="emailSelectAll(false)">전체 해제</button>
+              </div>
+            </div>
+            <!-- 필터 -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+              <button class="ftab active" onclick="emailFilterPartners('all',this)" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1.5px solid #E0E0F0;background:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">전체</button>
+              <button class="ftab" onclick="emailFilterPartners('active',this)" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1.5px solid #E0E0F0;background:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">활성 파트너</button>
+              <button class="ftab" onclick="emailFilterPartners('approved',this)" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1.5px solid #E0E0F0;background:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">승인 완료</button>
+              <button class="ftab" onclick="emailFilterPartners('pending',this)" style="font-size:11px;padding:5px 12px;border-radius:100px;border:1.5px solid #E0E0F0;background:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">승인 대기</button>
+            </div>
+            <div id="email-partner-list" style="max-height:440px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;"></div>
+            <div style="margin-top:12px;padding:10px 12px;background:var(--pale);border-radius:10px;font-size:12px;color:var(--p);font-weight:600;" id="email-selected-count">선택된 수신자: 0명</div>
+          </div>
+
+          <!-- 오른쪽: 이메일 작성 -->
+          <div>
+            <div class="card" style="margin-bottom:16px;">
+              <div class="card-header"><div class="card-title">✉️ 이메일 작성</div></div>
+
+              <div style="margin-bottom:12px;">
+                <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:6px;">템플릿 선택</label>
+                <select id="email-template-sel" onchange="applyEmailTemplate()" style="width:100%;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;">
+                  <option value="custom">직접 작성</option>
+                  <option value="welcome">파트너 환영 안내</option>
+                  <option value="notice">공지 / 업데이트</option>
+                  <option value="payback">페이백 정산 안내</option>
+                </select>
+              </div>
+
+              <div style="margin-bottom:12px;">
+                <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:6px;">제목 <span style="color:var(--err)">*</span></label>
+                <input id="email-subject" type="text" placeholder="이메일 제목을 입력하세요"
+                  style="width:100%;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;"
+                  onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'">
+              </div>
+
+              <div style="margin-bottom:16px;">
+                <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:6px;">본문 <span style="color:var(--err)">*</span></label>
+                <textarea id="email-body" rows="10" placeholder="이메일 내용을 입력하세요.&#10;&#10;{{name}} — 수신자 이름으로 자동 치환됩니다."
+                  style="width:100%;padding:10px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;resize:vertical;line-height:1.7;"
+                  onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'"></textarea>
+                <div style="font-size:11px;color:var(--gray);margin-top:4px;">{{name}} = 파트너 이름, {{code}} = 파트너 코드, {{tier}} = 등급</div>
+              </div>
+
+              <div id="email-send-result" style="display:none;margin-bottom:12px;padding:10px 14px;border-radius:10px;font-size:13px;"></div>
+
+              <button onclick="sendBulkEmail()" id="email-send-btn"
+                style="width:100%;padding:14px;background:var(--p);color:#fff;border:none;border-radius:100px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:background .15s;"
+                onmouseover="this.style.background='var(--pd)'" onmouseout="this.style.background='var(--p)'">
+                ✉️ 이메일 발송하기
+              </button>
+            </div>
+
+            <!-- 발송 로그 -->
+            <div class="card">
+              <div class="card-header"><div class="card-title">📋 발송 결과</div></div>
+              <div id="email-log" style="max-height:200px;overflow-y:auto;font-size:12px;color:var(--text);line-height:1.9;">
+                <span style="color:var(--gray)">발송 결과가 여기에 표시됩니다.</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /page-email-send -->
+
     </div><!-- /content -->
   </div><!-- /main -->
 </div><!-- /app -->
@@ -1124,7 +1202,8 @@ function showPage(name){
   const titles = {
     dashboard:'대시보드', partners:'파트너 목록',
     process:'처리 프로세스', payback:'페이백 현황',
-    materials:'마케팅 자료 관리', referrals:'고객 명단 현황'
+    materials:'마케팅 자료 관리', referrals:'고객 명단 현황',
+    'welcome-mgmt':'파트너 안내 페이지', 'email-send':'이메일 발송'
   };
   document.getElementById('page-title').textContent = titles[name]||name;
   if(event && event.currentTarget) {
@@ -1134,6 +1213,7 @@ function showPage(name){
   }
   if(name==='materials') loadAdminMaterials();
   if(name==='referrals') loadAdminReferrals();
+  if(name==='email-send') initEmailSend();
 }
 
 // ── TABLE ROW ─────────────────────────────────────
@@ -1813,6 +1893,195 @@ function copySmsText(){
   const sms = (document.getElementById('gen-sms')||{}).value||'';
   if(!sms) return;
   navigator.clipboard.writeText(sms).then(()=>toast('SMS 내용이 복사되었습니다.'));
+}
+
+// ═══════════════════════════════════════════════
+//  이메일 발송
+// ═══════════════════════════════════════════════
+let emailFilterStatus = 'all';
+const EMAIL_TEMPLATES = {
+  welcome: {
+    subject: '[메리웰파트너스] 파트너 환영 안내드립니다 🎉',
+    body: `안녕하세요, {{name}} 님!
+
+메리웰 파트너스에 오신 것을 진심으로 환영합니다.
+
+파트너 코드: {{code}}
+파트너 등급: {{tier}}
+
+파트너 포털(https://partners.marrywell.co.kr/partner.html)에서 고객 소개 현황과 페이백 내역을 확인하실 수 있습니다.
+
+궁금하신 사항은 언제든 아래 연락처로 문의해 주세요.
+📧 partners@marrywell.co.kr
+📞 02-6092-9169
+카카오톡 @marrywell
+
+감사합니다.
+MARRYWELL 파트너스 팀`
+  },
+  notice: {
+    subject: '[메리웰파트너스] 공지사항 안내',
+    body: `안녕하세요, {{name}} 님!
+
+메리웰 파트너스에서 안내 말씀 드립니다.
+
+[공지 내용을 입력하세요]
+
+감사합니다.
+MARRYWELL 파트너스 팀`
+  },
+  payback: {
+    subject: '[메리웰파트너스] 페이백 정산 안내',
+    body: `안녕하세요, {{name}} 님!
+
+이번 달 페이백 정산 내역을 안내드립니다.
+
+파트너 코드: {{code}}
+정산 예정일: 매월 15일
+
+정확한 정산 금액은 파트너 포털에서 확인하실 수 있습니다.
+→ https://partners.marrywell.co.kr/partner.html
+
+감사합니다.
+MARRYWELL 파트너스 팀`
+  }
+};
+
+function initEmailSend(){
+  renderEmailPartnerList();
+}
+
+function renderEmailPartnerList(){
+  const list = document.getElementById('email-partner-list');
+  const filtered = emailFilterStatus === 'all'
+    ? partners
+    : partners.filter(p => p.status === emailFilterStatus);
+
+  if(!filtered.length){
+    list.innerHTML = `<div style="text-align:center;padding:24px;color:var(--gray);font-size:13px;">해당하는 파트너가 없습니다.</div>`;
+    updateEmailSelectedCount();
+    return;
+  }
+
+  const TIER_LABEL = {'1-4':'Basic','5-9':'Silver','10+':'Gold'};
+  const STATUS_COLOR = {active:'var(--ok)',approved:'var(--p)',pending:'var(--warn)',rejected:'var(--err)'};
+  const STATUS_LABEL = {active:'활성',approved:'승인',pending:'대기',rejected:'거절'};
+
+  list.innerHTML = filtered.map(p => `
+    <label style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:#FAFAFF;border-radius:10px;cursor:pointer;border:1.5px solid transparent;transition:border .15s;"
+      onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='transparent'">
+      <input type="checkbox" class="email-chk" data-id="${p.id}" style="width:16px;height:16px;accent-color:var(--p);flex-shrink:0;cursor:pointer;" onchange="updateEmailSelectedCount()">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);">${p.name}
+          <span style="font-size:10px;background:var(--pale);color:var(--p);padding:2px 7px;border-radius:100px;margin-left:4px;">${TIER_LABEL[p.tier]||p.tier||'Basic'}</span>
+          <span style="font-size:10px;color:${STATUS_COLOR[p.status]||'var(--gray)'};margin-left:4px;">● ${STATUS_LABEL[p.status]||p.status}</span>
+        </div>
+        <div style="font-size:11px;color:var(--gray);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          ${p.email ? `✉ ${p.email}` : '<span style="color:#FCA5A5;">이메일 없음</span>'}
+          ${p.code ? ` &nbsp;·&nbsp; ${p.code}` : ''}
+        </div>
+      </div>
+    </label>`).join('');
+  updateEmailSelectedCount();
+}
+
+function emailFilterPartners(status, btn){
+  emailFilterStatus = status;
+  document.querySelectorAll('#page-email-send .ftab').forEach(t=>{
+    t.style.background = '#fff'; t.style.borderColor = '#E0E0F0'; t.style.color = 'var(--text)';
+  });
+  btn.style.background = 'var(--p)'; btn.style.borderColor = 'var(--p)'; btn.style.color = '#fff';
+  renderEmailPartnerList();
+}
+
+function emailSelectAll(checked){
+  document.querySelectorAll('.email-chk').forEach(c => c.checked = checked);
+  updateEmailSelectedCount();
+}
+
+function updateEmailSelectedCount(){
+  const total = document.querySelectorAll('.email-chk:checked').length;
+  const noEmail = [...document.querySelectorAll('.email-chk:checked')].filter(c=>{
+    const p = partners.find(p=>p.id===Number(c.dataset.id));
+    return !p?.email;
+  }).length;
+  let msg = `선택된 수신자: <strong>${total}명</strong>`;
+  if(noEmail) msg += ` <span style="color:var(--err);">(이메일 없음 ${noEmail}명 제외됩니다)</span>`;
+  document.getElementById('email-selected-count').innerHTML = msg;
+}
+
+function applyEmailTemplate(){
+  const key = document.getElementById('email-template-sel').value;
+  if(key === 'custom') return;
+  const tpl = EMAIL_TEMPLATES[key];
+  if(!tpl) return;
+  document.getElementById('email-subject').value = tpl.subject;
+  document.getElementById('email-body').value = tpl.body;
+}
+
+function replaceVars(text, p){
+  const TIER_LABEL = {'1-4':'Basic','5-9':'Silver','10+':'Gold'};
+  return text
+    .replace(/\{\{name\}\}/g, p.name || '')
+    .replace(/\{\{code\}\}/g, p.code || '미발급')
+    .replace(/\{\{tier\}\}/g, TIER_LABEL[p.tier] || p.tier || 'Basic');
+}
+
+async function sendBulkEmail(){
+  const subject = document.getElementById('email-subject').value.trim();
+  const body    = document.getElementById('email-body').value.trim();
+  const resultEl = document.getElementById('email-send-result');
+  const logEl    = document.getElementById('email-log');
+  const btn      = document.getElementById('email-send-btn');
+
+  if(!subject || !body){ toast('제목과 본문을 입력해 주세요.','err'); return; }
+
+  const checked = [...document.querySelectorAll('.email-chk:checked')];
+  const targets = checked
+    .map(c => partners.find(p => p.id === Number(c.dataset.id)))
+    .filter(p => p && p.email);
+
+  if(!targets.length){
+    toast('이메일이 있는 수신자를 선택해 주세요.','err'); return;
+  }
+
+  if(!confirm(`${targets.length}명에게 이메일을 발송하시겠습니까?`)) return;
+
+  btn.disabled = true; btn.textContent = '⏳ 발송 중...';
+  resultEl.style.display = 'none';
+  logEl.innerHTML = '';
+
+  let ok = 0, fail = 0;
+  for(const p of targets){
+    const personSubject = replaceVars(subject, p);
+    const personBody    = replaceVars(body, p);
+    try {
+      const TIER_MAP2 = {'1-4':'Basic','5-9':'Silver','10+':'Gold'};
+      await emailjs.send('service_2qnpx8i', 'template_welcome', {
+        partner_name:  p.name,
+        partner_email: p.email,
+        partner_code:  p.code || '미발급',
+        partner_tier:  TIER_MAP2[p.tier] || p.tier || 'Basic',
+        welcome_link:  'https://partners.marrywell.co.kr/partner.html',
+        extra_message: `[${personSubject}]\n\n${personBody}`,
+        portal_link:   'https://partners.marrywell.co.kr',
+      });
+      ok++;
+      logEl.innerHTML += `<div>✅ <strong>${p.name}</strong> (${p.email}) — 발송 완료</div>`;
+    } catch(e) {
+      fail++;
+      logEl.innerHTML += `<div style="color:var(--err);">❌ <strong>${p.name}</strong> (${p.email}) — 실패: ${e?.text||e}</div>`;
+    }
+    await new Promise(r => setTimeout(r, 300)); // API 레이트 제한 방지
+  }
+
+  resultEl.style.display = 'block';
+  resultEl.style.background = fail === 0 ? '#DCFCE7' : '#FEF3C7';
+  resultEl.style.color = fail === 0 ? '#14532D' : '#92400E';
+  resultEl.textContent = `발송 완료: ${ok}명 성공 / ${fail}명 실패`;
+
+  btn.disabled = false; btn.textContent = '✉️ 이메일 발송하기';
+  toast(`${ok}명 이메일 발송 완료`);
 }
 </script>
 </body>
