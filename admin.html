@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MARRYWELL 파트너스 — 관리자</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('_J5MvthpGTIyRcr0y');</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@600;700;800;900&display=swap');
 :root{
@@ -1107,7 +1109,32 @@ function issueCode(id){
   savePartners();
   updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
   toast(`${p.name} 님에게 코드 [${code}]가 발급되었습니다.`);
-  pushStatusToSheet(id, p.status, code); // 구글 시트 동기화
+  pushStatusToSheet(id, p.status, code);
+  sendApprovalEmail(p);
+}
+
+// ── 파트너 승인 안내 이메일 발송 ─────────────────────
+function sendApprovalEmail(p) {
+  const welcomeLink = 'https://partners.marrywell.co.kr/welcome.html'
+    + '?code=' + encodeURIComponent(p.code)
+    + '&name=' + encodeURIComponent(p.name)
+    + '&tier=' + encodeURIComponent(p.tier);
+
+  const tierMap = {'1-4':'Basic (월 1-4건 · 3만원/건)', '5-9':'Silver (월 5-9건 · 5만원/건)', '10+':'Gold (월 10건+ · 7만원/건)'};
+
+  emailjs.send('service_2qnpx8i', 'template_welcome', {
+    partner_name:   p.name,
+    partner_email:  p.email,
+    partner_code:   p.code,
+    partner_tier:   tierMap[p.tier] || p.tier,
+    welcome_link:   welcomeLink,
+    portal_link:    'https://partners.marrywell.co.kr',
+    materials_link: 'https://partners.marrywell.co.kr/welcome.html?code=' + encodeURIComponent(p.code),
+  }).then(() => {
+    toast(`${p.name} 님께 승인 안내 이메일을 발송했습니다.`);
+  }).catch(() => {
+    toast(`이메일 발송 실패 — 수동으로 안내해 주세요.`);
+  });
 }
 
 function filterPartners(f, el){
