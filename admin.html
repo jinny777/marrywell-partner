@@ -1491,7 +1491,7 @@ function renderAdminMaterials(){
       <td>
         <div class="actions">
           ${m.fileType==='html'?`<a class="btn-sm btn-view" href="${m.url}" target="_blank">미리보기</a>`:''}
-          ${m.fileType==='html'?`<a class="btn-sm" style="background:#EEF0FF;color:var(--p);font-weight:700;" href="${m.url}?pdf=1" target="_blank">PDF 저장</a>`:''}
+          ${m.fileType==='html'?`<a class="btn-sm" style="background:#EEF0FF;color:var(--p);font-weight:700;" href="${m.url}" target="_blank">PDF 저장</a>`:''}
           <button class="btn-sm btn-reject" onclick="deleteAdminMaterial(${m.id})">삭제</button>
         </div>
       </td>

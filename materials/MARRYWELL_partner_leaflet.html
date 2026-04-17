@@ -350,7 +350,8 @@
   .cta-url { font-size:11px; color:rgba(255,255,255,.45); }
 
   @media print {
-    body { background:white; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { background:white; margin:0; }
     .page { margin:0; box-shadow:none; }
     .pdf-fab { display: none !important; }
   }
@@ -574,9 +575,6 @@
 function dlPDF(){
   document.querySelector('.pdf-fab').style.display='none';
   setTimeout(()=>{ window.print(); document.querySelector('.pdf-fab').style.display='flex'; }, 80);
-}
-if(new URLSearchParams(location.search).get('pdf')==='1'){
-  window.addEventListener('load', ()=>{ setTimeout(()=>window.print(), 500); });
 }
 </script>
 </body>

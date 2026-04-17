@@ -877,6 +877,7 @@
 
   /* ─── 인쇄 ─── */
   @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     body { background: white; margin: 0; }
     .sheet { margin: 0; box-shadow: none; page-break-after: always; }
     .sheet::before, .sheet::after { display: none; }
@@ -1475,9 +1476,6 @@
       bar.style.visibility = '';
       document.querySelectorAll('.label').forEach(el => el.style.visibility = '');
     }, 80);
-  }
-  if(new URLSearchParams(location.search).get('pdf')==='1'){
-    window.addEventListener('load', ()=>{ setTimeout(()=>window.print(), 500); });
   }
 
   /* ── PPT 생성 : html2canvas로 브로셔 그대로 2슬라이드 캡처 ── */

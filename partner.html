@@ -1087,7 +1087,7 @@ function renderMaterials(){
         <div class="mat-desc">${m.description||''}</div>
         <div class="mat-footer">
           ${m.fileType==='html' ? `<button class="mat-btn mat-btn-preview" onclick="openMatPreview(${m.id})">미리보기</button>` : ''}
-          ${m.fileType==='html' ? `<a class="mat-btn mat-btn-download" href="${m.url}?pdf=1" target="_blank">PDF 저장</a>` : `<a class="mat-btn mat-btn-download" href="${m.url}" download>다운로드</a>`}
+          ${m.fileType==='html' ? `<a class="mat-btn mat-btn-download" href="${m.url}" target="_blank">PDF 저장</a>` : `<a class="mat-btn mat-btn-download" href="${m.url}" download>다운로드</a>`}
         </div>
       </div>
     </div>`).join('');
@@ -1100,7 +1100,7 @@ function openMatPreview(id){
   const pdfBtn = document.getElementById('mat-modal-pdf');
   const dlBtn  = document.getElementById('mat-modal-dl');
   if(m.fileType==='html'){
-    pdfBtn.href = m.url + '?pdf=1';
+    pdfBtn.href = m.url;
     pdfBtn.style.display = '';
     dlBtn.href = m.url;
     dlBtn.removeAttribute('download');

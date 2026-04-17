@@ -485,7 +485,8 @@
 
   /* ── PRINT ── */
   @media print {
-    body { background: white; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { background: white; margin: 0; }
     .page { margin: 0; box-shadow: none; border-radius: 0; }
     .pdf-fab { display: none !important; }
   }
@@ -820,9 +821,6 @@ function dlPDF(){
   setTimeout(()=>{ window.print(); document.querySelector('.pdf-fab').style.display='flex'; }, 80);
 }
 // URL에 ?pdf=1 이 있으면 자동 인쇄
-if(new URLSearchParams(location.search).get('pdf')==='1'){
-  window.addEventListener('load', ()=>{ setTimeout(()=>window.print(), 500); });
-}
 </script>
 </body>
 </html>
