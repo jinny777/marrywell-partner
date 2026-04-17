@@ -815,12 +815,28 @@
   <button class="pdf-btn outline" onclick="window.close()">✕ 닫기</button>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-function dlPDF(){
-  document.querySelector('.pdf-fab').style.display='none';
-  setTimeout(()=>{ window.print(); document.querySelector('.pdf-fab').style.display='flex'; }, 80);
+async function dlPDF(){
+  const fab = document.querySelector('.pdf-fab');
+  const btn = fab.querySelector('.pdf-btn');
+  btn.disabled = true; btn.textContent = '⏳ PDF 생성 중...';
+  fab.style.pointerEvents = 'none';
+  try {
+    const { jsPDF } = window.jspdf;
+    const pages = document.querySelectorAll('.page');
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    for (let i = 0; i < pages.length; i++) {
+      if (i > 0) pdf.addPage();
+      const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true, allowTaint: true, logging: false, backgroundColor: '#ffffff' });
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.97), 'JPEG', 0, 0, 210, 297);
+    }
+    pdf.save('MARRYWELL_서비스브로셔.pdf');
+  } catch(e) { alert('PDF 생성 중 오류가 발생했습니다.'); }
+  btn.disabled = false; btn.textContent = '⬇️ PDF 저장';
+  fab.style.pointerEvents = '';
 }
-// URL에 ?pdf=1 이 있으면 자동 인쇄
 </script>
 </body>
 </html>

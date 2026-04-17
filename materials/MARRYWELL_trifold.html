@@ -1457,6 +1457,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs/dist/pptxgen.bundle.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
   /* ── QR 코드 생성 (공개 홈페이지 URL) ── */
   new QRCode(document.getElementById("qrcode"), {
@@ -1467,15 +1468,29 @@
   });
 
   /* ── PDF 저장 ── */
-  function dlPDF(){
-    const bar = document.querySelector('.dl-bar');
-    bar.style.visibility = 'hidden';
+  async function dlPDF(){
+    const bar  = document.querySelector('.dl-bar');
+    const btn  = document.getElementById('pdfBtn');
+    btn.disabled = true; btn.textContent = '⏳ PDF 생성 중...';
     document.querySelectorAll('.label').forEach(el => el.style.visibility = 'hidden');
-    setTimeout(()=>{
-      window.print();
-      bar.style.visibility = '';
-      document.querySelectorAll('.label').forEach(el => el.style.visibility = '');
-    }, 80);
+    bar.style.visibility = 'hidden';
+    try {
+      const { jsPDF } = window.jspdf;
+      const sheets = document.querySelectorAll('.sheet');
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' });
+      for (let i = 0; i < sheets.length; i++) {
+        if (i > 0) pdf.addPage();
+        const canvas = await html2canvas(sheets[i], {
+          scale: 2, useCORS: true, allowTaint: true, logging: false,
+          backgroundColor: i === 0 ? '#1a0533' : '#fafbff'
+        });
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.97), 'JPEG', 0, 0, 297, 210);
+      }
+      pdf.save('MARRYWELL_3단브로셔.pdf');
+    } catch(e) { alert('PDF 생성 중 오류가 발생했습니다.'); }
+    document.querySelectorAll('.label').forEach(el => el.style.visibility = '');
+    bar.style.visibility = '';
+    btn.disabled = false; btn.textContent = '⬇ PDF 저장';
   }
 
   /* ── PPT 생성 : html2canvas로 브로셔 그대로 2슬라이드 캡처 ── */
