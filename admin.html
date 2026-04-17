@@ -1943,22 +1943,45 @@ async function shortenGenLink(){
   const btn = document.getElementById('shorten-btn');
   const link = box?.textContent?.trim() || '';
   if(!link || link.includes('입력')) { toast('코드를 먼저 입력해 주세요.','err'); return; }
-  if(link.startsWith('https://is.gd/') || link.startsWith('https://tinyurl.com/')) {
+  if(/^https:\/\/(cleanuri\.com|tinyurl\.com|is\.gd)\//.test(link)) {
     navigator.clipboard.writeText(link).then(()=>toast('이미 단축된 링크가 복사되었습니다.'));
     return;
   }
   btn.textContent = '⏳ 단축 중...'; btn.disabled = true;
   try {
-    const res = await fetch('https://is.gd/create.php?format=simple&url=' + encodeURIComponent(link));
-    if(!res.ok) throw new Error('API 오류');
-    const short = (await res.text()).trim();
+    // 1차: cleanuri.com (CORS 지원)
+    const res = await fetch('https://cleanuri.com/api/v1/shorten', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'url=' + encodeURIComponent(link)
+    });
+    const data = await res.json();
+    const short = data.result_url || '';
     if(!short.startsWith('http')) throw new Error('응답 오류');
     box.textContent = short;
     const smsEl = document.getElementById('gen-sms');
     if(smsEl) smsEl.value = smsEl.value.replace(link, short);
     navigator.clipboard.writeText(short).then(()=>toast('단축 링크 복사 완료! ' + short));
   } catch(e) {
-    toast('URL 단축 실패. 잠시 후 다시 시도해 주세요.','err');
+    // 2차: tinyurl JSONP 방식
+    try {
+      const short = await new Promise((resolve, reject) => {
+        const cb = 'tw_cb_' + Date.now();
+        const s = document.createElement('script');
+        s.src = 'https://tinyurl.com/api-create.php?url=' + encodeURIComponent(link) + '&callback=' + cb;
+        window[cb] = url => { delete window[cb]; document.head.removeChild(s); resolve(url); };
+        s.onerror = reject;
+        document.head.appendChild(s);
+        setTimeout(() => reject(new Error('timeout')), 8000);
+      });
+      if(!short.startsWith('http')) throw new Error('응답 오류');
+      box.textContent = short;
+      const smsEl = document.getElementById('gen-sms');
+      if(smsEl) smsEl.value = smsEl.value.replace(link, short);
+      navigator.clipboard.writeText(short).then(()=>toast('단축 링크 복사 완료! ' + short));
+    } catch(e2) {
+      toast('URL 단축 실패 — 링크가 너무 길거나 서비스 일시 오류입니다.', 'err');
+    }
   } finally {
     btn.textContent = '✂️ URL 단축'; btn.disabled = false;
   }
