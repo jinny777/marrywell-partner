@@ -859,6 +859,20 @@ tr:hover td{background:#FAFAFF;}
             </div>
             <div style="background:var(--white);border-radius:14px;padding:20px;box-shadow:0 2px 12px rgba(75,59,199,.06);">
               <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--p);margin-bottom:12px;">링크 생성기</div>
+
+              <!-- 파트너 불러오기 -->
+              <div style="margin-bottom:14px;">
+                <label style="font-size:11px;font-weight:600;color:var(--gray);display:block;margin-bottom:4px;">파트너 불러오기</label>
+                <div style="display:flex;gap:8px;">
+                  <select id="gen-partner-sel"
+                    style="flex:1;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;"
+                    onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'">
+                    <option value="">— 파트너 선택 —</option>
+                  </select>
+                  <button onclick="loadPartnerToGen()" class="btn-sm btn-code" style="white-space:nowrap;">불러오기</button>
+                </div>
+              </div>
+
               <div style="margin-bottom:10px;">
                 <label style="font-size:11px;font-weight:600;color:var(--gray);display:block;margin-bottom:4px;">파트너 코드</label>
                 <input id="gen-code" type="text" placeholder="MW-XXXX"
@@ -1259,6 +1273,7 @@ function showPage(name){
   if(name==='materials') loadAdminMaterials();
   if(name==='referrals') loadAdminReferrals();
   if(name==='email-send') initEmailSend();
+  if(name==='welcome-mgmt') populatePartnerSelect();
 }
 
 // ── TABLE ROW ─────────────────────────────────────
@@ -1915,6 +1930,35 @@ function refreshPreview(){
   const msg  = document.getElementById('wm-common-msg').value;
   const src = 'welcome.html?code='+encodeURIComponent(code)+'&name='+encodeURIComponent(name)+'&tier='+tier+(msg?'&msg='+encodeURIComponent(msg):'');
   document.getElementById('welcome-preview').src = src;
+}
+
+function populatePartnerSelect(){
+  const sel = document.getElementById('gen-partner-sel');
+  if(!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">— 파트너 선택 —</option>';
+  const list = [...partners].sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  list.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    const codeStr = p.code ? ` [${p.code}]` : ' [코드없음]';
+    const tierStr = {'1-4':'Basic','5-9':'Silver','10+':'Gold'}[p.tier] || p.tier;
+    opt.textContent = `${p.name}${codeStr} · ${tierStr}`;
+    sel.appendChild(opt);
+  });
+  if(prev) sel.value = prev;
+}
+
+function loadPartnerToGen(){
+  const sel = document.getElementById('gen-partner-sel');
+  if(!sel || !sel.value) { toast('파트너를 선택해 주세요.', 'err'); return; }
+  const p = partners.find(p => String(p.id) === sel.value);
+  if(!p) return;
+  document.getElementById('gen-code').value = p.code || '';
+  document.getElementById('gen-name').value = p.name || '';
+  updateGenLink();
+  refreshPreview();
+  toast(`${p.name} 님 정보를 불러왔습니다.`);
 }
 
 function updateGenLink(){
