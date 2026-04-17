@@ -178,39 +178,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   <!-- 마케팅 자료 -->
   <div class="section">
     <div class="section-title">마케팅 자료</div>
-    <div class="material-item">
-      <div class="mat-icon">📋</div>
-      <div>
-        <div class="mat-name">3단 브로셔 <span style="font-size:10px;background:var(--p);color:#fff;padding:2px 7px;border-radius:100px;margin-left:4px;">고객상담용</span></div>
-        <div class="mat-desc">고객 상담·배포용 3단 접지 브로셔</div>
-      </div>
-      <div class="mat-actions">
-        <a class="mat-pdf" href="materials/MARRYWELL_trifold.html" target="_blank">PDF</a>
-        <a class="mat-arrow" href="materials/MARRYWELL_trifold.html" target="_blank">›</a>
-      </div>
-    </div>
-    <div class="material-item">
-      <div class="mat-icon">📄</div>
-      <div>
-        <div class="mat-name">파트너 리플릿</div>
-        <div class="mat-desc">파트너 소개 수익 프로그램 안내</div>
-      </div>
-      <div class="mat-actions">
-        <a class="mat-pdf" href="materials/MARRYWELL_partner_leaflet.html" target="_blank">PDF</a>
-        <a class="mat-arrow" href="materials/MARRYWELL_partner_leaflet.html" target="_blank">›</a>
-      </div>
-    </div>
-    <div class="material-item">
-      <div class="mat-icon">🖼</div>
-      <div>
-        <div class="mat-name">서비스 플라이어</div>
-        <div class="mat-desc">SNS·인쇄용 A4 플라이어 (상담 연락처 포함)</div>
-      </div>
-      <div class="mat-actions">
-        <a class="mat-pdf" href="materials/MARRYWELL_flyer_v2.html" target="_blank">PDF</a>
-        <a class="mat-arrow" href="materials/MARRYWELL_flyer_v2.html" target="_blank">›</a>
-      </div>
-    </div>
+    <div id="materials-container"></div>
   </div>
 
   <!-- 파트너 포털 -->
@@ -254,6 +222,38 @@ if (msg) {
   document.getElementById('extra-msg-section').style.display = 'block';
   document.getElementById('extra-msg-text').textContent = decodeURIComponent(msg);
 }
+
+// 마케팅 자료 렌더링 (admin wm_materials 또는 기본 3종)
+(function renderMaterials() {
+  const DEFAULT = [
+    {icon:'📋', name:'3단 브로셔', badge:'고객상담용', desc:'고객 상담·배포용 3단 접지 브로셔', url:'materials/MARRYWELL_trifold.html'},
+    {icon:'📄', name:'파트너 리플릿', desc:'파트너 소개 수익 프로그램 안내', url:'materials/MARRYWELL_partner_leaflet.html'},
+    {icon:'🖼', name:'서비스 플라이어', desc:'SNS·인쇄용 A4 플라이어 (상담 연락처 포함)', url:'materials/MARRYWELL_flyer_v2.html'},
+  ];
+  let list = DEFAULT;
+  try {
+    const stored = JSON.parse(localStorage.getItem('wm_materials') || 'null');
+    if (stored && stored.length) {
+      list = stored
+        .filter(m => m.enabled !== false)
+        .map(m => ({ icon: m.icon||'📄', name: m.name||m.title, desc: m.desc||m.description||'', url: m.url }));
+    }
+  } catch(e) {}
+  const container = document.getElementById('materials-container');
+  if (!container) return;
+  container.innerHTML = list.map(m => `
+    <div class="material-item">
+      <div class="mat-icon">${m.icon}</div>
+      <div>
+        <div class="mat-name">${m.name}${m.badge ? ` <span style="font-size:10px;background:var(--p);color:#fff;padding:2px 7px;border-radius:100px;margin-left:4px;">${m.badge}</span>` : ''}</div>
+        <div class="mat-desc">${m.desc}</div>
+      </div>
+      <div class="mat-actions">
+        <a class="mat-pdf" href="${m.url}" target="_blank">PDF</a>
+        <a class="mat-arrow" href="${m.url}" target="_blank">›</a>
+      </div>
+    </div>`).join('');
+})();
 
 // 코드 복사
 function copyCode() {
