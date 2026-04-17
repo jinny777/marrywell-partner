@@ -824,6 +824,43 @@ tr:hover td{background:#FAFAFF;}
   </div>
 </div>
 
+<!-- ── 코드 발급 확인 모달 ── -->
+<div class="modal-overlay" id="issue-modal-overlay" onclick="if(event.target===this)closeIssueModal()">
+  <div class="modal" style="width:460px;">
+    <div class="modal-header">
+      <h3>🔑 파트너 코드 발급</h3>
+      <button class="modal-close" onclick="closeIssueModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="issue-partner-info" style="background:var(--pale);border-radius:12px;padding:14px 16px;margin-bottom:20px;font-size:13px;"></div>
+
+      <div style="margin-bottom:18px;">
+        <label style="font-size:12px;font-weight:700;color:var(--gray);display:block;margin-bottom:8px;">추가 안내 메시지 (선택)</label>
+        <textarea id="issue-extra-msg"
+          placeholder="파트너에게 전달할 추가 안내사항을 입력하세요.&#10;예) 온보딩 미팅은 다음 주 월요일 오전 10시에 진행 예정입니다."
+          style="width:100%;height:110px;padding:12px 14px;border:1.5px solid #E0E0F0;border-radius:12px;
+                 font-size:13px;font-family:'Noto Sans KR',sans-serif;color:var(--text);
+                 resize:vertical;outline:none;line-height:1.6;background:var(--bg);"
+          onfocus="this.style.borderColor='var(--pl)'"
+          onblur="this.style.borderColor='#E0E0F0'"></textarea>
+      </div>
+
+      <div style="background:#F8F9FF;border-radius:10px;padding:12px 14px;margin-bottom:20px;font-size:12px;color:var(--gray);line-height:1.7;">
+        ✓ 파트너 코드 자동 생성<br>
+        ✓ 승인 안내 이메일 자동 발송 (코드 + 마케팅 자료 링크)<br>
+        ✓ SMS 안내 링크 클립보드 복사
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button onclick="closeIssueModal()" style="flex:1;padding:12px;border-radius:100px;border:1.5px solid #E0E0F0;background:transparent;font-size:13px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">취소</button>
+        <button onclick="confirmIssueCode()" style="flex:2;padding:12px;border-radius:100px;border:none;background:var(--gold);font-size:14px;font-weight:800;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+          🔑 코드 발급 &amp; 이메일 발송
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── TOAST ── -->
 <div class="toast" id="toast"></div>
 
@@ -1100,27 +1137,56 @@ function changeStatus(id, status){
   pushStatusToSheet(id, status, null); // 구글 시트 동기화
 }
 
+let _issueTargetId = null;
+
 function issueCode(id){
   const p = partners.find(p=>p.id===id);
   if(!p) return;
+  _issueTargetId = id;
+
+  // 파트너 정보 표시
+  const tierMap = {'1-4':'Basic','5-9':'Silver','10+':'Gold'};
+  document.getElementById('issue-partner-info').innerHTML =
+    `<strong>${p.name}</strong> 님 &nbsp;·&nbsp; ${p.email} &nbsp;·&nbsp;
+     <span style="color:var(--p);font-weight:700">${tierMap[p.tier]||p.tier} 등급</span>`;
+
+  document.getElementById('issue-extra-msg').value = '';
+  document.getElementById('issue-modal-overlay').classList.add('open');
+}
+
+function closeIssueModal(){
+  document.getElementById('issue-modal-overlay').classList.remove('open');
+  _issueTargetId = null;
+}
+
+function confirmIssueCode(){
+  const p = partners.find(p=>p.id===_issueTargetId);
+  if(!p) return;
+
+  const extraMsg = document.getElementById('issue-extra-msg').value.trim();
   const code = 'MW-' + Math.random().toString(36).substr(2,4).toUpperCase();
   p.code = code;
   if(p.status==='approved') p.status = 'active';
   savePartners();
   updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
-  toast(`${p.name} 님에게 코드 [${code}]가 발급되었습니다.`);
-  pushStatusToSheet(id, p.status, code);
-  sendApprovalEmail(p);
+  pushStatusToSheet(p.id, p.status, code);
+  closeIssueModal();
+  if(document.getElementById('modal-overlay').classList.contains('open')) closeModalDirect();
+
+  toast(`${p.name} 님 코드 [${code}] 발급 완료`);
+  sendApprovalEmail(p, extraMsg);
 }
 
 // ── 파트너 승인 안내 이메일 발송 ─────────────────────
-function sendApprovalEmail(p) {
+function sendApprovalEmail(p, extraMsg) {
   const welcomeLink = 'https://partners.marrywell.co.kr/welcome.html'
     + '?code=' + encodeURIComponent(p.code)
     + '&name=' + encodeURIComponent(p.name)
-    + '&tier=' + encodeURIComponent(p.tier);
+    + '&tier=' + encodeURIComponent(p.tier)
+    + (extraMsg ? '&msg=' + encodeURIComponent(extraMsg) : '');
 
   const tierMap = {'1-4':'Basic (월 1-4건 · 3만원/건)', '5-9':'Silver (월 5-9건 · 5만원/건)', '10+':'Gold (월 10건+ · 7만원/건)'};
+  const smsText = `[메리웰파트너스] ${p.name}님 파트너 승인 완료🎉\n파트너코드: ${p.code}\n자료 및 포털: ${welcomeLink}`;
 
   emailjs.send('service_2qnpx8i', 'template_welcome', {
     partner_name:   p.name,
@@ -1128,10 +1194,12 @@ function sendApprovalEmail(p) {
     partner_code:   p.code,
     partner_tier:   tierMap[p.tier] || p.tier,
     welcome_link:   welcomeLink,
+    extra_message:  extraMsg || '추가 안내사항이 없습니다.',
     portal_link:    'https://partners.marrywell.co.kr',
-    materials_link: 'https://partners.marrywell.co.kr/welcome.html?code=' + encodeURIComponent(p.code),
   }).then(() => {
-    toast(`${p.name} 님께 승인 안내 이메일을 발송했습니다.`);
+    // SMS 링크 클립보드 복사
+    navigator.clipboard.writeText(smsText).catch(()=>{});
+    toast(`✉ 이메일 발송 완료 · 📱 SMS 내용 클립보드 복사됨`);
   }).catch(() => {
     toast(`이메일 발송 실패 — 수동으로 안내해 주세요.`);
   });

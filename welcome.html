@@ -135,6 +135,12 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
     <div><span class="tier-badge" id="tier-display">Silver 파트너</span></div>
   </div>
 
+  <!-- 담당자 추가 메시지 -->
+  <div class="section" id="extra-msg-section" style="display:none;border-left:4px solid var(--gold);">
+    <div class="section-title" style="color:var(--gold)">담당자 안내</div>
+    <p id="extra-msg-text" style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-line;"></p>
+  </div>
+
   <!-- 다음 단계 -->
   <div class="section">
     <div class="section-title">다음 단계</div>
@@ -215,11 +221,12 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 <div class="toast" id="toast">✓ 코드가 복사되었습니다!</div>
 
 <script>
-// URL 파라미터에서 code, name, tier 읽기
+// URL 파라미터에서 code, name, tier, msg 읽기
 const params = new URLSearchParams(window.location.search);
 const code  = (params.get('code')  || 'MW-????').toUpperCase();
 const name  = params.get('name')  || '';
 const tier  = params.get('tier')  || '5-9';
+const msg   = params.get('msg')   || '';
 
 const TIER_MAP = {'1-4':'Basic','5-9':'Silver','10+':'Gold'};
 const tierLabel = TIER_MAP[tier] || 'Silver';
@@ -230,6 +237,12 @@ document.getElementById('tier-display').textContent = tierLabel + ' 파트너';
 if (name) {
   document.getElementById('hero-title').innerHTML =
     name + ' 님,<br>파트너 승인을 <span>축하드립니다!</span>';
+}
+
+// 추가 메시지 표시
+if (msg) {
+  document.getElementById('extra-msg-section').style.display = 'block';
+  document.getElementById('extra-msg-text').textContent = decodeURIComponent(msg);
 }
 
 // 코드 복사
