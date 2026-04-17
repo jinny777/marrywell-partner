@@ -530,6 +530,7 @@ tr:hover td{background:#FAFAFF;}
             <div class="card-title">📁 마케팅 자료</div>
             <div class="filter-tabs" id="mat-filter-tabs">
               <button class="ftab active" onclick="filterMaterials('all',this)">전체</button>
+              <button class="ftab" onclick="filterMaterials('trifold',this)">3단 브로셔</button>
               <button class="ftab" onclick="filterMaterials('brochure',this)">브로셔</button>
               <button class="ftab" onclick="filterMaterials('flyer',this)">플라이어</button>
               <button class="ftab" onclick="filterMaterials('partner',this)">파트너 전용</button>
@@ -739,7 +740,8 @@ tr:hover td{background:#FAFAFF;}
       <div id="mat-modal-content"></div>
     </div>
     <div class="modal-footer">
-      <a id="mat-modal-dl" href="#" class="btn-primary">⬇ 다운로드</a>
+      <a id="mat-modal-pdf" href="#" target="_blank" class="btn-primary">⬇ PDF 저장</a>
+      <a id="mat-modal-dl" href="#" target="_blank" class="btn-outline" style="text-decoration:none;">새 탭으로 열기</a>
       <button class="btn-outline" onclick="closeMatModalDirect()">닫기</button>
     </div>
   </div>
@@ -799,8 +801,10 @@ const DEMO_REFERRALS = [
 ];
 
 const DEMO_MATERIALS = [
-  {id:1,title:'메리웰 브로셔',category:'brochure',fileType:'html',url:'materials/MARRYWELL_brochure.html',description:'고객 상담용 서비스 전체 소개 브로셔',visibleTo:'all',uploadedAt:'2026-04-01'},
-  {id:3,title:'고객 배포용 플라이어',category:'flyer',fileType:'html',url:'materials/MARRYWELL_flyer_v2.html',description:'가격표·혜택이 담긴 고객용 1페이지 플라이어',visibleTo:'all',uploadedAt:'2026-04-01'},
+  {id:1,title:'3단 브로셔 (고객상담용)',category:'trifold',fileType:'html',url:'materials/MARRYWELL_trifold.html',description:'고객 상담·배포용 3단 접지 브로셔',visibleTo:'all',uploadedAt:'2026-04-17'},
+  {id:2,title:'파트너 리플릿',category:'partner',fileType:'html',url:'materials/MARRYWELL_partner_leaflet.html',description:'파트너 소개 수익 프로그램 안내',visibleTo:'all',uploadedAt:'2026-04-17'},
+  {id:3,title:'서비스 플라이어',category:'flyer',fileType:'html',url:'materials/MARRYWELL_flyer_v2.html',description:'SNS·인쇄용 A4 플라이어 (상담 연락처 포함)',visibleTo:'all',uploadedAt:'2026-04-17'},
+  {id:4,title:'서비스 브로셔',category:'brochure',fileType:'html',url:'materials/MARRYWELL_brochure.html',description:'메리웰 서비스 전체 소개',visibleTo:'all',uploadedAt:'2026-04-17'},
 ];
 
 const DEMO_SETTLEMENTS = [
@@ -1073,7 +1077,7 @@ function renderMaterials(){
         <div class="mat-desc">${m.description||''}</div>
         <div class="mat-footer">
           ${m.fileType==='html' ? `<button class="mat-btn mat-btn-preview" onclick="openMatPreview(${m.id})">미리보기</button>` : ''}
-          <a class="mat-btn mat-btn-download" href="${m.url}" download>다운로드</a>
+          ${m.fileType==='html' ? `<a class="mat-btn mat-btn-download" href="${m.url}?pdf=1" target="_blank">PDF 저장</a>` : `<a class="mat-btn mat-btn-download" href="${m.url}" download>다운로드</a>`}
         </div>
       </div>
     </div>`).join('');
@@ -1083,8 +1087,19 @@ function openMatPreview(id){
   const m = allMaterials.find(x=>x.id===id);
   if(!m) return;
   document.getElementById('mat-modal-title').textContent = m.title;
-  document.getElementById('mat-modal-dl').href = m.url;
-  document.getElementById('mat-modal-dl').setAttribute('download','');
+  const pdfBtn = document.getElementById('mat-modal-pdf');
+  const dlBtn  = document.getElementById('mat-modal-dl');
+  if(m.fileType==='html'){
+    pdfBtn.href = m.url + '?pdf=1';
+    pdfBtn.style.display = '';
+    dlBtn.href = m.url;
+    dlBtn.removeAttribute('download');
+  } else {
+    pdfBtn.style.display = 'none';
+    dlBtn.href = m.url;
+    dlBtn.setAttribute('download','');
+    dlBtn.textContent = '⬇ 다운로드';
+  }
   const content = document.getElementById('mat-modal-content');
   if(m.fileType==='html'){
     content.innerHTML = `<div class="iframe-wrap"><iframe src="${m.url}" title="${m.title}" loading="lazy"></iframe></div>`;
