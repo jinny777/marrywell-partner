@@ -910,6 +910,37 @@ tr:hover td{background:#FAFAFF;}
 
           <!-- 오른쪽: 이메일 작성 -->
           <div>
+
+            <!-- EmailJS 템플릿 설정 -->
+            <div id="email-setup-card" class="card" style="margin-bottom:16px;border-left:4px solid var(--gold);">
+              <div class="card-header"><div class="card-title">⚙️ EmailJS 템플릿 설정</div></div>
+              <div style="font-size:12px;color:var(--gray);line-height:1.7;margin-bottom:12px;">
+                파트너에게 직접 발송하려면 EmailJS에 전용 템플릿이 필요합니다.<br>
+                아래 절차로 만든 후 Template ID를 입력하세요.
+              </div>
+              <details style="margin-bottom:12px;">
+                <summary style="font-size:12px;font-weight:700;color:var(--p);cursor:pointer;margin-bottom:8px;">📋 템플릿 만드는 방법 보기</summary>
+                <ol style="font-size:12px;color:var(--text);line-height:2;padding-left:18px;margin-top:8px;">
+                  <li><a href="https://dashboard.emailjs.com/admin/templates" target="_blank" style="color:var(--p);">dashboard.emailjs.com/admin/templates</a> 접속</li>
+                  <li>Create New Template 클릭</li>
+                  <li><b>To Email</b> 필드에 <code style="background:#F0F0F8;padding:1px 5px;border-radius:4px;">{{to_email}}</code> 입력</li>
+                  <li><b>Subject</b> 필드에 <code style="background:#F0F0F8;padding:1px 5px;border-radius:4px;">{{subject}}</code> 입력</li>
+                  <li><b>Content</b>에 아래 내용 붙여넣기:<br>
+                    <code style="background:#F0F0F8;padding:4px 8px;border-radius:4px;display:block;margin-top:4px;white-space:pre-wrap;">안녕하세요, {{to_name}}님!&#10;&#10;{{message}}&#10;&#10;MARRYWELL 파트너스팀</code>
+                  </li>
+                  <li>Save 후 Template ID 복사</li>
+                </ol>
+              </details>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input id="email-tpl-id" type="text" placeholder="예: template_abc123"
+                  style="flex:1;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;outline:none;font-family:'Noto Sans KR',sans-serif;"
+                  onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'"
+                  oninput="saveEmailTemplateId()">
+                <button class="btn-sm btn-approve" onclick="saveEmailTemplateId(true)">저장</button>
+              </div>
+              <div id="email-tpl-status" style="font-size:11px;margin-top:6px;color:var(--gray);">템플릿 ID를 입력하고 저장하세요.</div>
+            </div>
+
             <div class="card" style="margin-bottom:16px;">
               <div class="card-header"><div class="card-title">✉️ 이메일 작성</div></div>
 
@@ -1967,7 +1998,31 @@ MARRYWELL 파트너스 팀`
 };
 
 function initEmailSend(){
+  // 저장된 템플릿 ID 복원
+  const saved = localStorage.getItem('mw_email_tpl_id') || '';
+  const inp = document.getElementById('email-tpl-id');
+  if(inp) inp.value = saved;
+  updateEmailTplStatus(saved);
   renderEmailPartnerList();
+}
+
+function saveEmailTemplateId(showToastMsg){
+  const val = (document.getElementById('email-tpl-id')||{}).value?.trim() || '';
+  localStorage.setItem('mw_email_tpl_id', val);
+  updateEmailTplStatus(val);
+  if(showToastMsg) toast(val ? `템플릿 ID [${val}] 저장됨` : '템플릿 ID가 삭제되었습니다.');
+}
+
+function updateEmailTplStatus(id){
+  const el = document.getElementById('email-tpl-status');
+  if(!el) return;
+  if(id) {
+    el.style.color = 'var(--ok)';
+    el.textContent = `✓ 템플릿 ID 설정됨: ${id}`;
+  } else {
+    el.style.color = 'var(--err)';
+    el.textContent = '⚠ 템플릿 ID가 없으면 발송이 실패합니다.';
+  }
 }
 
 function renderEmailPartnerList(){
@@ -2064,6 +2119,13 @@ async function sendBulkEmail(){
     toast('이메일이 있는 수신자를 선택해 주세요.','err'); return;
   }
 
+  const tplId = localStorage.getItem('mw_email_tpl_id') || '';
+  if(!tplId){
+    toast('EmailJS 템플릿 ID를 먼저 설정해 주세요.','err');
+    document.getElementById('email-tpl-id')?.focus();
+    return;
+  }
+
   if(!confirm(`${targets.length}명에게 이메일을 발송하시겠습니까?`)) return;
 
   btn.disabled = true; btn.textContent = '⏳ 발송 중...';
@@ -2075,15 +2137,11 @@ async function sendBulkEmail(){
     const personSubject = replaceVars(subject, p);
     const personBody    = replaceVars(body, p);
     try {
-      const TIER_MAP2 = {'1-4':'Basic','5-9':'Silver','10+':'Gold'};
-      await emailjs.send('service_2qnpx8i', 'template_welcome', {
-        partner_name:  p.name,
-        partner_email: p.email,
-        partner_code:  p.code || '미발급',
-        partner_tier:  TIER_MAP2[p.tier] || p.tier || 'Basic',
-        welcome_link:  'https://partners.marrywell.co.kr/partner.html',
-        extra_message: `[${personSubject}]\n\n${personBody}`,
-        portal_link:   'https://partners.marrywell.co.kr',
+      await emailjs.send('service_2qnpx8i', tplId, {
+        to_email: p.email,
+        to_name:  p.name,
+        subject:  personSubject,
+        message:  personBody,
       });
       ok++;
       logEl.innerHTML += `<div>✅ <strong>${p.name}</strong> (${p.email}) — 발송 완료</div>`;
