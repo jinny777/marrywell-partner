@@ -881,6 +881,27 @@
     .sheet { margin: 0; box-shadow: none; page-break-after: always; }
     .sheet::before, .sheet::after { display: none; }
     .label { display: none; }
+    .dl-bar { display: none !important; }
+    .pdf-fab { display: none !important; }
+  }
+  .pdf-fab {
+    position: fixed; bottom: 28px; right: 28px; z-index: 999;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+  }
+  .pdf-btn {
+    background: #4B3BC7; color: #fff; border: none; border-radius: 100px;
+    padding: 13px 24px; font-size: 14px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(75,59,199,.35);
+    font-family: 'Noto Sans KR', sans-serif;
+    display: flex; align-items: center; gap: 8px;
+    transition: background .15s, transform .1s;
+  }
+  .pdf-btn:hover { background: #3A2DA0; transform: translateY(-1px); }
+  .pdf-btn.outline {
+    background: #fff; color: #4B3BC7;
+    border: 2px solid #4B3BC7;
+    box-shadow: 0 2px 12px rgba(75,59,199,.15);
+    font-size: 13px; padding: 10px 20px;
   }
 
   /* 안내 레이블 */
@@ -1018,9 +1039,8 @@
 
 <!-- 다운로드 버튼 -->
 <div class="dl-bar">
-  <button class="dl-btn" id="dlBtn" onclick="downloadPPT()">
-    ⬇ PPT 다운로드
-  </button>
+  <button class="dl-btn" id="pdfBtn" onclick="dlPDF()">⬇ PDF 저장</button>
+  <button class="dl-btn" id="dlBtn" onclick="downloadPPT()">⬇ PPT 다운로드</button>
 </div>
 
 <div class="label">▲ 앞장 (OUTSIDE) — 접었을 때 보이는 면 · 오른쪽 패널이 표지</div>
@@ -1444,6 +1464,21 @@
     colorDark: "#4B3BC7", colorLight: "#ffffff",
     correctLevel: QRCode.CorrectLevel.H
   });
+
+  /* ── PDF 저장 ── */
+  function dlPDF(){
+    const bar = document.querySelector('.dl-bar');
+    bar.style.visibility = 'hidden';
+    document.querySelectorAll('.label').forEach(el => el.style.visibility = 'hidden');
+    setTimeout(()=>{
+      window.print();
+      bar.style.visibility = '';
+      document.querySelectorAll('.label').forEach(el => el.style.visibility = '');
+    }, 80);
+  }
+  if(new URLSearchParams(location.search).get('pdf')==='1'){
+    window.addEventListener('load', ()=>{ setTimeout(()=>window.print(), 500); });
+  }
 
   /* ── PPT 생성 : html2canvas로 브로셔 그대로 2슬라이드 캡처 ── */
   async function downloadPPT() {

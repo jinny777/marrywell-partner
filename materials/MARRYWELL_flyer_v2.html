@@ -542,6 +542,26 @@
   @media print {
     body { background: white; }
     .page { margin: 0; box-shadow: none; border-radius: 0; width: 210mm; min-height: 297mm; }
+    .pdf-fab { display: none !important; }
+  }
+  .pdf-fab {
+    position: fixed; bottom: 28px; right: 28px; z-index: 999;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+  }
+  .pdf-btn {
+    background: #4B3BC7; color: #fff; border: none; border-radius: 100px;
+    padding: 13px 24px; font-size: 14px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(75,59,199,.35);
+    font-family: 'Noto Sans KR', sans-serif;
+    display: flex; align-items: center; gap: 8px;
+    transition: background .15s, transform .1s;
+  }
+  .pdf-btn:hover { background: #3A2DA0; transform: translateY(-1px); }
+  .pdf-btn.outline {
+    background: #fff; color: #4B3BC7;
+    border: 2px solid #4B3BC7;
+    box-shadow: 0 2px 12px rgba(75,59,199,.15);
+    font-size: 13px; padding: 10px 20px;
   }
 </style>
 </head>
@@ -890,5 +910,19 @@
 
 </div><!-- /page 2 -->
 
+<div class="pdf-fab">
+  <button class="pdf-btn" onclick="dlPDF()">⬇️ PDF 저장</button>
+  <button class="pdf-btn outline" onclick="window.close()">✕ 닫기</button>
+</div>
+
+<script>
+function dlPDF(){
+  document.querySelector('.pdf-fab').style.display='none';
+  setTimeout(()=>{ window.print(); document.querySelector('.pdf-fab').style.display='flex'; }, 80);
+}
+if(new URLSearchParams(location.search).get('pdf')==='1'){
+  window.addEventListener('load', ()=>{ setTimeout(()=>window.print(), 500); });
+}
+</script>
 </body>
 </html>
