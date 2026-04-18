@@ -182,7 +182,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   </div>
 
   <!-- 파트너 포털 -->
-  <a class="portal-btn" href="https://partners.marrywell.co.kr/partner.html" id="portal-link">
+  <a class="portal-btn" href="#" id="portal-link" onclick="goPortal(event)">
     🚀 파트너 포털 입장하기
   </a>
   <a class="portal-btn outline" href="https://partners.marrywell.co.kr/apply.html">
@@ -265,6 +265,23 @@ function copyCode() {
     window.getSelection().addRange(range);
     showToast();
   });
+}
+
+// 파트너 자격증명 localStorage 저장 (partner.html 자동 로그인용)
+if (code && code !== 'MW-????') {
+  try {
+    localStorage.setItem('mw_partner_auth', JSON.stringify({ code: code, pw: code }));
+  } catch(e) {}
+}
+
+function goPortal(e) {
+  e.preventDefault();
+  const portalUrl = 'https://partners.marrywell.co.kr/partner.html';
+  if (code && code !== 'MW-????') {
+    window.location.href = portalUrl + '#login:' + encodeURIComponent(code);
+  } else {
+    window.location.href = portalUrl;
+  }
 }
 
 function showToast() {

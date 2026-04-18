@@ -847,6 +847,40 @@ function demoLogin(){
   doLogin();
 }
 
+// partners-auth.json 캐시
+let _authList = null;
+async function fetchAuthList(){
+  if (_authList) return _authList;
+  try {
+    const r = await fetch('partners-auth.json?_=' + Date.now());
+    _authList = await r.json();
+  } catch(e){ _authList = []; }
+  return _authList;
+}
+
+// URL hash 자동 로그인 (#login:CODE)
+window.addEventListener('load', async () => {
+  const hash = location.hash;
+  if (hash.startsWith('#login:')) {
+    const autoCode = decodeURIComponent(hash.slice(7)).toUpperCase();
+    if (autoCode) {
+      document.getElementById('login-code').value = autoCode;
+      document.getElementById('login-pw').value   = autoCode;
+      history.replaceState(null, '', location.pathname);
+      await doLogin();
+      return;
+    }
+  }
+  // localStorage에 저장된 자격증명 자동 채우기
+  try {
+    const saved = JSON.parse(localStorage.getItem('mw_partner_auth') || 'null');
+    if (saved && saved.code) {
+      document.getElementById('login-code').value = saved.code;
+      document.getElementById('login-pw').value   = saved.pw || saved.code;
+    }
+  } catch(e){}
+});
+
 async function doLogin(){
   const code = document.getElementById('login-code').value.trim().toUpperCase();
   const pw   = document.getElementById('login-pw').value.trim();
@@ -856,18 +890,30 @@ async function doLogin(){
   if(!code || !pw){ err.style.display='block'; return; }
 
   if(isDemoMode()){
-    // 1) admin이 발급한 실제 파트너 코드 확인 (같은 브라우저 localStorage)
+    // 1) admin 같은 브라우저 localStorage
     const stored = JSON.parse(localStorage.getItem('mw_partners') || '[]');
     const found  = stored.find(p => p.code && p.code.toUpperCase() === code);
     if(found){
       const validPw = found.pw || found.code;
       if(pw === validPw || pw === found.code){
         setSession({ code: found.code, name: found.name, tier: found.tier || 'basic', email: found.email || '', pw: validPw, isReal: true });
-        startApp();
-        return;
+        startApp(); return;
       }
     }
-    // 2) 데모 계정
+    // 2) partners-auth.json (배포된 인증 파일)
+    const authList = await fetchAuthList();
+    const authEntry = authList.find(p => p.code && p.code.toUpperCase() === code);
+    if(authEntry){
+      const validPw = authEntry.pw || authEntry.code;
+      if(pw === validPw || pw === authEntry.code){
+        setSession({ code: authEntry.code, name: authEntry.name||authEntry.code, tier: authEntry.tier||'5-9', email: authEntry.email||'', pw: validPw, isReal: true });
+        startApp(); return;
+      } else {
+        err.textContent = '비밀번호가 올바르지 않습니다.\n(초기 비밀번호는 파트너 코드와 동일합니다)';
+        err.style.display = 'block'; return;
+      }
+    }
+    // 3) 데모 계정
     if(code === DEMO_PARTNER.code && pw === DEMO_PARTNER.pw){
       setSession(DEMO_PARTNER);
       startApp();

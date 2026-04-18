@@ -422,7 +422,10 @@ tr:hover td{background:#FAFAFF;}
         <span class="sb-ico">🌐</span> 파트너 소개 페이지
       </a>
     </nav>
-    <div class="sb-footer">v1.0 · MARRYWELL © 2025</div>
+    <div class="sb-footer" style="display:flex;flex-direction:column;gap:8px;">
+      <button onclick="exportPartnersAuth()" style="width:100%;padding:8px;background:rgba(162,155,254,.15);border:1px solid rgba(162,155,254,.3);border-radius:8px;color:var(--ac);font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">🔑 파트너 인증 파일 내보내기</button>
+      <span style="font-size:10px;color:rgba(255,255,255,.2);">v1.0 · MARRYWELL © 2025</span>
+    </div>
   </aside>
 
   <!-- MAIN -->
@@ -1874,6 +1877,26 @@ window.addEventListener('storage', e => {
     processNewApplication(e.newValue);
   }
 });
+
+// 파트너 인증 파일 내보내기 (partners-auth.json 용)
+function exportPartnersAuth(){
+  const list = partners
+    .filter(p => p.code)
+    .map(p => ({ code: p.code, pw: p.pw || p.code, name: p.name, tier: p.tier || '5-9', email: p.email || '' }));
+  if(!list.length){ toast('코드가 발급된 파트너가 없습니다.', 'err'); return; }
+  const json = JSON.stringify(list, null, 2);
+  // 클립보드 복사
+  navigator.clipboard.writeText(json).then(() => {
+    toast(`${list.length}명의 인증 데이터가 복사됐습니다. Claude에게 "파트너 인증 파일 배포해줘"라고 붙여넣기 하세요.`);
+  }).catch(() => {
+    // 복사 실패 시 다운로드
+    const blob = new Blob([json], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'partners-auth.json';
+    a.click();
+  });
+}
 
 // 페이지 로드 / 포커스 시 미처리 신청 체크 (admin보다 apply가 먼저 열린 경우)
 function checkPendingApplication() {
