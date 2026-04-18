@@ -354,6 +354,49 @@ tr:hover td{background:#FAFAFF;}
   .stat-grid{grid-template-columns:1fr 1fr;}
   .process-grid{grid-template-columns:1fr;}
 }
+
+/* ── HISTORY ── */
+.hist-filter-btn{
+  padding:6px 13px;border-radius:100px;font-size:11px;font-weight:600;
+  border:1.5px solid #E5E5F0;color:var(--gray);cursor:pointer;
+  transition:all .15s;background:none;font-family:'Noto Sans KR',sans-serif;
+}
+.hist-filter-btn:hover{border-color:var(--pl);color:var(--p);}
+.hist-filter-btn.active{background:var(--p);color:#fff;border-color:var(--p);}
+.hist-summary-chip{
+  display:flex;align-items:center;gap:6px;
+  background:var(--white);border-radius:10px;padding:8px 14px;
+  font-size:12px;box-shadow:0 1px 6px rgba(75,59,199,.07);
+}
+.hist-summary-chip .chip-num{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:900;color:var(--p);}
+/* 타임라인 */
+.hist-day-group{margin-bottom:24px;}
+.hist-day-label{
+  font-size:11px;font-weight:800;letter-spacing:1px;color:var(--gray);
+  margin-bottom:10px;display:flex;align-items:center;gap:8px;
+}
+.hist-day-label::after{content:'';flex:1;height:1px;background:#E8E8F4;}
+.hist-timeline-list{display:flex;flex-direction:column;gap:0;}
+.hist-item{
+  display:flex;gap:14px;
+  background:var(--white);border-radius:12px;padding:14px 16px;
+  margin-bottom:8px;box-shadow:0 1px 6px rgba(75,59,199,.06);
+  transition:box-shadow .15s;
+}
+.hist-item:hover{box-shadow:0 3px 14px rgba(75,59,199,.12);}
+.hist-icon{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+}
+.hist-body{flex:1;min-width:0;}
+.hist-desc{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.hist-meta{font-size:11px;color:var(--gray);}
+.hist-time{font-size:11px;color:var(--gray);white-space:nowrap;flex-shrink:0;}
+.hist-detail{
+  margin-top:6px;padding:6px 10px;background:var(--bg);
+  border-radius:6px;font-size:11px;color:var(--gray);line-height:1.6;
+  white-space:pre-wrap;word-break:break-all;
+}
 </style>
 </head>
 <body>
@@ -413,6 +456,10 @@ tr:hover td{background:#FAFAFF;}
       </a>
       <a class="sb-item" onclick="showPage('email-send')">
         <span class="sb-ico">✉️</span> 이메일 발송
+      </a>
+      <div class="sb-section">기록</div>
+      <a class="sb-item" onclick="showPage('history')">
+        <span class="sb-ico">🗂</span> 변경 이력
       </a>
       <div class="sb-section">설정</div>
       <a class="sb-item" href="partner.html" target="_blank">
@@ -1049,6 +1096,38 @@ tr:hover td{background:#FAFAFF;}
         </div>
       </div><!-- /page-email-send -->
 
+      <!-- ════ PAGE: HISTORY ════ -->
+      <div class="page" id="page-history">
+        <!-- 필터 + 내보내기 툴바 -->
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;flex:1;">
+            <button class="hist-filter-btn active" data-type="" onclick="setHistFilter(this,'')">전체</button>
+            <button class="hist-filter-btn" data-type="partner_added"   onclick="setHistFilter(this,'partner_added')">파트너 추가</button>
+            <button class="hist-filter-btn" data-type="status_change"   onclick="setHistFilter(this,'status_change')">상태 변경</button>
+            <button class="hist-filter-btn" data-type="code_issued"     onclick="setHistFilter(this,'code_issued')">코드 발급</button>
+            <button class="hist-filter-btn" data-type="email_sent"      onclick="setHistFilter(this,'email_sent')">이메일 발송</button>
+            <button class="hist-filter-btn" data-type="referral_added"  onclick="setHistFilter(this,'referral_added')">고객 등록</button>
+            <button class="hist-filter-btn" data-type="data_sync"       onclick="setHistFilter(this,'data_sync')">데이터 동기화</button>
+            <button class="hist-filter-btn" data-type="login"           onclick="setHistFilter(this,'login')">로그인</button>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <input id="hist-search" type="text" placeholder="검색..." oninput="renderHistory()"
+              style="padding:7px 12px;border:1.5px solid #E0E0F0;border-radius:8px;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;width:160px;">
+            <button onclick="exportHistory()" style="padding:7px 14px;background:var(--pale);color:var(--p);border:1.5px solid var(--ac);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">CSV 내보내기</button>
+            <button onclick="clearHistory()" style="padding:7px 14px;background:var(--err-pale);color:var(--err);border:1.5px solid var(--err);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">전체 삭제</button>
+          </div>
+        </div>
+        <!-- 통계 요약 -->
+        <div id="hist-summary" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;"></div>
+        <!-- 타임라인 -->
+        <div id="hist-timeline"></div>
+        <div id="hist-empty" style="display:none;text-align:center;padding:60px 20px;color:var(--gray);">
+          <div style="font-size:40px;margin-bottom:12px;">🗂</div>
+          <div style="font-size:14px;font-weight:600;">이력이 없습니다</div>
+          <div style="font-size:12px;margin-top:6px;">파트너 추가·상태 변경·이메일 발송 등 액션이 기록됩니다.</div>
+        </div>
+      </div><!-- /page-history -->
+
     </div><!-- /content -->
   </div><!-- /main -->
 </div><!-- /app -->
@@ -1276,6 +1355,7 @@ async function pushPartnersAuth(){
     if(putRes.ok){
       const ind = document.getElementById('gh-sync-status');
       if(ind){ ind.textContent = '✓ 인증 동기화됨'; ind.style.color = 'var(--ok)'; setTimeout(()=>{ ind.textContent=''; }, 3000); }
+      logHistory('data_sync', 'GitHub 인증 파일 동기화 완료', { file: 'partners-auth.json', count: rawList.length });
     }
   } catch(e){ /* 실패 시 무시 — 로컬에는 이미 저장됨 */ }
 }
@@ -1335,6 +1415,7 @@ async function doLogin(){
     // 암호화 키 파생 (로그인 비밀번호 기반)
     _cryptoKey = await deriveCryptoKey(pw);
     await loadPartners();
+    logHistory('login', '관리자 로그인', { time: new Date().toLocaleString('ko-KR') });
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='block';
     initApp();
@@ -1395,7 +1476,8 @@ function showPage(name){
     dashboard:'대시보드', partners:'파트너 목록',
     process:'처리 프로세스', payback:'페이백 현황',
     materials:'마케팅 자료 관리', referrals:'고객 명단 현황',
-    'welcome-mgmt':'파트너 안내 페이지', 'email-send':'이메일 발송'
+    'welcome-mgmt':'파트너 안내 페이지', 'email-send':'이메일 발송',
+    history:'변경 이력'
   };
   document.getElementById('page-title').textContent = titles[name]||name;
   if(event && event.currentTarget) {
@@ -1407,6 +1489,7 @@ function showPage(name){
   if(name==='referrals') loadAdminReferrals();
   if(name==='email-send') initEmailSend();
   if(name==='welcome-mgmt') populatePartnerSelect();
+  if(name==='history') renderHistory();
 }
 
 // ── TABLE ROW ─────────────────────────────────────
@@ -1534,12 +1617,164 @@ function renderMonthChart(){
   labels.innerHTML = months.map(m=>`<div style="flex:1;text-align:center;font-size:10px;color:var(--gray)">${m}</div>`).join('');
 }
 
+// ── 변경 이력 ─────────────────────────────────────
+const HIST_TYPE_META = {
+  login:          { icon:'🔐', color:'#E0F2FE', label:'로그인' },
+  partner_added:  { icon:'👤', color:'#DCFCE7', label:'파트너 추가' },
+  status_change:  { icon:'🔄', color:'#FEF3C7', label:'상태 변경' },
+  code_issued:    { icon:'🏷', color:'#EEF0FF', label:'코드 발급' },
+  email_sent:     { icon:'✉️', color:'#F0FDF4', label:'이메일 발송' },
+  referral_added: { icon:'🤝', color:'#FDF4FF', label:'고객 등록' },
+  data_sync:      { icon:'☁️', color:'#E0F2FE', label:'데이터 동기화' },
+  payback_update: { icon:'💰', color:'#FEF3C7', label:'페이백 변경' },
+  partner_deleted:{ icon:'🗑', color:'#FEE2E2', label:'파트너 삭제' },
+  settings:       { icon:'⚙️', color:'#F4F4FC', label:'설정 변경' },
+};
+
+function logHistory(type, desc, detail){
+  const raw = localStorage.getItem('mw_history');
+  const list = raw ? JSON.parse(raw) : [];
+  list.unshift({
+    id:   Date.now(),
+    ts:   new Date().toISOString(),
+    type,
+    desc,
+    detail: detail || null
+  });
+  // 최대 1000건 유지
+  if(list.length > 1000) list.length = 1000;
+  localStorage.setItem('mw_history', JSON.stringify(list));
+}
+
+let _histFilter = '';
+function setHistFilter(btn, type){
+  _histFilter = type;
+  document.querySelectorAll('.hist-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistory();
+}
+
+function renderHistory(){
+  const raw = localStorage.getItem('mw_history');
+  const all = raw ? JSON.parse(raw) : [];
+  const q   = (document.getElementById('hist-search')?.value || '').toLowerCase();
+
+  const filtered = all.filter(h => {
+    if(_histFilter && h.type !== _histFilter) return false;
+    if(q && !h.desc.toLowerCase().includes(q) &&
+       !(h.detail && JSON.stringify(h.detail).toLowerCase().includes(q))) return false;
+    return true;
+  });
+
+  // 통계 요약
+  const summary = document.getElementById('hist-summary');
+  if(summary){
+    const counts = {};
+    all.forEach(h => { counts[h.type] = (counts[h.type]||0)+1; });
+    const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    summary.innerHTML = top.map(([type, cnt]) => {
+      const m = HIST_TYPE_META[type] || {icon:'📌', label:type};
+      return `<div class="hist-summary-chip">
+        <span>${m.icon}</span>
+        <span class="chip-num">${cnt}</span>
+        <span style="color:var(--gray)">${m.label}</span>
+      </div>`;
+    }).join('') + `<div class="hist-summary-chip">
+      <span>📋</span><span class="chip-num">${all.length}</span><span style="color:var(--gray)">전체</span>
+    </div>`;
+  }
+
+  const timeline = document.getElementById('hist-timeline');
+  const empty    = document.getElementById('hist-empty');
+  if(!timeline) return;
+
+  if(!filtered.length){
+    timeline.innerHTML = '';
+    if(empty) empty.style.display = 'block';
+    return;
+  }
+  if(empty) empty.style.display = 'none';
+
+  // 날짜별 그룹
+  const groups = {};
+  filtered.forEach(h => {
+    const d = h.ts.slice(0,10);
+    if(!groups[d]) groups[d] = [];
+    groups[d].push(h);
+  });
+
+  timeline.innerHTML = Object.entries(groups).map(([date, items]) => {
+    const label = formatHistDate(date);
+    const rows = items.map(h => {
+      const m = HIST_TYPE_META[h.type] || {icon:'📌', color:'#F4F4FC', label:h.type};
+      const time = h.ts.slice(11,16);
+      const detailHtml = h.detail
+        ? `<div class="hist-detail">${typeof h.detail === 'string' ? h.detail : JSON.stringify(h.detail, null, 2)}</div>`
+        : '';
+      return `<div class="hist-item">
+        <div class="hist-icon" style="background:${m.color}">${m.icon}</div>
+        <div class="hist-body">
+          <div class="hist-desc">${escHtml(h.desc)}</div>
+          <div class="hist-meta">${m.label}</div>
+          ${detailHtml}
+        </div>
+        <div class="hist-time">${time}</div>
+      </div>`;
+    }).join('');
+    return `<div class="hist-day-group">
+      <div class="hist-day-label">${label}</div>
+      <div class="hist-timeline-list">${rows}</div>
+    </div>`;
+  }).join('');
+}
+
+function formatHistDate(dateStr){
+  const d = new Date(dateStr);
+  const today = new Date();
+  const yesterday = new Date(today); yesterday.setDate(today.getDate()-1);
+  const fmt = d.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+  if(dateStr === today.toISOString().slice(0,10)) return '오늘 · ' + fmt;
+  if(dateStr === yesterday.toISOString().slice(0,10)) return '어제 · ' + fmt;
+  return fmt;
+}
+
+function escHtml(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function exportHistory(){
+  const raw = localStorage.getItem('mw_history');
+  const list = raw ? JSON.parse(raw) : [];
+  const header = '날짜,시간,유형,내용,상세';
+  const rows = list.map(h => {
+    const d = h.ts.slice(0,10);
+    const t = h.ts.slice(11,19);
+    const type = (HIST_TYPE_META[h.type]||{label:h.type}).label;
+    const detail = h.detail ? (typeof h.detail === 'string' ? h.detail : JSON.stringify(h.detail)) : '';
+    return [d, t, type, h.desc, detail].map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',');
+  });
+  const csv = '\uFEFF' + header + '\n' + rows.join('\n'); // BOM for Excel
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'marrywell_history_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+function clearHistory(){
+  if(!confirm('전체 이력을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+  localStorage.removeItem('mw_history');
+  renderHistory();
+  toast('이력이 삭제되었습니다.');
+}
+
 // ── 상태 변경 ─────────────────────────────────────
 async function changeStatus(id, status){
   const p = partners.find(p=>p.id===id);
   if(!p) return;
+  const prev = p.status;
   p.status = status;
   await savePartners();
+  logHistory('status_change', `${p.name} 님 상태 변경: [${STATUS_MAP[prev]||prev}] → [${STATUS_MAP[status]}]`, { id: p.id, code: p.code||'미발급' });
   updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
   toast(`${p.name} 님 상태가 [${STATUS_MAP[status]}]으로 변경되었습니다.`);
   pushStatusToSheet(id, status, null); // 구글 시트 동기화
@@ -1577,6 +1812,7 @@ async function confirmIssueCode(){
   p.pw   = code; // 초기 비밀번호 = 파트너 코드
   if(p.status==='approved') p.status = 'active';
   await savePartners();
+  logHistory('code_issued', `${p.name} 님 파트너 코드 발급: ${code}`, { tier: p.tier, email: p.email||'없음' });
   updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
   pushStatusToSheet(p.id, p.status, code);
   closeIssueModal();
@@ -1966,6 +2202,7 @@ async function processNewApplication(raw) {
       status: 'pending', code: '', referrals: 0, payback: 0
     });
     await savePartners();
+    logHistory('partner_added', `신규 신청: ${data.name} (${data.email||'이메일 없음'})`, { channel: data.channel||'온라인 신청', tier: data.tier||'5-9' });
     updateStats(); renderRecentTable(); renderPartnerTable();
     localStorage.removeItem('mw_new_application');
     toast('새 파트너 신청: ' + data.name + ' 님');
@@ -2658,6 +2895,10 @@ async function sendBulkEmail(){
   resultEl.style.color = fail === 0 ? '#14532D' : '#92400E';
   resultEl.textContent = `발송 완료: ${ok}명 성공 / ${fail}명 실패`;
 
+  logHistory('email_sent', `이메일 발송: ${ok}명 성공 / ${fail}명 실패`, {
+    subject, recipients: targets.map(p => `${p.name}(${p.email})`).join(', ')
+  });
+
   btn.disabled = false; btn.textContent = '✉️ 이메일 발송하기';
   toast(`${ok}명 이메일 발송 완료`);
 }
@@ -2702,6 +2943,7 @@ async function submitAddPartner(){
     msg, date: today, status, code, pw: code||'', referrals:0, payback:0
   });
   await savePartners();
+  logHistory('partner_added', `직접 추가: ${name} (${email||'이메일 없음'})`, { tier, status: STATUS_MAP[status]||status, code: code||'미발급' });
   updateStats(); renderRecentTable(); renderPartnerTable();
   closeAddPartnerModal();
   toast(`${name} 님이 파트너로 등록되었습니다.`);
