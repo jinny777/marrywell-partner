@@ -1180,13 +1180,61 @@ const STATUS_CLASS = {
 const CHECKLIST_L = ['파트너 신청 접수 확인','신청 확인 이메일 발송','관리자 검토 및 승인','파트너 코드 생성 및 발급','코드 발급 이메일 발송'];
 const CHECKLIST_R = ['전담 매니저 배정 (Silver+)','온보딩 가이드 이메일 발송','마케팅 자료 패키지 제공 (브로셔, SNS 콘텐츠)','파트너 대시보드 접속 링크 안내','첫 소개 활동 여부 확인 (D+3)'];
 
-let partners = JSON.parse(localStorage.getItem('mw_partners') || 'null') || [];
+let partners = [];
 let currentFilter = 'all';
 let currentSearch = '';
 
-function savePartners(){
-  localStorage.setItem('mw_partners', JSON.stringify(partners));
+// ── AES-256-GCM 암호화 ─────────────────────────────
+const _SALT = 'MW_PARTNER_SALT_2026_v1';
+let _cryptoKey = null;
+
+async function deriveCryptoKey(password){
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt:enc.encode(_SALT), iterations:100000, hash:'SHA-256' },
+    keyMaterial, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']
+  );
+}
+
+async function encryptJSON(data){
+  if(!_cryptoKey) return JSON.stringify(data);
+  const enc = new TextEncoder();
+  const iv  = crypto.getRandomValues(new Uint8Array(12));
+  const buf = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, _cryptoKey, enc.encode(JSON.stringify(data)));
+  const out = new Uint8Array(iv.byteLength + buf.byteLength);
+  out.set(iv, 0); out.set(new Uint8Array(buf), iv.byteLength);
+  return 'ENC:' + btoa(String.fromCharCode(...out));
+}
+
+async function decryptJSON(raw){
+  if(!raw || !raw.startsWith('ENC:')) return JSON.parse(raw || 'null');
+  if(!_cryptoKey) return null;
+  try {
+    const bytes = Uint8Array.from(atob(raw.slice(4)), c=>c.charCodeAt(0));
+    const iv  = bytes.slice(0,12);
+    const buf = await crypto.subtle.decrypt({ name:'AES-GCM', iv }, _cryptoKey, bytes.slice(12));
+    return JSON.parse(new TextDecoder().decode(buf));
+  } catch(e){ return null; }
+}
+
+async function sha256hex(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function savePartners(){
+  const enc = await encryptJSON(partners);
+  localStorage.setItem('mw_partners', enc);
   pushPartnersAuth();
+}
+
+async function loadPartners(){
+  const raw = localStorage.getItem('mw_partners') || '[]';
+  const data = await decryptJSON(raw);
+  partners = Array.isArray(data) ? data : [];
 }
 
 // ── GitHub API로 partners-auth.json 자동 업데이트 ────
@@ -1197,11 +1245,17 @@ function getGhToken(){ return localStorage.getItem('mw_gh_token') || ''; }
 
 async function pushPartnersAuth(){
   const token = getGhToken();
-  if(!token) return; // 토큰 미설정 시 조용히 스킵
+  if(!token) return;
 
-  const list = partners
-    .filter(p => p.code)
-    .map(p => ({ code: p.code, pw: p.pw || p.code, name: p.name, tier: p.tier || '5-9', email: p.email || '' }));
+  // 비밀번호는 SHA-256 해시로 저장
+  const rawList = partners.filter(p => p.code);
+  const list = await Promise.all(rawList.map(async p => ({
+    code:  p.code,
+    pw:    await sha256hex(p.pw || p.code),
+    name:  p.name,
+    tier:  p.tier || '5-9',
+    email: p.email || ''
+  })));
 
   const content = btoa(unescape(encodeURIComponent(JSON.stringify(list, null, 2))));
 
@@ -1254,7 +1308,7 @@ async function loadFromSheet() {
         referrals: parseInt(p.referrals) || 0,
         payback:   parseInt(p.payback)   || 0
       }));
-      savePartners();
+      await savePartners();
       updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
       if (indicator) { indicator.textContent = '✓ 실시간 연동'; indicator.style.color = 'var(--ok)'; }
     }
@@ -1274,11 +1328,13 @@ async function pushStatusToSheet(id, status, code) {
 }
 
 // ── 로그인 ────────────────────────────────────────
-function doLogin(){
+async function doLogin(){
   const id = document.getElementById('login-id').value;
   const pw = document.getElementById('login-pw').value;
   if(id==='admin' && pw==='marrywell2025'){
-    partners = JSON.parse(localStorage.getItem('mw_partners') || '[]');
+    // 암호화 키 파생 (로그인 비밀번호 기반)
+    _cryptoKey = await deriveCryptoKey(pw);
+    await loadPartners();
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='block';
     initApp();
@@ -1479,11 +1535,11 @@ function renderMonthChart(){
 }
 
 // ── 상태 변경 ─────────────────────────────────────
-function changeStatus(id, status){
+async function changeStatus(id, status){
   const p = partners.find(p=>p.id===id);
   if(!p) return;
   p.status = status;
-  savePartners();
+  await savePartners();
   updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
   toast(`${p.name} 님 상태가 [${STATUS_MAP[status]}]으로 변경되었습니다.`);
   pushStatusToSheet(id, status, null); // 구글 시트 동기화
@@ -1511,7 +1567,7 @@ function closeIssueModal(){
   _issueTargetId = null;
 }
 
-function confirmIssueCode(){
+async function confirmIssueCode(){
   const p = partners.find(p=>p.id===_issueTargetId);
   if(!p) return;
 
@@ -1520,7 +1576,7 @@ function confirmIssueCode(){
   p.code = code;
   p.pw   = code; // 초기 비밀번호 = 파트너 코드
   if(p.status==='approved') p.status = 'active';
-  savePartners();
+  await savePartners();
   updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
   pushStatusToSheet(p.id, p.status, code);
   closeIssueModal();
@@ -1897,7 +1953,7 @@ async function changeReferralStatus(id, status){
 }
 
 // ── apply.html에서 넘어온 신규 신청 처리 ─────────
-function processNewApplication(raw) {
+async function processNewApplication(raw) {
   try {
     const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
     if (!data || !data.name) return;
@@ -1909,7 +1965,7 @@ function processNewApplication(raw) {
       date: data.date || new Date().toLocaleDateString('ko-KR'),
       status: 'pending', code: '', referrals: 0, payback: 0
     });
-    savePartners();
+    await savePartners();
     updateStats(); renderRecentTable(); renderPartnerTable();
     localStorage.removeItem('mw_new_application');
     toast('새 파트너 신청: ' + data.name + ' 님');
@@ -2616,7 +2672,7 @@ function closeAddPartnerModal(){
   document.getElementById('add-partner-form').reset();
 }
 
-function submitAddPartner(){
+async function submitAddPartner(){
   const name    = document.getElementById('ap-name').value.trim();
   const email   = document.getElementById('ap-email').value.trim();
   const phone   = document.getElementById('ap-phone').value.trim();
@@ -2645,7 +2701,7 @@ function submitAddPartner(){
     id: newId, name, email, phone, sns:'', biz, tier, channel:'직접추가',
     msg, date: today, status, code, pw: code||'', referrals:0, payback:0
   });
-  savePartners();
+  await savePartners();
   updateStats(); renderRecentTable(); renderPartnerTable();
   closeAddPartnerModal();
   toast(`${name} 님이 파트너로 등록되었습니다.`);

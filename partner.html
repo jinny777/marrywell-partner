@@ -841,6 +841,11 @@ function statusBadge(s){
 // ═══════════════════════════════════════════════
 //  AUTH
 // ═══════════════════════════════════════════════
+async function sha256hex(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
 function demoLogin(){
   document.getElementById('login-code').value = 'MW-DEMO';
   document.getElementById('login-pw').value   = 'MW-DEMO';
@@ -904,9 +909,13 @@ async function doLogin(){
     const authList = await fetchAuthList();
     const authEntry = authList.find(p => p.code && p.code.toUpperCase() === code);
     if(authEntry){
-      const validPw = authEntry.pw || authEntry.code;
-      if(pw === validPw || pw === authEntry.code){
-        setSession({ code: authEntry.code, name: authEntry.name||authEntry.code, tier: authEntry.tier||'5-9', email: authEntry.email||'', pw: validPw, isReal: true });
+      const storedPw = authEntry.pw || authEntry.code;
+      const pwHash = await sha256hex(pw);
+      // storedPw가 해시(64자 hex)이면 해시 비교, 아니면 평문 비교 (구버전 호환)
+      const isHash = /^[0-9a-f]{64}$/.test(storedPw);
+      const pwMatch = isHash ? (pwHash === storedPw) : (pw === storedPw || pw === authEntry.code);
+      if(pwMatch){
+        setSession({ code: authEntry.code, name: authEntry.name||authEntry.code, tier: authEntry.tier||'5-9', email: authEntry.email||'', pw: storedPw, isReal: true });
         startApp(); return;
       } else {
         err.textContent = '비밀번호가 올바르지 않습니다.\n(초기 비밀번호는 파트너 코드와 동일합니다)';
