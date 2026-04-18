@@ -2425,10 +2425,43 @@ function generateEmailHTML(name, code, tier, msgBody) {
       <p style="font-size:13px;color:#1A1A2E;line-height:1.7;white-space:pre-line;margin:0;">${msgBody.trim()}</p>
     </div>` : '';
   const wmSettings = (() => {
-    try { return JSON.parse(localStorage.getItem('mw_welcome_settings')||'{}'); } catch(e){ return {}; }
+    try { return JSON.parse(localStorage.getItem('wm_settings')||'{}'); } catch(e){ return {}; }
   })();
   const portalUrl = 'https://partners.marrywell.co.kr/partner.html';
   const applyUrl  = 'https://partners.marrywell.co.kr/apply.html';
+  const baseUrl   = 'https://partners.marrywell.co.kr/';
+
+  // 활성화된 마케팅 자료 목록
+  const matList = (() => {
+    try {
+      const mw = JSON.parse(localStorage.getItem('mw_materials')||'null');
+      const wm = JSON.parse(localStorage.getItem('wm_materials')||'null');
+      const src = (mw && mw.length) ? mw : (wm || []);
+      return src.filter(m => m.active !== false && m.enabled !== false);
+    } catch(e){ return []; }
+  })();
+  const materialsBlock = matList.length ? `
+  <!-- 마케팅 자료 -->
+  <div style="background:#fff;border-radius:20px;padding:24px;margin-bottom:16px;box-shadow:0 2px 16px rgba(75,59,199,.06);">
+    <div style="font-size:13px;font-weight:800;color:#1A1A2E;margin-bottom:16px;padding-left:11px;border-left:3px solid #6C5CE7;">마케팅 자료</div>
+    ${matList.map(m => {
+      const url = m.url && m.url.startsWith('http') ? m.url : baseUrl + m.url;
+      return `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-bottom:1px solid #F0F0F8;margin-bottom:10px;padding-bottom:10px;">
+        <tr>
+          <td width="40" valign="middle">
+            <div style="width:40px;height:40px;border-radius:10px;background:#EEF0FF;text-align:center;line-height:40px;font-size:20px;">${m.icon||'📄'}</div>
+          </td>
+          <td style="padding-left:12px;" valign="middle">
+            <div style="font-size:13px;font-weight:600;color:#1A1A2E;">${m.name||m.title}</div>
+            <div style="font-size:11px;color:#6C757D;margin-top:2px;">${m.desc||m.description||''}</div>
+          </td>
+          <td width="60" valign="middle" align="right">
+            <a href="${url}" style="font-size:11px;font-weight:700;background:#EEF0FF;color:#4B3BC7;border:1.5px solid #A29BFE;border-radius:100px;padding:4px 10px;text-decoration:none;">PDF</a>
+          </td>
+        </tr>
+      </table>`;
+    }).join('')}
+  </div>` : '';
 
   return `<!DOCTYPE html>
 <html lang="ko">
@@ -2489,6 +2522,8 @@ function generateEmailHTML(name, code, tier, msgBody) {
       </td></tr>
     </table>
   </div>
+
+  ${materialsBlock}
 
   <!-- 포털 버튼 -->
   <a href="${portalUrl}" style="display:block;width:100%;padding:16px;background:#4B3BC7;color:#fff;border-radius:100px;font-size:15px;font-weight:800;text-align:center;text-decoration:none;margin-bottom:12px;">🚀 파트너 포털 입장하기</a>
