@@ -638,6 +638,9 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F4
     await emailjs.send('service_2qnpx8i', 'template_z904kd6', {
       to_email:        'partners@marrywell.co.kr',
       to_name:         'MARRYWELL 파트너스',
+      from_name:       'MARRYWELL 파트너스 신청시스템',
+      from_email:      'partners@marrywell.co.kr',
+      reply_to:        payload.email || 'partners@marrywell.co.kr',
       subject:         `[파트너 신청] ${payload.name} 님 — ${payload.date}`,
       html_body:       notifyHtml,
       applicant_name:  payload.name,

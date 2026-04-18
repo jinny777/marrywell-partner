@@ -1842,10 +1842,13 @@ function sendApprovalEmail(p, extraMsg) {
   const htmlBody = generateEmailHTML(p.name, p.code, p.tier, extraMsg);
 
   emailjs.send('service_2qnpx8i', tplId, {
-    to_email:  p.email,
-    to_name:   p.name,
-    subject:   `[MARRYWELL] ${p.name}님, 파트너 승인을 축하드립니다! 🎉`,
-    html_body: htmlBody,
+    to_email:   p.email,
+    to_name:    p.name,
+    from_name:  'MARRYWELL 파트너스',
+    from_email: 'partners@marrywell.co.kr',
+    reply_to:   'partners@marrywell.co.kr',
+    subject:    `[MARRYWELL] ${p.name}님, 파트너 승인을 축하드립니다! 🎉`,
+    html_body:  htmlBody,
   }).then(() => {
     navigator.clipboard.writeText(smsText).catch(()=>{});
     toast(`✉ 이메일 발송 완료 · 📱 SMS 내용 클립보드 복사됨`);
@@ -2876,10 +2879,13 @@ async function sendBulkEmail(){
     const htmlBody      = generateEmailHTML(p.name, p.code||'미발급', TIER_MAP[p.tier]||p.tier, personBody);
     try {
       await emailjs.send('service_2qnpx8i', tplId, {
-        to_email:  p.email,
-        to_name:   p.name,
-        subject:   personSubject,
-        html_body: htmlBody,
+        to_email:   p.email,
+        to_name:    p.name,
+        from_name:  'MARRYWELL 파트너스',
+        from_email: 'partners@marrywell.co.kr',
+        reply_to:   'partners@marrywell.co.kr',
+        subject:    personSubject,
+        html_body:  htmlBody,
       });
       ok++;
       logEl.innerHTML += `<div>✅ <strong>${p.name}</strong> (${p.email}) — 발송 완료</div>`;
