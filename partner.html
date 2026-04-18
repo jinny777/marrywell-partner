@@ -1095,11 +1095,13 @@ async function loadMaterials(){
   if(isDemoMode() && !session.isReal){
     allMaterials = DEMO_MATERIALS;
   } else if(session.isReal){
-    // 관리자가 설정한 자료를 localStorage에서 로드
+    // 관리자 자료관리탭(mw_materials, active 플래그) 우선, 없으면 wm_materials
     try {
-      const stored = JSON.parse(localStorage.getItem('wm_materials') || 'null');
-      allMaterials = (stored||[])
-        .filter(m => m.enabled !== false)
+      const mw = JSON.parse(localStorage.getItem('mw_materials') || 'null');
+      const wm = JSON.parse(localStorage.getItem('wm_materials') || 'null');
+      const src = (mw && mw.length) ? mw : (wm || []);
+      allMaterials = src
+        .filter(m => m.active !== false && m.enabled !== false)
         .map(m => ({ id: m.id||0, title: m.name||m.title, description: m.desc||m.description||'', url: m.url, fileType: m.fileType||'html', category: m.category||'all', visibleTo:'all', active:true }));
     } catch(e){ allMaterials = []; }
   } else {
