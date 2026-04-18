@@ -423,7 +423,18 @@ tr:hover td{background:#FAFAFF;}
       </a>
     </nav>
     <div class="sb-footer" style="display:flex;flex-direction:column;gap:8px;">
-      <button onclick="exportPartnersAuth()" style="width:100%;padding:8px;background:rgba(162,155,254,.15);border:1px solid rgba(162,155,254,.3);border-radius:8px;color:var(--ac);font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">🔑 파트너 인증 파일 내보내기</button>
+      <!-- GitHub Token 설정 -->
+      <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:10px;">
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:1px;margin-bottom:6px;">🔑 GITHUB TOKEN</div>
+        <div style="display:flex;gap:5px;">
+          <input id="gh-token-input" type="password" placeholder="ghp_xxxx..."
+            style="flex:1;padding:6px 8px;background:rgba(255,255,255,.08);border:1px solid rgba(162,155,254,.2);border-radius:6px;color:#fff;font-size:11px;outline:none;width:0;"
+            value="">
+          <button onclick="saveGhToken()" style="padding:6px 8px;background:rgba(162,155,254,.25);border:none;border-radius:6px;color:var(--ac);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">저장</button>
+        </div>
+        <div id="gh-sync-status" style="font-size:10px;margin-top:5px;color:rgba(255,255,255,.3);min-height:14px;"></div>
+      </div>
+      <button onclick="exportPartnersAuth()" style="width:100%;padding:8px;background:rgba(162,155,254,.15);border:1px solid rgba(162,155,254,.3);border-radius:8px;color:var(--ac);font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">📤 인증 파일 수동 내보내기</button>
       <span style="font-size:10px;color:rgba(255,255,255,.2);">v1.0 · MARRYWELL © 2025</span>
     </div>
   </aside>
@@ -1173,7 +1184,47 @@ let partners = JSON.parse(localStorage.getItem('mw_partners') || 'null') || [];
 let currentFilter = 'all';
 let currentSearch = '';
 
-function savePartners(){ localStorage.setItem('mw_partners', JSON.stringify(partners)); }
+function savePartners(){
+  localStorage.setItem('mw_partners', JSON.stringify(partners));
+  pushPartnersAuth();
+}
+
+// ── GitHub API로 partners-auth.json 자동 업데이트 ────
+const GH_REPO = 'jinny777/marrywell-partner';
+const GH_FILE = 'partners-auth.json';
+
+function getGhToken(){ return localStorage.getItem('mw_gh_token') || ''; }
+
+async function pushPartnersAuth(){
+  const token = getGhToken();
+  if(!token) return; // 토큰 미설정 시 조용히 스킵
+
+  const list = partners
+    .filter(p => p.code)
+    .map(p => ({ code: p.code, pw: p.pw || p.code, name: p.name, tier: p.tier || '5-9', email: p.email || '' }));
+
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(list, null, 2))));
+
+  try {
+    // 현재 파일 SHA 조회
+    const getRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`, {
+      headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    const getData = await getRes.json();
+    const sha = getData.sha || '';
+
+    // 파일 업데이트
+    const putRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`, {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+      body: JSON.stringify({ message: '파트너 인증 자동 업데이트', content, sha })
+    });
+    if(putRes.ok){
+      const ind = document.getElementById('gh-sync-status');
+      if(ind){ ind.textContent = '✓ 인증 동기화됨'; ind.style.color = 'var(--ok)'; setTimeout(()=>{ ind.textContent=''; }, 3000); }
+    }
+  } catch(e){ /* 실패 시 무시 — 로컬에는 이미 저장됨 */ }
+}
 
 // ── 구글 시트 연동 ──────────────────────────────────
 async function loadFromSheet() {
@@ -1244,6 +1295,7 @@ function doLogout(){
 // ── 초기화 ────────────────────────────────────────
 async function initApp(){
   document.getElementById('today-date').textContent = new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+  restoreGhToken();
   updateStats();
   renderRecentTable();
   renderPartnerTable();
@@ -1877,6 +1929,29 @@ window.addEventListener('storage', e => {
     processNewApplication(e.newValue);
   }
 });
+
+function saveGhToken(){
+  const val = (document.getElementById('gh-token-input')||{}).value?.trim() || '';
+  localStorage.setItem('mw_gh_token', val);
+  const st = document.getElementById('gh-sync-status');
+  if(val){
+    if(st) { st.textContent = '✓ 토큰 저장됨 — 이제 자동 동기화됩니다'; st.style.color='var(--ok)'; }
+    toast('GitHub Token 저장 완료. 파트너 추가/코드 발급 시 자동 동기화됩니다.');
+    pushPartnersAuth(); // 즉시 동기화
+  } else {
+    if(st) { st.textContent = '토큰 없음 — 자동 동기화 비활성화'; st.style.color='rgba(255,255,255,.3)'; }
+  }
+}
+
+// 로그인 후 토큰 입력란 복원
+function restoreGhToken(){
+  const t = getGhToken();
+  const inp = document.getElementById('gh-token-input');
+  if(inp && t) inp.value = t;
+  const st = document.getElementById('gh-sync-status');
+  if(st) st.textContent = t ? '✓ 자동 동기화 활성화됨' : '토큰을 입력하면 자동 동기화됩니다';
+  if(st) st.style.color = t ? 'var(--ok)' : 'rgba(255,255,255,.3)';
+}
 
 // 파트너 인증 파일 내보내기 (partners-auth.json 용)
 function exportPartnersAuth(){
