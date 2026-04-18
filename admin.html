@@ -1812,14 +1812,7 @@ async function loadAdminReferrals(){
       if(Array.isArray(data)){ allReferrals = data; }
     }catch(e){}
   } else {
-    // 데모 데이터
-    allReferrals = [
-      {id:1,partnerCode:'MW-DEMO',partnerName:'홍길동',customerName:'김민지',customerPhone:'010-1234-5678',bizType:'스튜디오',submittedAt:'2026-04-10',status:'purchased',memo:''},
-      {id:2,partnerCode:'MW-DEMO',partnerName:'홍길동',customerName:'이수연',customerPhone:'010-2345-6789',bizType:'드레스',submittedAt:'2026-04-08',status:'contacted',memo:''},
-      {id:3,partnerCode:'MW-DEMO',partnerName:'홍길동',customerName:'박지영',customerPhone:'010-3456-7890',bizType:'메이크업',submittedAt:'2026-04-05',status:'purchased',memo:''},
-      {id:4,partnerCode:'MW-ABCD',partnerName:'이영희',customerName:'최은아',customerPhone:'010-4567-8901',bizType:'스튜디오',submittedAt:'2026-04-12',status:'submitted',memo:''},
-      {id:5,partnerCode:'MW-ABCD',partnerName:'이영희',customerName:'정수빈',customerPhone:'010-5678-9012',bizType:'예식장',submittedAt:'2026-04-11',status:'contacted',memo:''},
-    ];
+    allReferrals = JSON.parse(localStorage.getItem('mw_referrals') || '[]');
   }
   rfLoaded = true;
   renderReferralsStats();
