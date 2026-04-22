@@ -810,9 +810,9 @@ tr:hover td{background:#FAFAFF;}
           </div>
         </div>
         <div class="card">
-          <div class="card-header">
+          <div class="card-header" style="flex-wrap:wrap;gap:10px;">
             <div class="card-title">📋 전체 고객 명단</div>
-            <div class="card-actions">
+            <div class="card-actions" style="flex-wrap:wrap;gap:8px;">
               <div class="filter-tabs" id="rf-filter-tabs">
                 <button class="ftab active" onclick="filterReferrals('all',this)">전체</button>
                 <button class="ftab" onclick="filterReferrals('submitted',this)">접수됨</button>
@@ -820,9 +820,13 @@ tr:hover td{background:#FAFAFF;}
                 <button class="ftab" onclick="filterReferrals('purchased',this)">구매완료</button>
                 <button class="ftab" onclick="filterReferrals('settled',this)">정산완료</button>
               </div>
-              <div class="search-box">
-                <span class="search-ico">🔍</span>
-                <input type="text" id="rf-search" placeholder="파트너명, 고객명 검색..." oninput="renderReferralsTable()">
+              <div style="display:flex;gap:8px;align-items:center;">
+                <div class="search-box">
+                  <span class="search-ico">🔍</span>
+                  <input type="text" id="rf-search" placeholder="파트너명, 고객명, 연락처 검색..." oninput="renderReferralsTable()">
+                </div>
+                <button class="btn-outline" onclick="reloadReferrals()" style="white-space:nowrap;padding:7px 14px;font-size:12px;">↺ 새로고침</button>
+                <button class="btn-outline" onclick="exportReferralsCSV()" style="white-space:nowrap;padding:7px 14px;font-size:12px;">⬇ CSV</button>
               </div>
             </div>
           </div>
@@ -830,8 +834,9 @@ tr:hover td{background:#FAFAFF;}
             <table>
               <thead>
                 <tr>
-                  <th>#</th><th>파트너</th><th>고객명</th><th>업체 유형</th>
-                  <th>제출일</th><th>상태</th><th>메모</th><th>상태 변경</th>
+                  <th>#</th><th>파트너</th><th>고객명</th><th>연락처</th>
+                  <th>이메일</th><th>업체 유형</th><th>메모</th>
+                  <th>제출일</th><th>상태</th><th>상태 변경</th>
                 </tr>
               </thead>
               <tbody id="referrals-tbody"></tbody>
@@ -2159,18 +2164,40 @@ let allReferrals    = [];
 let rfLoaded        = false;
 let currentRfFilter = 'all';
 
+const DEMO_REFERRALS = [
+  {id:1,partnerCode:'MW-DEMO',partnerName:'홍길동',customerName:'김민지',customerPhone:'010-1234-5678',customerEmail:'minji@example.com',bizType:'스튜디오',memo:'',submittedAt:'2026-04-10',status:'purchased'},
+  {id:2,partnerCode:'MW-DEMO',partnerName:'홍길동',customerName:'이수연',customerPhone:'010-2345-6789',customerEmail:'',bizType:'드레스',memo:'상담 희망',submittedAt:'2026-04-08',status:'contacted'},
+  {id:3,partnerCode:'MW-DEMO',partnerName:'홍길동',customerName:'박지영',customerPhone:'010-3456-7890',customerEmail:'jiyoung@example.com',bizType:'메이크업',memo:'',submittedAt:'2026-04-05',status:'purchased'},
+  {id:4,partnerCode:'MW-DEMO',partnerName:'홍길동',customerName:'최은아',customerPhone:'010-4567-8901',customerEmail:'',bizType:'스튜디오',memo:'',submittedAt:'2026-03-28',status:'settled'},
+  {id:5,partnerCode:'MW-B001',partnerName:'이파트너',customerName:'정수빈',customerPhone:'010-5678-9012',customerEmail:'subin@example.com',bizType:'예식장',memo:'',submittedAt:'2026-03-20',status:'settled'},
+  {id:6,partnerCode:'MW-B001',partnerName:'이파트너',customerName:'한유진',customerPhone:'010-6789-0123',customerEmail:'',bizType:'허니문',memo:'급하게 연락 요망',submittedAt:'2026-04-14',status:'submitted'},
+  {id:7,partnerCode:'MW-B001',partnerName:'이파트너',customerName:'오채원',customerPhone:'010-7890-1234',customerEmail:'',bizType:'드레스',memo:'',submittedAt:'2026-04-13',status:'submitted'},
+];
+
 async function loadAdminReferrals(){
   if(rfLoaded) return;
+  await fetchReferrals();
+  rfLoaded = true;
+}
+
+async function reloadReferrals(){
+  rfLoaded = false;
+  await fetchReferrals();
+  rfLoaded = true;
+  toast('고객 명단을 새로고침했습니다.');
+}
+
+async function fetchReferrals(){
   if(SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL'){
     try{
       const res  = await fetch(`${SCRIPT_URL}?action=allReferrals&token=mw_admin_2025`);
       const data = await res.json();
       if(Array.isArray(data)){ allReferrals = data; }
-    }catch(e){}
+    }catch(e){ allReferrals = DEMO_REFERRALS; }
   } else {
-    allReferrals = JSON.parse(localStorage.getItem('mw_referrals') || '[]');
+    const stored = JSON.parse(localStorage.getItem('mw_referrals') || '[]');
+    allReferrals = stored.length ? stored : DEMO_REFERRALS;
   }
-  rfLoaded = true;
   renderReferralsStats();
   renderReferralsTable();
 }
@@ -2209,11 +2236,12 @@ function renderReferralsTable(){
   if(search) list = list.filter(r=>
     (r.partnerName||'').toLowerCase().includes(search)||
     (r.customerName||'').toLowerCase().includes(search)||
-    (r.partnerCode||'').toLowerCase().includes(search));
+    (r.partnerCode||'').toLowerCase().includes(search)||
+    (r.customerPhone||'').toLowerCase().includes(search));
 
   const tbody = document.getElementById('referrals-tbody');
   if(!list.length){
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="ico">📋</div><p>명단이 없습니다.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="ico">📋</div><p>명단이 없습니다.</p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = list.map((r,i)=>`
@@ -2224,10 +2252,12 @@ function renderReferralsTable(){
         <div class="td-sub">${r.partnerCode||''}</div>
       </td>
       <td class="td-name">${r.customerName||'-'}</td>
+      <td style="font-size:12px;font-weight:600;">${r.customerPhone||'-'}</td>
+      <td style="font-size:11px;color:var(--gray)">${r.customerEmail||'-'}</td>
       <td style="font-size:12px">${r.bizType||'-'}</td>
+      <td style="font-size:11px;color:var(--gray);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.memo||''}">${r.memo||'-'}</td>
       <td style="font-size:12px;color:var(--gray)">${(r.submittedAt||'').slice(0,10)}</td>
       <td><span class="status ${RF_STATUS_CLS[r.status]||'s-pending'}">${RF_STATUS_MAP[r.status]||r.status}</span></td>
-      <td style="font-size:12px;color:var(--gray);max-width:120px;overflow:hidden;text-overflow:ellipsis">${r.memo||'-'}</td>
       <td>
         <select onchange="changeReferralStatus(${r.id},this.value)"
           style="padding:5px 8px;border:1.5px solid #E0E0F0;border-radius:8px;font-size:11px;font-family:'Noto Sans KR',sans-serif;background:#FAFAFF;">
@@ -2238,6 +2268,23 @@ function renderReferralsTable(){
         </select>
       </td>
     </tr>`).join('');
+}
+
+function exportReferralsCSV(){
+  const header = ['#','파트너명','파트너코드','고객명','연락처','이메일','업체유형','메모','제출일','상태'];
+  const rows = allReferrals.map((r,i)=>[
+    i+1, r.partnerName||'', r.partnerCode||'',
+    r.customerName||'', r.customerPhone||'', r.customerEmail||'',
+    r.bizType||'', r.memo||'',
+    (r.submittedAt||'').slice(0,10),
+    RF_STATUS_MAP[r.status]||r.status
+  ]);
+  const csv = [header,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `고객명단_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
 }
 
 async function changeReferralStatus(id, status){
