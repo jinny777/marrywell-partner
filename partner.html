@@ -846,6 +846,15 @@ async function sha256hex(str){
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
+function saveReferralsToStorage(){
+  try {
+    const existing = JSON.parse(localStorage.getItem('mw_referrals') || '[]');
+    const existingIds = new Set(existing.map(r => String(r.id)));
+    const merged = [...allCustomers.filter(r => !existingIds.has(String(r.id))), ...existing];
+    localStorage.setItem('mw_referrals', JSON.stringify(merged));
+  } catch(e) {}
+}
+
 function demoLogin(){
   document.getElementById('login-code').value = 'MW-DEMO';
   document.getElementById('login-pw').value   = 'MW-DEMO';
@@ -1345,6 +1354,7 @@ async function submitSingle(){
   allCustomers.unshift(row);
   allReferrals = allCustomers;
   custLoaded = true;
+  saveReferralsToStorage();
   clearSingleForm();
   renderCustomers();
   renderDashboard();
@@ -1454,6 +1464,7 @@ async function submitBulk(){
   allCustomers = [...rows, ...allCustomers];
   allReferrals = allCustomers;
   custLoaded   = true;
+  saveReferralsToStorage();
   clearCSV();
   renderCustomers();
   renderDashboard();

@@ -2193,7 +2193,10 @@ async function fetchReferrals(){
       const res  = await fetch(`${SCRIPT_URL}?action=allReferrals&token=mw_admin_2025`);
       const data = await res.json();
       if(Array.isArray(data)){ allReferrals = data; }
-    }catch(e){ allReferrals = DEMO_REFERRALS; }
+    }catch(e){
+      const stored = JSON.parse(localStorage.getItem('mw_referrals') || '[]');
+      allReferrals = stored.length ? stored : DEMO_REFERRALS;
+    }
   } else {
     const stored = JSON.parse(localStorage.getItem('mw_referrals') || '[]');
     allReferrals = stored.length ? stored : DEMO_REFERRALS;
