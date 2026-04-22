@@ -239,6 +239,13 @@ tr:hover td{background:#FAFAFF;}
   transition:background .15s;
 }
 .btn-primary:hover{background:var(--pd);}
+.btn-outline{
+  background:transparent;color:var(--gray);border:1.5px solid #DDD;border-radius:10px;
+  padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;
+  font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;gap:6px;
+  transition:all .15s;
+}
+.btn-outline:hover{border-color:var(--p);color:var(--p);}
 .btn-secondary{
   background:#fff;color:var(--p);border:1.5px solid var(--p);border-radius:10px;
   padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;
@@ -575,6 +582,7 @@ tr:hover td{background:#FAFAFF;}
                 <span class="search-ico">🔍</span>
                 <input type="text" id="search-input" placeholder="이름, 이메일 검색..." oninput="searchPartners()">
               </div>
+              <button class="btn-outline" onclick="restoreFromGitHub()" style="white-space:nowrap;flex-shrink:0;" title="GitHub partners-auth.json에서 복원">↩ GitHub 복원</button>
               <button class="btn-primary" onclick="openAddPartnerModal()" style="white-space:nowrap;flex-shrink:0;">+ 파트너 추가</button>
             </div>
           </div>
@@ -1358,6 +1366,59 @@ async function pushPartnersAuth(){
       logHistory('data_sync', 'GitHub 인증 파일 동기화 완료', { file: 'partners-auth.json', count: rawList.length });
     }
   } catch(e){ /* 실패 시 무시 — 로컬에는 이미 저장됨 */ }
+}
+
+// ── GitHub에서 파트너 목록 복원 ─────────────────────
+async function restoreFromGitHub(){
+  const token = getGhToken();
+  if(!token){
+    alert('GitHub 토큰이 설정되지 않았습니다.\n설정 > GitHub 토큰 입력 후 다시 시도하세요.\n\n토큰 없이도 공개 파일로 시도합니다...');
+  }
+  try {
+    const headers = { 'Accept': 'application/vnd.github.v3+json' };
+    if(token) headers['Authorization'] = 'token ' + token;
+    const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`, { headers });
+    if(!res.ok) throw new Error('GitHub 파일 조회 실패: ' + res.status);
+    const data = await res.json();
+    const decoded = JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g,'')))));
+    if(!Array.isArray(decoded) || decoded.length === 0){
+      alert('GitHub에 저장된 파트너 데이터가 없습니다.');
+      return;
+    }
+    let added = 0;
+    for(const p of decoded){
+      const exists = partners.find(x => x.code === p.code);
+      if(!exists){
+        partners.push({
+          id:        Date.now() + Math.random(),
+          name:      p.name  || '',
+          email:     p.email || '',
+          phone:     p.phone || '',
+          sns:       '',
+          biz:       '',
+          tier:      p.tier  || 'basic',
+          channel:   '',
+          msg:       '',
+          date:      new Date().toISOString().slice(0,10),
+          status:    'active',
+          code:      p.code  || '',
+          referrals: 0,
+          payback:   0
+        });
+        added++;
+      }
+    }
+    if(added === 0){
+      alert(`GitHub에서 ${decoded.length}명을 확인했으나 이미 목록에 있는 파트너입니다.`);
+      return;
+    }
+    await savePartners();
+    updateStats(); renderPartnerTable();
+    logHistory('restore', `GitHub에서 파트너 ${added}명 복원`, { count: added });
+    alert(`✅ ${added}명의 파트너 데이터를 복원했습니다.`);
+  } catch(e) {
+    alert('복원 실패: ' + e.message + '\n\nGitHub 토큰이 필요하거나 네트워크 오류입니다.');
+  }
 }
 
 // ── 구글 시트 연동 ──────────────────────────────────
