@@ -895,8 +895,12 @@ async function doLogin(){
   if(!code || !pw){ err.style.display='block'; return; }
 
   if(isDemoMode()){
-    // 1) admin 같은 브라우저 localStorage
-    const stored = JSON.parse(localStorage.getItem('mw_partners') || '[]');
+    // 1) admin 같은 브라우저 localStorage (plain JSON만, ENC: 암호화 데이터는 건너뜀)
+    let stored = [];
+    try {
+      const raw = localStorage.getItem('mw_partners') || '[]';
+      if (!raw.startsWith('ENC:')) stored = JSON.parse(raw);
+    } catch(e) {}
     const found  = stored.find(p => p.code && p.code.toUpperCase() === code);
     if(found){
       const validPw = found.pw || found.code;
