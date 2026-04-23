@@ -1468,6 +1468,15 @@
   });
 
   /* ── PDF 저장 ── */
+  // A4 가로 (landscape) 기준
+  const LS_W_PX = 1123; const LS_H_PX = 794; const LS_W_MM = 297; const LS_H_MM = 210;
+  async function captureSheet(sheet, bg) {
+    const saved = sheet.getAttribute('style') || '';
+    sheet.style.cssText += 'width:'+LS_W_PX+'px;height:'+LS_H_PX+'px;min-height:'+LS_H_PX+'px;overflow:hidden;margin:0;box-shadow:none;';
+    const canvas = await html2canvas(sheet, { scale: 3, width: LS_W_PX, height: LS_H_PX, windowWidth: LS_W_PX, windowHeight: LS_H_PX, useCORS: true, allowTaint: true, logging: false, backgroundColor: bg || '#ffffff' });
+    sheet.setAttribute('style', saved);
+    return canvas;
+  }
   async function dlPDF(){
     const bar  = document.querySelector('.dl-bar');
     const btn  = document.getElementById('pdfBtn');
@@ -1480,14 +1489,12 @@
       const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' });
       for (let i = 0; i < sheets.length; i++) {
         if (i > 0) pdf.addPage();
-        const canvas = await html2canvas(sheets[i], {
-          scale: 2, useCORS: true, allowTaint: true, logging: false,
-          backgroundColor: i === 0 ? '#1a0533' : '#fafbff'
-        });
-        pdf.addImage(canvas.toDataURL('image/jpeg', 0.97), 'JPEG', 0, 0, 297, 210);
+        const bg = i === 0 ? '#1a0533' : '#fafbff';
+        const canvas = await captureSheet(sheets[i], bg);
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, LS_W_MM, LS_H_MM);
       }
       pdf.save('MARRYWELL_3단브로셔.pdf');
-    } catch(e) { alert('PDF 생성 중 오류가 발생했습니다.'); }
+    } catch(e) { alert('PDF 생성 오류 — 브라우저 인쇄(Ctrl+P → PDF 저장)를 이용해 주세요.'); }
     document.querySelectorAll('.label').forEach(el => el.style.visibility = '');
     bar.style.visibility = '';
     btn.disabled = false; btn.textContent = '⬇ PDF 저장';
