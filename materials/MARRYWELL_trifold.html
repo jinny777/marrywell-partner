@@ -1469,13 +1469,19 @@
 
   /* ── PDF 저장 ── */
   // A4 가로 (landscape) 기준
-  const LS_W_PX = 1123; const LS_H_PX = 794; const LS_W_MM = 297; const LS_H_MM = 210;
+  const LS_W_PX = 1123; const LS_W_MM = 297; const LS_H_MM = 210;
+  const GRAD_SEL = ['.pc-headline .hl'];
+  function fixGT(el){ const s=[]; GRAD_SEL.forEach(sel=>el.querySelectorAll(sel).forEach(e=>{ s.push({e,st:e.getAttribute('style')||''}); e.style.cssText+=';background:none!important;-webkit-text-fill-color:#fff!important;color:#fff!important;'; })); return s; }
+  function restoreGT(s){ s.forEach(({e,st})=>e.setAttribute('style',st)); }
+
   async function captureSheet(sheet, bg) {
     const saved = sheet.getAttribute('style') || '';
-    sheet.style.cssText += 'width:'+LS_W_PX+'px;height:'+LS_H_PX+'px;min-height:'+LS_H_PX+'px;overflow:hidden;margin:0;box-shadow:none;';
-    const canvas = await html2canvas(sheet, { scale: 3, width: LS_W_PX, height: LS_H_PX, windowWidth: LS_W_PX, windowHeight: LS_H_PX, useCORS: true, allowTaint: true, logging: false, backgroundColor: bg || '#ffffff' });
-    sheet.setAttribute('style', saved);
-    return canvas;
+    const gs = fixGT(sheet);
+    sheet.style.cssText += ';width:'+LS_W_PX+'px;margin:0;box-shadow:none;overflow:visible;';
+    const naturalH = sheet.scrollHeight || 794;
+    const canvas = await html2canvas(sheet, { scale: 3, width: LS_W_PX, height: naturalH, windowWidth: LS_W_PX, windowHeight: naturalH, useCORS: true, allowTaint: true, logging: false, backgroundColor: bg || '#ffffff' });
+    sheet.setAttribute('style', saved); restoreGT(gs);
+    return { canvas, pdfH: (naturalH / LS_W_PX) * LS_W_MM };
   }
   async function dlPDF(){
     const bar  = document.querySelector('.dl-bar');
@@ -1486,12 +1492,13 @@
     try {
       const { jsPDF } = window.jspdf;
       const sheets = document.querySelectorAll('.sheet');
-      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' });
+      let pdf = null;
       for (let i = 0; i < sheets.length; i++) {
-        if (i > 0) pdf.addPage();
         const bg = i === 0 ? '#1a0533' : '#fafbff';
-        const canvas = await captureSheet(sheets[i], bg);
-        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, LS_W_MM, LS_H_MM);
+        const { canvas, pdfH } = await captureSheet(sheets[i], bg);
+        if (i === 0) { pdf = new jsPDF({ unit: 'mm', format: [LS_W_MM, pdfH], orientation: 'landscape' }); }
+        else { pdf.addPage([LS_W_MM, pdfH], 'landscape'); }
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, LS_W_MM, pdfH);
       }
       pdf.save('MARRYWELL_3단브로셔.pdf');
     } catch(e) { alert('PDF 생성 오류 — 브라우저 인쇄(Ctrl+P → PDF 저장)를 이용해 주세요.'); }

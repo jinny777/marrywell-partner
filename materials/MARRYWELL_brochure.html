@@ -818,13 +818,18 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-const A4_W_PX = 794; const A4_H_PX = 1123; const A4_W_MM = 210; const A4_H_MM = 297;
+const A4_W_PX = 794; const A4_W_MM = 210;
+const GRAD_SEL = ['.cover-headline .highlight'];
+function fixGT(page){ const s=[]; GRAD_SEL.forEach(sel=>page.querySelectorAll(sel).forEach(el=>{ s.push({el,st:el.getAttribute('style')||''}); el.style.cssText+=';background:none!important;-webkit-text-fill-color:#fff!important;color:#fff!important;'; })); return s; }
+function restoreGT(s){ s.forEach(({el,st})=>el.setAttribute('style',st)); }
 async function capturePage(page) {
   const saved = page.getAttribute('style') || '';
-  page.style.cssText += 'width:'+A4_W_PX+'px;height:'+A4_H_PX+'px;min-height:'+A4_H_PX+'px;overflow:hidden;margin:0;box-shadow:none;border-radius:0;';
-  const canvas = await html2canvas(page, { scale: 3, width: A4_W_PX, height: A4_H_PX, windowWidth: A4_W_PX, windowHeight: A4_H_PX, useCORS: true, allowTaint: true, logging: false, backgroundColor: '#ffffff' });
-  page.setAttribute('style', saved);
-  return canvas;
+  const gs = fixGT(page);
+  page.style.cssText += ';width:'+A4_W_PX+'px;margin:0;box-shadow:none;border-radius:0;overflow:visible;';
+  const naturalH = page.scrollHeight || 1123;
+  const canvas = await html2canvas(page, { scale: 3, width: A4_W_PX, height: naturalH, windowWidth: A4_W_PX, windowHeight: naturalH, useCORS: true, allowTaint: true, logging: false, backgroundColor: '#ffffff' });
+  page.setAttribute('style', saved); restoreGT(gs);
+  return { canvas, pdfH: (naturalH / A4_W_PX) * A4_W_MM };
 }
 async function dlPDF(){
   const fab = document.querySelector('.pdf-fab');
@@ -834,11 +839,12 @@ async function dlPDF(){
   try {
     const { jsPDF } = window.jspdf;
     const pages = document.querySelectorAll('.page');
-    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    let pdf = null;
     for (let i = 0; i < pages.length; i++) {
-      if (i > 0) pdf.addPage();
-      const canvas = await capturePage(pages[i]);
-      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
+      const { canvas, pdfH } = await capturePage(pages[i]);
+      if (i === 0) { pdf = new jsPDF({ unit: 'mm', format: [A4_W_MM, pdfH], orientation: 'portrait' }); }
+      else { pdf.addPage([A4_W_MM, pdfH], 'portrait'); }
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, pdfH);
     }
     pdf.save('MARRYWELL_서비스브로셔.pdf');
   } catch(e) { alert('PDF 생성 오류 — 브라우저 인쇄(Ctrl+P → PDF 저장)를 이용해 주세요.'); }

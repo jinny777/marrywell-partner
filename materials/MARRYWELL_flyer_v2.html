@@ -920,30 +920,45 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-const A4_W_PX = 794;   // A4 @ 96dpi
-const A4_H_PX = 1123;
+const A4_W_PX = 794;
 const A4_W_MM = 210;
 const A4_H_MM = 297;
 
+// html2canvas가 지원 안 하는 gradient-clip 텍스트를 흰색으로 임시 교체
+const GRAD_TEXT_SELECTORS = ['.hero-title', '.cta-title'];
+
+function fixGradientText(page) {
+  const saved = [];
+  GRAD_TEXT_SELECTORS.forEach(sel => {
+    page.querySelectorAll(sel).forEach(el => {
+      saved.push({ el, style: el.getAttribute('style') || '' });
+      el.style.cssText += ';background:none!important;-webkit-text-fill-color:#fff!important;color:#fff!important;';
+    });
+  });
+  return saved;
+}
+function restoreGradientText(saved) {
+  saved.forEach(({ el, style }) => el.setAttribute('style', style));
+}
+
 async function capturePage(page) {
-  // 캡처 전 정확한 A4 크기로 고정
-  const saved = page.getAttribute('style') || '';
-  page.style.cssText += [
-    'width:'     + A4_W_PX + 'px',
-    'height:'    + A4_H_PX + 'px',
-    'min-height:'+ A4_H_PX + 'px',
-    'overflow:hidden',
-    'margin:0',
-    'box-shadow:none',
-    'border-radius:0',
-  ].join(';') + ';';
+  const savedStyle = page.getAttribute('style') || '';
+
+  // gradient 텍스트 임시 교체 (흰색 고정)
+  const gradSaved = fixGradientText(page);
+
+  // A4 너비 고정, overflow visible — 내용이 잘리지 않게
+  page.style.cssText += ';width:' + A4_W_PX + 'px;margin:0;box-shadow:none;border-radius:0;overflow:visible;';
+
+  // 실제 콘텐츠 높이 측정
+  const naturalH = page.scrollHeight || 1123;
 
   const canvas = await html2canvas(page, {
     scale: 3,
-    width:  A4_W_PX,
-    height: A4_H_PX,
-    windowWidth:  A4_W_PX,
-    windowHeight: A4_H_PX,
+    width:       A4_W_PX,
+    height:      naturalH,
+    windowWidth: A4_W_PX,
+    windowHeight: naturalH,
     useCORS: true,
     allowTaint: true,
     logging: false,
@@ -951,8 +966,12 @@ async function capturePage(page) {
   });
 
   // 원복
-  page.setAttribute('style', saved);
-  return canvas;
+  page.setAttribute('style', savedStyle);
+  restoreGradientText(gradSaved);
+
+  // PDF 높이: A4 너비 비율에 맞춰 계산
+  const pdfH = (naturalH / A4_W_PX) * A4_W_MM;
+  return { canvas, pdfH };
 }
 
 async function dlPDF(){
@@ -963,11 +982,15 @@ async function dlPDF(){
   try {
     const { jsPDF } = window.jspdf;
     const pages = document.querySelectorAll('.page');
-    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    let pdf = null;
     for (let i = 0; i < pages.length; i++) {
-      if (i > 0) pdf.addPage();
-      const canvas = await capturePage(pages[i]);
-      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
+      const { canvas, pdfH } = await capturePage(pages[i]);
+      if (i === 0) {
+        pdf = new jsPDF({ unit: 'mm', format: [A4_W_MM, pdfH], orientation: 'portrait' });
+      } else {
+        pdf.addPage([A4_W_MM, pdfH], 'portrait');
+      }
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, pdfH);
     }
     pdf.save('MARRYWELL_서비스플라이어.pdf');
   } catch(e) {
