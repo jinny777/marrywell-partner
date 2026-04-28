@@ -483,7 +483,8 @@
 <script>
 // ── Google Apps Script URL ─────────────────────────
 // Code.gs 배포 후 아래 URL을 교체하세요
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxtNv06xywUUgAWZLGiIsq228Z4CU4sj7JScHYz4QaBlKZdJjnOcKPnQdm4cgtzQRFE/exec';
+const SCRIPT_URL = 'YOUR_SCRIPT_URL';
+const API_BASE = 'https://aiweddingstudio.onrender.com';
 
 let currentStep = 1;
 let formData = {};
@@ -654,17 +655,14 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#F4
     });
   } catch(e) { /* 이메일 실패 시 신청은 계속 진행 */ }
 
-  // 3) Google Sheets 저장 (URL 설정 시 외부 기기에서도 확인 가능)
-  if (SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL') {
-    try {
-      await fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode:   'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-    } catch(e) { /* 네트워크 오류 시 무시 */ }
-  }
+  // 3) Supabase API 저장
+  try {
+    await fetch(`${API_BASE}/api/partners/apply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) { /* 네트워크 오류 시 무시 */ }
 
   // 성공 화면 전환
   document.getElementById('step3').classList.remove('active');
