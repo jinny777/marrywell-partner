@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARRYWELL — 스마트 웨딩 플랫폼 브로셔</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700;800;900&display=swap');
+
+  :root {
+    --purple: #4B3BC7;
+    --purple-light: #6C5CE7;
+    --purple-dark: #3A2DA0;
+    --purple-pale: #EEF0FF;
+    --accent: #A29BFE;
+    --text: #1a1a2e;
+    --gray: #6c757d;
+    --light: #f8f9ff;
+    --gold: #F4C430;
+    --white: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #f0f0f8;
+    color: var(--text);
+  }
+
+  /* ── PAGE WRAPPER ── */
+  .page {
+    width: 794px;
+    margin: 40px auto;
+    background: white;
+    box-shadow: 0 8px 48px rgba(75,59,199,0.15);
+    border-radius: 4px;
+    overflow: hidden;
+    page-break-after: always;
+  }
+
+  /* ══════════════════════════════
+     PAGE 1 — COVER (FLYER)
+  ══════════════════════════════ */
+  .cover {
+    background: linear-gradient(155deg, #1a0533 0%, #2d1b69 45%, #4B3BC7 100%);
+    min-height: 1123px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  /* decorative circles */
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -120px; right: -120px;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(162,155,254,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: -200px; left: -200px;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(75,59,199,0.25) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  /* top bar */
+  .cover-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 28px 48px 0;
+    position: relative; z-index: 2;
+  }
+  .logo {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 2px;
+  }
+  .logo span { color: var(--accent); }
+  .cover-url {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 1px;
+  }
+
+  /* hero area */
+  .cover-hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 48px 40px;
+    position: relative; z-index: 2;
+  }
+
+  .cover-eyebrow {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cover-eyebrow::before {
+    content: '';
+    width: 40px; height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  .cover-headline {
+    font-size: 62px;
+    font-weight: 900;
+    line-height: 1.1;
+    color: white;
+    margin-bottom: 8px;
+  }
+  .cover-headline .highlight {
+    background: linear-gradient(90deg, #A29BFE, #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .cover-tagline {
+    font-size: 22px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 36px;
+    letter-spacing: 0.5px;
+  }
+
+  .cover-desc {
+    font-size: 16px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.85;
+    max-width: 560px;
+    margin-bottom: 48px;
+  }
+
+  /* pill badges */
+  .badge-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 56px; }
+  .badge {
+    padding: 9px 20px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .badge-outline {
+    border: 1.5px solid rgba(162,155,254,0.55);
+    color: var(--accent);
+  }
+  .badge-fill {
+    background: rgba(162,155,254,0.2);
+    color: white;
+    border: 1.5px solid rgba(162,155,254,0.3);
+  }
+
+  /* 4 core features strip */
+  .cover-features {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: rgba(255,255,255,0.08);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    position: relative; z-index: 2;
+  }
+  .cover-feature {
+    padding: 28px 24px;
+    text-align: center;
+    background: rgba(255,255,255,0.04);
+  }
+  .cover-feature:not(:last-child) {
+    border-right: 1px solid rgba(255,255,255,0.08);
+  }
+  .cf-icon { font-size: 28px; margin-bottom: 10px; }
+  .cf-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 4px;
+  }
+  .cf-desc { font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.5; }
+
+  /* bottom CTA bar */
+  .cover-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 48px;
+    background: rgba(0,0,0,0.25);
+    position: relative; z-index: 2;
+  }
+  .cta-text { font-size: 15px; color: rgba(255,255,255,0.6); }
+  .cta-text strong { color: white; font-weight: 700; }
+  .cta-btn {
+    background: white;
+    color: var(--purple-dark);
+    font-weight: 800;
+    font-size: 14px;
+    padding: 14px 32px;
+    border-radius: 100px;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  /* ══════════════════════════════
+     PAGE 2 — DETAIL BROCHURE
+  ══════════════════════════════ */
+  .brochure {
+    min-height: 1123px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* header stripe */
+  .bro-header {
+    background: linear-gradient(90deg, var(--purple-dark), var(--purple-light));
+    padding: 32px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .bro-header .logo { font-size: 20px; }
+  .bro-header-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+    letter-spacing: 1px;
+  }
+
+  /* body */
+  .bro-body { padding: 40px 48px; flex: 1; }
+
+  /* section title */
+  .sec-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--purple);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sec-label::before {
+    content: '';
+    width: 28px; height: 2px;
+    background: var(--purple);
+    border-radius: 2px;
+  }
+  .sec-title {
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.25;
+  }
+  .sec-sub {
+    font-size: 15px;
+    color: var(--gray);
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, var(--purple-pale), transparent);
+    margin: 36px 0;
+  }
+
+  /* pain points */
+  .pain-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 36px;
+  }
+  .pain-card {
+    background: var(--purple-pale);
+    border-radius: 14px;
+    padding: 24px;
+    border-left: 4px solid var(--purple);
+  }
+  .pain-card h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--purple);
+    margin-bottom: 12px;
+  }
+  .pain-card ul { list-style: none; }
+  .pain-card ul li {
+    font-size: 13px;
+    color: #444;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(75,59,199,0.08);
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .pain-card ul li:last-child { border-bottom: none; }
+  .pain-card ul li::before {
+    content: '"';
+    color: var(--accent);
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: -2px;
+  }
+
+  /* feature cards */
+  .feat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .feat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 3px 18px rgba(75,59,199,0.07);
+    border-top: 3px solid var(--purple-light);
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .feat-ico {
+    width: 48px; height: 48px;
+    background: var(--purple-pale);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .feat-text h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .feat-text p { font-size: 12px; color: var(--gray); line-height: 1.65; }
+  .feat-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .ftag {
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: var(--purple-pale);
+    color: var(--purple);
+    font-weight: 600;
+  }
+
+  /* comparison table */
+  .comp-wrap { overflow: hidden; border-radius: 12px; box-shadow: 0 3px 16px rgba(0,0,0,0.06); margin-bottom: 32px; }
+  .comp-table { width: 100%; border-collapse: collapse; }
+  .comp-table thead tr { background: var(--purple); }
+  .comp-table th {
+    padding: 14px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    text-align: center;
+  }
+  .comp-table th:first-child { text-align: left; }
+  .comp-table th.hl { background: var(--purple-dark); color: var(--gold); }
+  .comp-table td {
+    padding: 13px 16px;
+    text-align: center;
+    font-size: 13px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .comp-table td:first-child { text-align: left; font-weight: 600; color: var(--text); }
+  .comp-table tbody tr:nth-child(odd) { background: #fafbff; }
+  .comp-table tbody tr:nth-child(even) { background: white; }
+  .comp-table td.hl { background: #EEF0FF; color: var(--purple); font-weight: 600; }
+  .chk { color: #4CAF50; font-weight: 900; font-size: 16px; }
+  .crs { color: #ccc; font-size: 16px; }
+
+  /* value proposition (3 columns) */
+  .value-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .value-card {
+    background: var(--purple-pale);
+    border-radius: 14px;
+    padding: 24px 20px;
+    text-align: center;
+  }
+  .value-who {
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+  .value-card h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--purple-dark);
+    margin-bottom: 10px;
+  }
+  .value-card ul { list-style: none; }
+  .value-card ul li {
+    font-size: 12px;
+    color: #555;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(75,59,199,0.08);
+  }
+  .value-card ul li:last-child { border-bottom: none; }
+  .value-card ul li::before { content: '✓ '; color: var(--purple); font-weight: 700; }
+
+  /* traction numbers */
+  .traction-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .traction-card {
+    background: linear-gradient(135deg, var(--purple-dark), var(--purple));
+    border-radius: 14px;
+    padding: 24px 20px;
+    text-align: center;
+    color: white;
+  }
+  .traction-num {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .traction-label { font-size: 12px; color: rgba(255,255,255,0.7); line-height: 1.4; }
+
+  /* footer */
+  .bro-footer {
+    background: var(--text);
+    padding: 24px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-logo {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 2px;
+  }
+  .footer-logo span { color: var(--accent); }
+  .footer-links {
+    display: flex;
+    gap: 24px;
+  }
+  .footer-link { font-size: 12px; color: rgba(255,255,255,0.5); }
+  .footer-link strong { color: rgba(255,255,255,0.85); font-weight: 600; }
+
+  /* ── PRINT ── */
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { background: white; margin: 0; }
+    .page { margin: 0; box-shadow: none; border-radius: 0; }
+    .pdf-fab { display: none !important; }
+  }
+  .pdf-fab {
+    position: fixed; bottom: 28px; right: 28px; z-index: 999;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+  }
+  .pdf-btn {
+    background: #4B3BC7; color: #fff; border: none; border-radius: 100px;
+    padding: 13px 24px; font-size: 14px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(75,59,199,.35);
+    font-family: 'Noto Sans KR', sans-serif;
+    display: flex; align-items: center; gap: 8px;
+    transition: background .15s, transform .1s;
+  }
+  .pdf-btn:hover { background: #3A2DA0; transform: translateY(-1px); }
+  .pdf-btn.outline {
+    background: #fff; color: #4B3BC7;
+    border: 2px solid #4B3BC7;
+    box-shadow: 0 2px 12px rgba(75,59,199,.15);
+    font-size: 13px; padding: 10px 20px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════
+     PAGE 1 — FLYER / COVER
+══════════════════════ -->
+<div class="page">
+<div class="cover">
+
+  <div class="cover-topbar">
+    <div class="logo">MARRY<span>WELL</span></div>
+    <div class="cover-url">www.marrywell.co.kr</div>
+  </div>
+
+  <div class="cover-hero">
+    <div class="cover-eyebrow">AI Wedding Studio</div>
+
+    <div class="cover-headline">
+      AI가 완성하는<br>
+      <span class="highlight">스마트 웨딩</span>
+    </div>
+    <div class="cover-tagline">사진 한 장으로 청첩장과 영상이 자동 완성</div>
+
+    <div class="cover-desc">
+      AI 청첩장·영상 자동 생성부터 하객 관리, 모바일 답례까지<br>
+      결혼 준비의 모든 과정을 하나의 플랫폼으로 완성하는 <strong style="color:white;">AI Wedding Studio</strong>입니다.
+    </div>
+
+    <div class="badge-row">
+      <div class="badge badge-fill">AI 청첩장 자동생성</div>
+      <div class="badge badge-outline">AI 영상 자동생성</div>
+      <div class="badge badge-fill">하객 관리 · RSVP</div>
+      <div class="badge badge-outline">모바일 답례</div>
+      <div class="badge badge-fill">ALL-IN-ONE</div>
+    </div>
+  </div>
+
+  <div class="cover-features">
+    <div class="cover-feature">
+      <div class="cf-icon">💌</div>
+      <div class="cf-title">모바일 청첩장</div>
+      <div class="cf-desc">RSVP · 동영상 공유<br>모든 것이 하나로</div>
+    </div>
+    <div class="cover-feature">
+      <div class="cf-icon">🤖</div>
+      <div class="cf-title">AI 청첩장 생성</div>
+      <div class="cf-desc">사진 한 장으로<br>자동 완성</div>
+    </div>
+    <div class="cover-feature">
+      <div class="cf-icon">📖</div>
+      <div class="cf-title">디지털 방명록</div>
+      <div class="cf-desc">영구 보관 가능한<br>소중한 방명록</div>
+    </div>
+    <div class="cover-feature">
+      <div class="cf-icon">🎁</div>
+      <div class="cf-title">모바일 답례</div>
+      <div class="cf-desc">Paperless 답례품<br>배송까지 원스톱</div>
+    </div>
+  </div>
+
+  <div class="cover-cta">
+    <div class="cta-text">
+      <strong>AI</strong>가 자동 완성하는 청첩장 &amp; 영상 &nbsp;·&nbsp;
+      하객 관리부터 모바일 답례까지 &nbsp;·&nbsp;
+      ALL-IN-ONE 웨딩 스튜디오
+    </div>
+    <a href="https://www.marrywell.co.kr" class="cta-btn">지금 시작하기 →</a>
+  </div>
+
+</div>
+</div><!-- /page 1 -->
+
+
+<!-- ══════════════════════
+     PAGE 2 — DETAIL BROCHURE
+══════════════════════ -->
+<div class="page">
+<div class="brochure">
+
+  <div class="bro-header">
+    <div class="logo" style="color:white;">MARRY<span>WELL</span></div>
+    <div class="bro-header-sub">AI Wedding Studio · 상세 소개서</div>
+  </div>
+
+  <div class="bro-body">
+
+    <!-- WHY MARRYWELL -->
+    <div class="sec-label">Why MARRYWELL</div>
+    <div class="sec-title">결혼식, 아직도 이렇게 불편한가요?</div>
+    <div class="sec-sub">결혼을 경험한 사람, 결혼을 앞둔 예비 부부 모두 똑같은 문제를 겪습니다.<br>아날로그 방식의 웨딩 문화가 만들어내는 불편함, MARRYWELL이 해결합니다.</div>
+
+    <div class="pain-grid">
+      <div class="pain-card">
+        <h4>💍 결혼 경험자의 불편함</h4>
+        <ul>
+          <li>이 친구가 내 결혼에 얼마 축의했더라? 또 까먹었네</li>
+          <li>결혼식 못 갈 것 같은데 축의금 전달을 누구한테 부탁하지?</li>
+          <li>답례품 받으러 가기도 귀찮고, 원하는 게 없는데…</li>
+        </ul>
+      </div>
+      <div class="pain-card">
+        <h4>💒 결혼 예정자의 불편함</h4>
+        <ul>
+          <li>하객에게 계좌번호 공개 없이 안전하게 축의금 받고 싶어</li>
+          <li>종이 방명록은 분실 위험이 있어 디지털로 보관하고 싶어</li>
+          <li>원하는 답례품을 모바일로 직접 고르게 해주고 싶어</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- CORE FEATURES -->
+    <div class="sec-label">Core Features</div>
+    <div class="sec-title">AI가 완성하는<br>스마트 웨딩 경험</div>
+    <div class="sec-sub">MARRYWELL AI Wedding Studio는 사진 한 장으로 청첩장과 영상을 자동 생성하고, 하객 관리부터 모바일 답례까지 모든 것을 하나로 완성합니다.</div>
+
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-ico">🤖</div>
+        <div class="feat-text">
+          <h4>AI 청첩장 자동 생성</h4>
+          <p>사진 한 장만 업로드하면 AI가 감성 청첩장을 자동 완성. 디자인 선택부터 문구 작성까지 수분 내 완료됩니다.</p>
+          <div class="feat-tags">
+            <span class="ftag">사진 1장으로 완성</span>
+            <span class="ftag">AI 문구 작성</span>
+            <span class="ftag">다양한 템플릿</span>
+          </div>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-ico">🎬</div>
+        <div class="feat-text">
+          <h4>AI 웨딩 영상 자동 생성</h4>
+          <p>사진과 음악을 선택하면 AI가 감동적인 웨딩 영상을 자동 편집. 전문 영상 편집 없이 완성도 높은 영상을 제공합니다.</p>
+          <div class="feat-tags">
+            <span class="ftag">자동 편집</span>
+            <span class="ftag">BGM 매칭</span>
+            <span class="ftag">SNS 공유</span>
+          </div>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-ico">💌</div>
+        <div class="feat-text">
+          <h4>모바일 청첩장 &amp; RSVP</h4>
+          <p>참석/불참석 RSVP, 디지털 방명록, 동영상 공유까지 — AI가 만든 청첩장 하나로 모든 것이 해결됩니다.</p>
+          <div class="feat-tags">
+            <span class="ftag">RSVP</span>
+            <span class="ftag">디지털 방명록</span>
+            <span class="ftag">지도 연동</span>
+          </div>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-ico">🎁</div>
+        <div class="feat-text">
+          <h4>모바일 답례 서비스</h4>
+          <p>오일, 와인, 커피, 떡 등 원하는 답례품을 모바일로 직접 선택 후 배송까지. Paperless·무인화로 웨딩홀 인건비를 절감합니다.</p>
+          <div class="feat-tags">
+            <span class="ftag">Paperless</span>
+            <span class="ftag">원스톱 배송</span>
+            <span class="ftag">인건비 절감</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- COMPARISON -->
+    <div class="sec-label">Competitive Edge</div>
+    <div class="sec-title">왜 MARRYWELL이 다른가요?</div>
+    <div class="sec-sub">기존 서비스는 단순 청첩장에 그칩니다. MARRYWELL AI Wedding Studio만이 AI 자동 생성부터 하객 관리까지 통합 솔루션을 제공합니다.</div>
+
+    <div class="comp-wrap">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>기능</th>
+            <th class="hl">MARRYWELL</th>
+            <th>일반 청첩장</th>
+            <th>타 웨딩 서비스</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>AI 청첩장 자동 생성</td>
+            <td class="hl"><span class="chk">✓</span></td>
+            <td><span class="crs">—</span></td>
+            <td><span class="crs">—</span></td>
+          </tr>
+          <tr>
+            <td>AI 웨딩 영상 자동 생성</td>
+            <td class="hl"><span class="chk">✓</span></td>
+            <td><span class="crs">—</span></td>
+            <td><span class="crs">—</span></td>
+          </tr>
+          <tr>
+            <td>모바일 청첩장 + RSVP</td>
+            <td class="hl"><span class="chk">✓</span></td>
+            <td><span class="chk">✓</span></td>
+            <td><span class="crs">—</span></td>
+          </tr>
+          <tr>
+            <td>디지털 방명록</td>
+            <td class="hl"><span class="chk">✓</span></td>
+            <td><span class="crs">—</span></td>
+            <td><span class="crs">—</span></td>
+          </tr>
+          <tr>
+            <td>모바일 답례 서비스</td>
+            <td class="hl"><span class="chk">✓</span></td>
+            <td><span class="crs">—</span></td>
+            <td><span class="crs">—</span></td>
+          </tr>
+          <tr>
+            <td>ALL-IN-ONE 통합 플랫폼</td>
+            <td class="hl"><span class="chk">✓</span></td>
+            <td><span class="crs">—</span></td>
+            <td><span class="crs">—</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- VALUE PROP -->
+    <div class="sec-label">Value for Everyone</div>
+    <div class="sec-title">모두에게 명확한 가치</div>
+
+    <div class="value-grid">
+      <div class="value-card">
+        <div class="value-who">💑</div>
+        <h4>신혼부부</h4>
+        <ul>
+          <li>특별한 온라인 결혼식 연출</li>
+          <li>정확한 결혼식 정산 관리</li>
+          <li>안전한 비노출 계좌 송금</li>
+          <li>원하는 답례품 자유 선택</li>
+        </ul>
+      </div>
+      <div class="value-card">
+        <div class="value-who">🏛️</div>
+        <h4>웨딩홀</h4>
+        <ul>
+          <li>차별화된 특화 서비스 제공</li>
+          <li>Paperless로 인건비 절감</li>
+          <li>관리자 페이지로 운영 효율화</li>
+          <li>경쟁력 강화</li>
+        </ul>
+      </div>
+      <div class="value-card">
+        <div class="value-who">🎊</div>
+        <h4>하객</h4>
+        <ul>
+          <li>비대면 결혼식 참여 가능</li>
+          <li>축의금 간편 전달</li>
+          <li>참석 여부 편리하게 전달</li>
+          <li>원하는 답례품 직접 선택</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- AI EVOLUTION -->
+    <div class="divider"></div>
+    <div class="sec-label">AI Wedding Studio</div>
+    <div class="sec-title">웨딩의 미래,<br>AI로 한 단계 더</div>
+    <div class="sec-sub">MARRYWELL은 단순 청첩장 플랫폼을 넘어 AI Wedding Studio로 진화합니다.<br>사진 한 장으로 완성되는 청첩장과 영상, 스마트한 하객 관리까지 — 결혼 준비의 새로운 기준을 제시합니다.</div>
+
+    <div class="traction-row" style="grid-template-columns: repeat(3,1fr);">
+      <div class="traction-card">
+        <div class="traction-num" style="font-size:28px;">📸→💌</div>
+        <div class="traction-label" style="margin-top:6px;">사진 1장으로<br>AI 청첩장 자동 완성</div>
+      </div>
+      <div class="traction-card">
+        <div class="traction-num" style="font-size:28px;">🎬✨</div>
+        <div class="traction-label" style="margin-top:6px;">AI 웨딩 영상<br>자동 편집 · 생성</div>
+      </div>
+      <div class="traction-card">
+        <div class="traction-num" style="font-size:28px;">🏆</div>
+        <div class="traction-label" style="margin-top:6px;">ALL-IN-ONE<br>스마트 웨딩 플랫폼</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bro-footer">
+    <div class="footer-logo">MARRY<span>WELL</span></div>
+    <div class="footer-links">
+      <div class="footer-link">웹사이트 <strong>www.marrywell.co.kr</strong></div>
+      <div class="footer-link">AI 청첩장 · AI 영상 · 스마트 답례 · ALL-IN-ONE</div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /page 2 -->
+
+
+<div class="pdf-fab">
+  <button class="pdf-btn" onclick="dlPDF()">⬇️ PDF 저장</button>
+  <button class="pdf-btn outline" onclick="window.close()">✕ 닫기</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const A4_W_PX = 794; const A4_W_MM = 210;
+const GRAD_SEL = ['.cover-headline .highlight'];
+function fixGT(page){ const s=[]; GRAD_SEL.forEach(sel=>page.querySelectorAll(sel).forEach(el=>{ s.push({el,st:el.getAttribute('style')||''}); el.style.cssText+=';background:none!important;-webkit-text-fill-color:#fff!important;color:#fff!important;'; })); return s; }
+function restoreGT(s){ s.forEach(({el,st})=>el.setAttribute('style',st)); }
+async function capturePage(page) {
+  const saved = page.getAttribute('style') || '';
+  const gs = fixGT(page);
+  page.style.cssText += ';width:'+A4_W_PX+'px;margin:0;box-shadow:none;border-radius:0;overflow:visible;';
+  const naturalH = page.scrollHeight || 1123;
+  const canvas = await html2canvas(page, { scale: 3, width: A4_W_PX, height: naturalH, windowWidth: A4_W_PX, windowHeight: naturalH, useCORS: true, allowTaint: true, logging: false, backgroundColor: '#ffffff' });
+  page.setAttribute('style', saved); restoreGT(gs);
+  return { canvas, pdfH: (naturalH / A4_W_PX) * A4_W_MM };
+}
+async function dlPDF(){
+  const fab = document.querySelector('.pdf-fab');
+  const btn = fab.querySelector('.pdf-btn');
+  btn.disabled = true; btn.textContent = '⏳ PDF 생성 중...';
+  fab.style.pointerEvents = 'none';
+  try {
+    const { jsPDF } = window.jspdf;
+    const pages = document.querySelectorAll('.page');
+    let pdf = null;
+    for (let i = 0; i < pages.length; i++) {
+      const { canvas, pdfH } = await capturePage(pages[i]);
+      if (i === 0) { pdf = new jsPDF({ unit: 'mm', format: [A4_W_MM, pdfH], orientation: 'portrait' }); }
+      else { pdf.addPage([A4_W_MM, pdfH], 'portrait'); }
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, pdfH);
+    }
+    pdf.save('MARRYWELL_서비스브로셔.pdf');
+  } catch(e) { alert('PDF 생성 오류 — 브라우저 인쇄(Ctrl+P → PDF 저장)를 이용해 주세요.'); }
+  btn.disabled = false; btn.textContent = '⬇️ PDF 저장';
+  fab.style.pointerEvents = '';
+}
+function printPDF(){ window.print(); }
+</script>
+</body>
+</html>

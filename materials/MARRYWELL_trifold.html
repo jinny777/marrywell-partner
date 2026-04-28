@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARRYWELL — 서비스 소개서</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Montserrat:wght@400;600;700;800;900&display=swap');
+
+  :root {
+    --purple:      #4B3BC7;
+    --purple-l:    #6C5CE7;
+    --purple-d:    #3A2DA0;
+    --purple-pale: #EEF0FF;
+    --accent:      #A29BFE;
+    --gold:        #F4C430;
+    --text:        #1a1a2e;
+    --gray:        #6c757d;
+    --white:       #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #ddd;
+    color: var(--text);
+  }
+
+  /* ─── 페이지 공통 (A4 가로) ─── */
+  .sheet {
+    width: 297mm;
+    height: 210mm;
+    display: flex;
+    margin: 20px auto;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* 접지선 (인쇄용 가이드) */
+  .sheet::before,
+  .sheet::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: rgba(0,0,0,0.08);
+    z-index: 100;
+  }
+  .sheet::before { left: 33.333%; }
+  .sheet::after  { left: 66.666%; }
+
+  /* 패널 공통 */
+  .panel {
+    width: 33.333%;
+    height: 100%;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ══════════════════════════════
+     PAGE 1 — 앞장 (OUTSIDE)
+     패널 순서: A(왼쪽) | B(가운데) | C(오른쪽=표지)
+  ══════════════════════════════ */
+
+  /* ─ PANEL A : 뒷면 날개 (연락처·QR) ─ */
+  .pa {
+    background: linear-gradient(180deg, #1a0533 0%, #2d1b69 60%, #3A2DA0 100%);
+    color: white;
+    padding: 28px 24px;
+    justify-content: space-between;
+  }
+
+  .pa-logo {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .pa-section-title {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pa-section-title::before {
+    content: '';
+    width: 18px; height: 1.5px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  .contact-block { margin-bottom: 22px; }
+  .contact-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .contact-icon {
+    width: 26px; height: 26px;
+    background: rgba(162,155,254,0.2);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .contact-info { flex: 1; }
+  .contact-label { font-size: 9px; color: rgba(255,255,255,0.45); margin-bottom: 2px; letter-spacing: 0.5px; }
+  .contact-value { font-size: 11px; font-weight: 600; color: white; line-height: 1.4; }
+
+  .qr-box {
+    background: white;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .qr-placeholder {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, var(--purple) 0%, var(--purple-l) 100%);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .qr-text h5 { font-size: 10px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .qr-text p  { font-size: 9px; color: var(--gray); line-height: 1.5; }
+
+  .social-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .social-badge {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(162,155,254,0.25);
+    border-radius: 8px;
+    padding: 8px 6px;
+    text-align: center;
+    font-size: 9px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.4;
+  }
+  .social-badge strong { display: block; color: var(--accent); font-size: 15px; margin-bottom: 2px; }
+
+  .pa-footer-text {
+    font-size: 9px;
+    color: rgba(255,255,255,0.3);
+    text-align: center;
+    line-height: 1.6;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 12px;
+  }
+
+  /* ─ PANEL B : 회사 소개 & 비교 ─ */
+  .pb {
+    background: var(--white);
+    padding: 28px 22px;
+    border-left: 1px solid #eee;
+    border-right: 1px solid #eee;
+  }
+
+  .pb-eyebrow {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--purple);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pb-eyebrow::before {
+    content: '';
+    width: 18px; height: 1.5px;
+    background: var(--purple);
+  }
+
+  .pb-title {
+    font-size: 17px;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  .pb-title span { color: var(--purple); }
+
+  .pb-desc {
+    font-size: 10px;
+    color: var(--gray);
+    line-height: 1.7;
+    margin-bottom: 18px;
+  }
+
+  /* 통계 수치 */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .stat-card {
+    background: var(--purple-pale);
+    border-radius: 8px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--purple);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label { font-size: 9px; color: var(--gray); line-height: 1.4; }
+
+  /* 비교 테이블 */
+  .comp-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9px;
+    margin-bottom: 16px;
+  }
+  .comp-table th {
+    background: var(--purple);
+    color: white;
+    padding: 6px 8px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 9px;
+  }
+  .comp-table th:first-child { text-align: left; border-radius: 6px 0 0 0; }
+  .comp-table th:last-child  { border-radius: 0 6px 0 0; }
+  .comp-table th.hl { background: var(--purple-d); color: var(--gold); }
+  .comp-table td {
+    padding: 5px 8px;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 9px;
+  }
+  .comp-table td:first-child { text-align: left; font-weight: 600; color: var(--text); }
+  .comp-table tr:nth-child(odd) td { background: #fafbff; }
+  .comp-table td.hl { background: #EEF0FF; color: var(--purple); font-weight: 700; }
+  .chk { color: #4CAF50; font-weight: 900; font-size: 11px; }
+  .crs { color: #ccc; font-size: 11px; }
+
+  /* 파트너 배지 */
+  .partner-strip {
+    background: linear-gradient(90deg, var(--purple-d), var(--purple-l));
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: white;
+  }
+  .partner-strip p { font-size: 9px; color: rgba(255,255,255,0.7); margin-bottom: 4px; }
+  .partner-list {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .partner-tag {
+    background: rgba(255,255,255,0.15);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 9px;
+    font-weight: 600;
+    color: white;
+  }
+
+  /* ─ PANEL C : 표지 (FRONT COVER) ─ */
+  .pc {
+    background: linear-gradient(155deg, #1a0533 0%, #2d1b69 45%, #4B3BC7 100%);
+    color: white;
+    padding: 0;
+    justify-content: flex-end;
+    position: relative;
+  }
+
+  .pc::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 340px; height: 340px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(162,155,254,0.15) 0%, transparent 65%);
+  }
+
+  .pc-badge {
+    position: absolute;
+    top: 22px; right: 18px;
+    background: rgba(244,196,48,0.15);
+    border: 1px solid rgba(244,196,48,0.5);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 1px;
+    z-index: 2;
+  }
+
+  .pc-top {
+    position: absolute;
+    top: 20px; left: 20px;
+    z-index: 2;
+  }
+  .pc-logo {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 3px;
+  }
+  .pc-logo span { color: var(--accent); }
+  .pc-logo-sub {
+    font-size: 8px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+
+  /* 중앙 꽃 일러스트 영역 */
+  .pc-visual {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -58%);
+    width: 130px; height: 130px;
+    z-index: 1;
+  }
+  .pc-ring {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    border: 2px solid rgba(162,155,254,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: none;
+    position: relative;
+  }
+  .pc-ring::before {
+    content: '';
+    position: absolute;
+    inset: 10px;
+    border-radius: 50%;
+    border: 1px solid rgba(162,155,254,0.2);
+  }
+  .pc-icon-main { font-size: 52px; }
+
+  /* 반짝 별 요소 */
+  .sparkle {
+    position: absolute;
+    color: var(--accent);
+    font-size: 12px;
+    opacity: 0.6;
+    z-index: 1;
+  }
+
+  .pc-content {
+    position: relative;
+    z-index: 2;
+    padding: 20px 22px 24px;
+    background: linear-gradient(0deg, rgba(26,5,51,0.97) 0%, rgba(26,5,51,0.7) 60%, transparent 100%);
+    margin-top: auto;
+  }
+  .pc-eyebrow {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .pc-eyebrow::before {
+    content: '';
+    width: 16px; height: 1.5px;
+    background: var(--accent);
+  }
+  .pc-headline {
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .pc-headline .hl {
+    background: linear-gradient(90deg, var(--accent), white);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .pc-tagline {
+    font-size: 11px;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+
+  .pc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 14px;
+  }
+  .chip {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 600;
+  }
+  .chip-outline {
+    border: 1px solid rgba(162,155,254,0.5);
+    color: var(--accent);
+  }
+  .chip-fill {
+    background: rgba(162,155,254,0.2);
+    color: white;
+    border: 1px solid rgba(162,155,254,0.25);
+  }
+
+  .pc-cta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border-radius: 20px;
+    padding: 8px 14px;
+    display: inline-flex;
+  }
+  .pc-cta-text { font-size: 11px; font-weight: 800; color: var(--purple-d); }
+  .pc-cta-arrow { font-size: 14px; color: var(--purple); }
+
+  /* ══════════════════════════════
+     PAGE 2 — 뒷장 (INSIDE)
+     패널 순서: D(왼쪽) | E(가운데) | F(오른쪽)
+  ══════════════════════════════ */
+
+  .sheet2 { background: #fafbff; }
+
+  /* ─ PANEL D : 불편함 & WHY ─ */
+  .pd {
+    background: white;
+    padding: 28px 22px;
+  }
+
+  .inner-eyebrow {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--purple);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .inner-eyebrow::before {
+    content: '';
+    width: 18px; height: 1.5px;
+    background: var(--purple);
+  }
+
+  .inner-title {
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  .inner-title span { color: var(--purple); }
+
+  .inner-desc {
+    font-size: 10px;
+    color: var(--gray);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+
+  .pain-card {
+    background: var(--purple-pale);
+    border-radius: 10px;
+    padding: 14px 14px;
+    border-left: 3px solid var(--purple);
+    margin-bottom: 10px;
+  }
+  .pain-card h4 {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--purple);
+    margin-bottom: 8px;
+  }
+  .pain-item {
+    display: flex;
+    gap: 6px;
+    font-size: 9.5px;
+    color: #444;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(75,59,199,0.08);
+    line-height: 1.5;
+    align-items: flex-start;
+  }
+  .pain-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .pain-item::before {
+    content: '"';
+    color: var(--accent);
+    font-size: 16px;
+    font-weight: 900;
+    flex-shrink: 0;
+    line-height: 1.1;
+    margin-top: -1px;
+  }
+
+  /* 솔루션 화살표 */
+  .solution-arrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0;
+  }
+  .solution-line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--purple-pale), var(--purple)); }
+  .solution-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--purple);
+    white-space: nowrap;
+    background: var(--purple-pale);
+    padding: 4px 10px;
+    border-radius: 12px;
+  }
+
+  .solution-box {
+    background: linear-gradient(135deg, var(--purple-d), var(--purple-l));
+    border-radius: 10px;
+    padding: 14px;
+    color: white;
+  }
+  .solution-box h4 { font-size: 11px; font-weight: 700; margin-bottom: 8px; }
+  .solution-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 9.5px;
+    color: rgba(255,255,255,0.85);
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .solution-row:last-child { border-bottom: none; }
+  .solution-row::before {
+    content: '✓';
+    color: var(--gold);
+    font-weight: 900;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  /* ─ PANEL E : 핵심 서비스 4가지 ─ */
+  .pe {
+    background: var(--purple-pale);
+    padding: 28px 22px;
+    border-left: 1px solid rgba(75,59,199,0.1);
+    border-right: 1px solid rgba(75,59,199,0.1);
+  }
+
+  .service-card {
+    background: white;
+    border-radius: 10px;
+    padding: 14px 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 10px rgba(75,59,199,0.07);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .service-ico {
+    width: 38px; height: 38px;
+    background: var(--purple-pale);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    border-top: 2px solid var(--purple-l);
+  }
+  .service-text h4 {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .service-text p {
+    font-size: 9px;
+    color: var(--gray);
+    line-height: 1.6;
+    margin-bottom: 6px;
+  }
+  .service-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+  .stag {
+    font-size: 8px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: var(--purple-pale);
+    color: var(--purple);
+    font-weight: 600;
+  }
+
+  /* 하단 배너 */
+  .flow-banner {
+    background: linear-gradient(90deg, var(--purple-d), var(--purple-l));
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: white;
+    margin-top: 4px;
+  }
+  .flow-banner p { font-size: 9px; color: rgba(255,255,255,0.65); margin-bottom: 6px; }
+  .flow-steps {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .flow-step {
+    background: rgba(255,255,255,0.15);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 9px;
+    font-weight: 600;
+    color: white;
+  }
+  .flow-arrow { font-size: 10px; color: rgba(255,255,255,0.4); }
+
+  /* ─ PANEL F : 가치 & CTA ─ */
+  .pf {
+    background: white;
+    padding: 28px 22px;
+  }
+
+  .value-card-small {
+    background: var(--purple-pale);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .value-who { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .value-text h4 {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--purple-d);
+    margin-bottom: 5px;
+  }
+  .value-li {
+    font-size: 9px;
+    color: #555;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(75,59,199,0.07);
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    line-height: 1.4;
+  }
+  .value-li:last-child { border-bottom: none; }
+  .value-li::before { content: '✓'; color: var(--purple); font-weight: 700; font-size: 9px; flex-shrink: 0; }
+
+  /* 수치 통계 */
+  .kpi-row {
+    display: flex;
+    gap: 8px;
+    margin: 14px 0;
+  }
+  .kpi-box {
+    flex: 1;
+    background: linear-gradient(135deg, var(--purple-d), var(--purple));
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+    color: white;
+  }
+  .kpi-num {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+  .kpi-label { font-size: 8px; color: rgba(255,255,255,0.65); line-height: 1.4; }
+
+  /* 최종 CTA 박스 */
+  .cta-box {
+    background: linear-gradient(135deg, #1a0533, #3A2DA0);
+    border-radius: 12px;
+    padding: 18px 16px;
+    color: white;
+    text-align: center;
+    margin-top: 6px;
+  }
+  .cta-box h3 { font-size: 14px; font-weight: 900; margin-bottom: 5px; }
+  .cta-box p  { font-size: 9px; color: rgba(255,255,255,0.65); margin-bottom: 12px; line-height: 1.6; }
+  .cta-url {
+    display: inline-block;
+    background: white;
+    color: var(--purple-d);
+    font-weight: 800;
+    font-size: 11px;
+    padding: 8px 20px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .cta-sub { font-size: 9px; color: rgba(255,255,255,0.45); }
+
+  /* 향후 제공 칩 */
+  .chip-soon {
+    border: 1px dashed rgba(244,196,48,0.5);
+    color: rgba(255,255,255,0.55);
+    font-size: 9px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-style: normal;
+  }
+  .chip-soon em {
+    font-style: normal;
+    font-size: 8px;
+    color: var(--gold);
+    margin-left: 3px;
+    background: rgba(244,196,48,0.15);
+    padding: 1px 5px;
+    border-radius: 6px;
+  }
+  .soon-badge {
+    font-size: 8px;
+    font-weight: 700;
+    color: var(--gold);
+    background: rgba(244,196,48,0.12);
+    border: 1px solid rgba(244,196,48,0.35);
+    padding: 1px 6px;
+    border-radius: 6px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+
+  /* Panel B 서비스 특징 리스트 */
+  .feat-list { margin-bottom: 16px; }
+  .feat-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .feat-row:last-child { border-bottom: none; }
+  .feat-row-ico {
+    width: 28px; height: 28px;
+    background: var(--purple-pale);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .feat-row-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .feat-row-text strong {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .feat-row-text span { font-size: 9.5px; color: var(--gray); line-height: 1.5; }
+  .feat-row-soon .feat-row-ico { background: rgba(244,196,48,0.1); border: 1px dashed rgba(244,196,48,0.35); }
+  .feat-row-soon .feat-row-text strong { color: #9a9a9a; }
+  .feat-row-soon .feat-row-text span  { color: #bbb; }
+
+  /* 서비스 대상 박스 */
+  .target-box {
+    background: linear-gradient(135deg, var(--purple-d), var(--purple-l));
+    border-radius: 10px;
+    padding: 14px;
+    color: white;
+  }
+  .target-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+  .target-rows { display: flex; flex-direction: column; gap: 7px; }
+  .target-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.9);
+  }
+  .t-ico { font-size: 14px; flex-shrink: 0; }
+
+  /* 향후 제공 카드 (Panel E) */
+  .coming-soon-card {
+    background: rgba(75,59,199,0.25);
+    border: 1px dashed rgba(244,196,48,0.4);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .cs-badge {
+    font-size: 8px;
+    font-weight: 700;
+    color: var(--gold);
+    background: rgba(244,196,48,0.15);
+    border: 1px solid rgba(244,196,48,0.4);
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+
+  /* Panel F 혜택 리스트 */
+  .benefit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 12px 0 14px;
+  }
+  .benefit-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--purple-pale);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .b-ico { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .benefit-row div strong {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--purple-d);
+    margin-bottom: 2px;
+  }
+  .benefit-row div span { font-size: 9px; color: var(--gray); line-height: 1.5; }
+
+  /* ─── 인쇄 ─── */
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { background: white; margin: 0; }
+    .sheet { margin: 0; box-shadow: none; page-break-after: always; }
+    .sheet::before, .sheet::after { display: none; }
+    .label { display: none; }
+    .dl-bar { display: none !important; }
+    .pdf-fab { display: none !important; }
+  }
+  .pdf-fab {
+    position: fixed; bottom: 28px; right: 28px; z-index: 999;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+  }
+  .pdf-btn {
+    background: #4B3BC7; color: #fff; border: none; border-radius: 100px;
+    padding: 13px 24px; font-size: 14px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(75,59,199,.35);
+    font-family: 'Noto Sans KR', sans-serif;
+    display: flex; align-items: center; gap: 8px;
+    transition: background .15s, transform .1s;
+  }
+  .pdf-btn:hover { background: #3A2DA0; transform: translateY(-1px); }
+  .pdf-btn.outline {
+    background: #fff; color: #4B3BC7;
+    border: 2px solid #4B3BC7;
+    box-shadow: 0 2px 12px rgba(75,59,199,.15);
+    font-size: 13px; padding: 10px 20px;
+  }
+
+  /* 안내 레이블 */
+  .label {
+    text-align: center;
+    font-size: 11px;
+    color: #888;
+    margin: 8px 0 4px;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+
+  /* ══════════════════════════════
+     폰트 통일 (Noto Sans KR) & 텍스트 크기 업
+  ══════════════════════════════ */
+  * { font-family: 'Noto Sans KR', sans-serif; }
+  /* Montserrat는 로고 전용 유지 */
+  .pa-logo, .pc-logo { font-family: 'Montserrat', sans-serif !important; }
+
+  /* PANEL A */
+  .pa-section-title             { font-size: 11px; }
+  .contact-label                { font-size: 10.5px; }
+  .contact-value                { font-size: 13px; }
+  .qr-text h5                   { font-size: 12px; }
+  .qr-text p                    { font-size: 11px; }
+  .pa-footer-text               { font-size: 10.5px; }
+
+  /* PANEL B */
+  .pb-eyebrow                   { font-size: 11px; }
+  .pb-title                     { font-size: 20px; }
+  .pb-desc                      { font-size: 12px; }
+  .stat-num                     { font-size: 22px; }
+  .stat-label                   { font-size: 11px; }
+  .comp-title                   { font-size: 13px; }
+  .comp-table                   { font-size: 11px; }
+  .comp-table th                { font-size: 11px; }
+  .comp-table td                { font-size: 11px; }
+  .partner-strip p              { font-size: 11px; }
+  .partner-tag                  { font-size: 11px; }
+  .feat-row-text strong         { font-size: 13px !important; display: flex; align-items: center; gap: 4px; }
+  .feat-row-text span           { font-size: 11px !important; }
+  .target-title                 { font-size: 11.5px; }
+  .target-row                   { font-size: 12px; }
+
+  /* PANEL C (표지) */
+  .pc-badge                     { font-size: 10.5px; }
+  .pc-logo-sub                  { font-size: 10px; }
+  .pc-eyebrow                   { font-size: 10px; }
+  .pc-headline                  { font-size: 28px; }
+  .pc-tagline                   { font-size: 12px; }
+  .chip                         { font-size: 11px; padding: 5px 12px; }
+  .chip-soon                    { font-size: 10px; }
+  .pc-cta-text                  { font-size: 13px; }
+  .pc-cta-arrow                 { font-size: 15px; }
+
+  /* PANEL D */
+  .inner-eyebrow                { font-size: 11px; }
+  .inner-title                  { font-size: 18px; }
+  .inner-desc                   { font-size: 12px; }
+  .pain-card h4                 { font-size: 12px; }
+  .pain-item                    { font-size: 11.5px; }
+  .solution-label               { font-size: 11px; }
+  .solution-box h4              { font-size: 13px; }
+  .solution-row                 { font-size: 11.5px; }
+
+  /* PANEL E */
+  .service-text h4              { font-size: 13.5px; }
+  .service-text p               { font-size: 11px; }
+  .stag                         { font-size: 10.5px; padding: 3px 9px; }
+  .cs-badge                     { font-size: 10px; }
+  .flow-banner p                { font-size: 11px; }
+  .flow-step                    { font-size: 11px; }
+  .flow-arrow                   { font-size: 12px; }
+
+  /* PANEL F */
+  .value-text h4                { font-size: 13.5px; }
+  .value-li                     { font-size: 11.5px; }
+  .kpi-num                      { font-size: 22px; }
+  .kpi-label                    { font-size: 10.5px; }
+  .benefit-row div strong       { font-size: 12px; }
+  .benefit-row div span         { font-size: 11px; }
+  .cta-box h3                   { font-size: 17px; }
+  .cta-box p                    { font-size: 11.5px; }
+  .cta-url                      { font-size: 13px; }
+  .cta-sub                      { font-size: 11px; }
+
+  /* ── Panel F 오버플로우 방지 (내용 압축) ── */
+  .pf                           { padding: 18px 18px; }
+  .pf .inner-eyebrow            { margin-bottom: 4px; }
+  .pf .inner-title              { font-size: 16px; margin-bottom: 3px; }
+  .pf .inner-desc               { font-size: 10.5px; margin-bottom: 7px !important; }
+  .pf .value-card-small         { padding: 7px 10px; margin-bottom: 5px; }
+  .pf .value-who                { font-size: 16px; }
+  .pf .value-text h4            { font-size: 11.5px; margin-bottom: 2px; }
+  .pf .value-li                 { font-size: 10px; padding: 2px 0; }
+  .pf .benefit-list             { gap: 4px; margin: 7px 0 8px; }
+  .pf .benefit-row              { padding: 6px 9px; }
+  .pf .b-ico                    { font-size: 15px; }
+  .pf .benefit-row div strong   { font-size: 10.5px; }
+  .pf .benefit-row div span     { font-size: 9.5px; }
+  .pf .cta-box                  { padding: 10px 13px; margin-top: 4px; margin-bottom: 14px; border-radius: 10px; }
+  .pf .cta-box h3               { font-size: 13px; margin-bottom: 3px; }
+  .pf .cta-box p                { font-size: 9.5px; margin-bottom: 7px; line-height: 1.5; }
+  .pf .cta-url                  { font-size: 11px; padding: 5px 14px; margin-bottom: 5px; }
+  .pf .cta-sub                  { font-size: 9px; }
+  /* 다운로드 버튼 */
+  .dl-bar {
+    position: fixed;
+    top: 16px; right: 20px;
+    z-index: 9999;
+    display: flex;
+    gap: 10px;
+  }
+  .dl-btn {
+    background: linear-gradient(135deg, #4B3BC7, #6C5CE7);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 22px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(75,59,199,0.4);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: opacity .2s;
+  }
+  .dl-btn:hover { opacity: 0.88; }
+  .dl-btn:disabled { opacity: 0.5; cursor: wait; }
+</style>
+</head>
+<body>
+
+<!-- 다운로드 버튼 -->
+<div class="dl-bar">
+  <button class="dl-btn" id="pdfBtn" onclick="dlPDF()">⬇ PDF 저장</button>
+  <button class="dl-btn" id="dlBtn" onclick="downloadPPT()">⬇ PPT 다운로드</button>
+</div>
+
+<div class="label">▲ 앞장 (OUTSIDE) — 접었을 때 보이는 면 · 오른쪽 패널이 표지</div>
+
+<!-- ══════════════════════════════
+     SHEET 1 — 앞장 (OUTSIDE)
+     [A: 날개/연락처] [B: 회사소개·비교] [C: 표지]
+══════════════════════════════ -->
+<div class="sheet">
+
+  <!-- PANEL A : 날개 (로고 + QR) -->
+  <div class="panel pa" style="justify-content:center;align-items:center;text-align:center;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:24px;width:100%;">
+
+      <!-- 로고 -->
+      <div>
+        <div style="font-family:'Montserrat',sans-serif;font-size:26px;font-weight:900;letter-spacing:3px;color:white;">
+          MARRY<span style="color:var(--accent);">WELL</span>
+        </div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:2px;margin-top:4px;">Smart Wedding Platform</div>
+      </div>
+
+      <!-- 구분선 -->
+      <div style="width:40px;height:1px;background:rgba(162,155,254,0.3);"></div>
+
+      <!-- QR 박스 -->
+      <div style="background:white;border-radius:14px;padding:16px;width:148px;">
+        <div id="qrcode" style="margin:0 auto 10px;display:flex;justify-content:center;"></div>
+        <div style="font-size:10px;font-weight:700;color:var(--text);margin-bottom:2px;">QR코드 스캔</div>
+        <div style="font-size:8px;color:var(--gray);line-height:1.5;word-break:break-all;">www.marrywell.co.kr</div>
+      </div>
+
+      <!-- 연락처 + 저작권 -->
+      <div style="text-align:center;">
+        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.75);margin-bottom:5px;">www.marrywell.co.kr</div>
+        <div style="font-size:11px;font-weight:600;color:rgba(162,155,254,0.8);margin-bottom:10px;">02-6092-9169</div>
+        <div style="width:30px;height:1px;background:rgba(255,255,255,0.1);margin:0 auto 10px;"></div>
+        <div style="font-size:9.5px;color:rgba(255,255,255,0.28);line-height:1.7;">
+          © 2026 Marrywell<br>All rights reserved.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PANEL B : 회사 소개 & 비교 -->
+  <div class="panel pb">
+    <div class="pb-eyebrow">AI Wedding Studio</div>
+    <div class="pb-title">세 가지 형태로<br><span>제공합니다</span></div>
+    <div class="pb-desc">
+      AI가 자동으로 생성하는 모바일, 종이, 영상 청첩장.<br>기본 정보 입력만으로 완성되는 <strong>올인원 웨딩 플랫폼</strong>
+    </div>
+
+    <!-- 3가지 서비스 -->
+    <div class="feat-list">
+      <div class="feat-row">
+        <div class="feat-row-ico">📱</div>
+        <div class="feat-row-text">
+          <strong>모바일 청첩장</strong>
+          <span>URL·QR 코드로 간편 공유 / 실시간 RSVP / 지도 연동 / 축하 메시지</span>
+        </div>
+      </div>
+      <div class="feat-row">
+        <div class="feat-row-ico">📄</div>
+        <div class="feat-row-text">
+          <strong>종이 청첩장 PDF</strong>
+          <span>인쇄용 A5 고품질 디자인 / 프리미엄 템플릿 / 인쇄 업체 연동 / 맞춤 편집</span>
+        </div>
+      </div>
+      <div class="feat-row">
+        <div class="feat-row-ico">🎬</div>
+        <div class="feat-row-text">
+          <strong>AI 영상 청첩장</strong>
+          <span>30-60초 감성 영상 자동 생성 / 자동 편집 / 음악 추가 / SNS 최적화</span>
+        </div>
+      </div>
+      <div class="feat-row feat-row-soon">
+        <div class="feat-row-ico">💸</div>
+        <div class="feat-row-text">
+          <strong>스마트 축의금 송금 <span class="soon-badge">향후 제공</span></strong>
+          <span>계좌번호 비노출 오픈뱅킹 간편 송금</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 서비스 대상 -->
+    <div class="target-box">
+      <div class="target-title">이런 분들께 딱 맞습니다</div>
+      <div class="target-rows">
+        <div class="target-row"><span class="t-ico">💑</span><span>청첩장을 특별하게 만들고 싶은 예비부부</span></div>
+        <div class="target-row"><span class="t-ico">🎥</span><span>AI 영상 청첩장으로 감동을 전하고 싶은 분</span></div>
+        <div class="target-row"><span class="t-ico">📬</span><span>모바일·종이 동시에 발송하고 싶은 분</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL C : 표지 (FRONT COVER) -->
+  <div class="panel pc">
+
+    <!-- 배경 SVG 데코 레이어 -->
+    <svg style="position:absolute;inset:0;width:100%;height:100%;z-index:0;" viewBox="0 0 330 794" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <!-- 큰 원형 글로우 -->
+      <circle cx="165" cy="320" r="180" fill="rgba(108,92,231,0.18)"/>
+      <circle cx="165" cy="320" r="130" fill="rgba(75,59,199,0.15)"/>
+      <!-- 상단 오른쪽 작은 글로우 -->
+      <circle cx="290" cy="60" r="80" fill="rgba(162,155,254,0.12)"/>
+      <!-- 하단 왼쪽 -->
+      <circle cx="30" cy="680" r="90" fill="rgba(58,45,160,0.2)"/>
+      <!-- 회로 라인 (AI 느낌) -->
+      <g stroke="rgba(162,155,254,0.18)" stroke-width="1" fill="none">
+        <line x1="20" y1="120" x2="80" y2="120"/><circle cx="80" cy="120" r="3" fill="rgba(162,155,254,0.3)"/>
+        <line x1="80" y1="120" x2="80" y2="160"/><circle cx="80" cy="160" r="3" fill="rgba(162,155,254,0.3)"/>
+        <line x1="250" y1="200" x2="310" y2="200"/><circle cx="250" cy="200" r="3" fill="rgba(162,155,254,0.3)"/>
+        <line x1="250" y1="200" x2="250" y2="240"/><circle cx="250" cy="240" r="3" fill="rgba(162,155,254,0.3)"/>
+        <line x1="40" y1="500" x2="40" y2="560"/><circle cx="40" cy="500" r="3" fill="rgba(162,155,254,0.25)"/>
+        <line x1="40" y1="560" x2="90" y2="560"/><circle cx="90" cy="560" r="3" fill="rgba(162,155,254,0.25)"/>
+        <line x1="280" y1="580" x2="310" y2="580"/><circle cx="280" cy="580" r="3" fill="rgba(162,155,254,0.2)"/>
+        <line x1="280" y1="560" x2="280" y2="580"/>
+      </g>
+      <!-- 작은 점들 (AI 파티클) -->
+      <circle cx="55"  cy="90"  r="2" fill="rgba(162,155,254,0.4)"/>
+      <circle cx="280" cy="140" r="1.5" fill="rgba(162,155,254,0.5)"/>
+      <circle cx="300" cy="450" r="2" fill="rgba(162,155,254,0.3)"/>
+      <circle cx="30"  cy="400" r="1.5" fill="rgba(162,155,254,0.4)"/>
+      <circle cx="310" cy="660" r="2" fill="rgba(162,155,254,0.3)"/>
+      <!-- 별(✦) 장식 -->
+      <text x="22"  y="260" font-size="10" fill="rgba(162,155,254,0.5)">✦</text>
+      <text x="298" y="350" font-size="7"  fill="rgba(162,155,254,0.4)">✦</text>
+      <text x="15"  y="610" font-size="8"  fill="rgba(162,155,254,0.35)">✦</text>
+      <text x="305" y="500" font-size="6"  fill="rgba(162,155,254,0.4)">✦</text>
+    </svg>
+
+    <!-- AI 웨딩 일러스트 SVG -->
+    <svg style="position:absolute;top:50px;left:50%;transform:translateX(-50%);width:240px;height:340px;z-index:1;" viewBox="0 0 240 340" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- 웨딩 아치 -->
+      <path d="M30,300 L30,140 Q30,60 120,60 Q210,60 210,140 L210,300" fill="none" stroke="rgba(162,155,254,0.35)" stroke-width="2.5" stroke-dasharray="6,4"/>
+      <path d="M50,300 L50,148 Q50,85 120,85 Q190,85 190,148 L190,300" fill="none" stroke="rgba(162,155,254,0.2)" stroke-width="1.5"/>
+
+      <!-- 아치 상단 꽃 장식 -->
+      <circle cx="120" cy="57" r="10" fill="rgba(162,155,254,0.25)" stroke="rgba(162,155,254,0.5)" stroke-width="1.5"/>
+      <circle cx="120" cy="57" r="5" fill="rgba(162,155,254,0.5)"/>
+      <circle cx="103" cy="65" r="6" fill="rgba(162,155,254,0.2)" stroke="rgba(162,155,254,0.4)" stroke-width="1"/>
+      <circle cx="137" cy="65" r="6" fill="rgba(162,155,254,0.2)" stroke="rgba(162,155,254,0.4)" stroke-width="1"/>
+      <!-- 금색 별 장식 -->
+      <text x="113" y="45" font-size="10" fill="rgba(244,196,48,0.8)">✦</text>
+
+      <!-- 여성 실루엣 (왼쪽) -->
+      <!-- 드레스 -->
+      <path d="M75,290 Q60,250 68,210 Q72,190 80,180 L90,180 Q98,190 102,210 Q110,250 95,290 Z" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+      <!-- 드레스 하단 플레어 -->
+      <path d="M65,290 Q70,270 75,290 Q80,310 85,290 Q90,270 95,290 Q100,310 105,290 Q110,270 115,290 L95,300 Z" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.25)" stroke-width="0.8"/>
+      <!-- 상체 -->
+      <rect x="78" y="165" width="28" height="18" rx="4" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+      <!-- 머리 -->
+      <circle cx="92" cy="152" r="14" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.45)" stroke-width="1.2"/>
+      <!-- 머리카락 (긴 머리) -->
+      <path d="M80,148 Q74,165 78,185" stroke="rgba(255,255,255,0.35)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M104,148 Q108,162 106,178" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- 부케 -->
+      <circle cx="72" cy="195" r="9" fill="rgba(162,155,254,0.4)" stroke="rgba(162,155,254,0.7)" stroke-width="1"/>
+      <circle cx="65" cy="190" r="6" fill="rgba(162,155,254,0.35)" stroke="rgba(162,155,254,0.6)" stroke-width="1"/>
+      <circle cx="79" cy="188" r="6" fill="rgba(244,196,48,0.3)" stroke="rgba(244,196,48,0.5)" stroke-width="1"/>
+      <!-- 베일 -->
+      <path d="M92,138 Q110,145 115,175 Q118,195 112,215" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" fill="rgba(255,255,255,0.06)" stroke-linecap="round"/>
+
+      <!-- 남성 실루엣 (오른쪽) -->
+      <!-- 정장 바지 -->
+      <path d="M130,290 L135,220 L145,220 L155,220 L160,290 Z" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+      <!-- 정장 상의 -->
+      <path d="M128,220 Q128,195 138,183 L152,183 Q162,195 162,220 Z" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+      <!-- 넥타이 -->
+      <path d="M145,183 L143,200 L145,205 L147,200 Z" fill="rgba(162,155,254,0.5)"/>
+      <!-- 머리 -->
+      <circle cx="145" cy="168" r="14" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.45)" stroke-width="1.2"/>
+      <!-- 짧은 머리 -->
+      <path d="M133,162 Q132,155 145,153 Q158,155 157,162" fill="rgba(255,255,255,0.25)" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+
+      <!-- 두 사람 사이 하트 -->
+      <path d="M117,195 Q117,188 120,188 Q123,188 123,195 Q123,188 126,188 Q129,188 129,195 Q129,200 123,205 Q117,200 117,195 Z" fill="rgba(244,196,48,0.7)"/>
+
+      <!-- AI 데이터 연결선 (두 사람 머리에서 뻗는 느낌) -->
+      <line x1="92" y1="138" x2="120" y2="110" stroke="rgba(162,155,254,0.3)" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="145" y1="154" x2="120" y2="110" stroke="rgba(162,155,254,0.3)" stroke-width="1" stroke-dasharray="3,3"/>
+      <circle cx="120" cy="110" r="5" fill="rgba(162,155,254,0.4)" stroke="rgba(162,155,254,0.7)" stroke-width="1"/>
+      <!-- AI 노드에서 뻗는 선들 -->
+      <line x1="120" y1="105" x2="120" y2="88" stroke="rgba(162,155,254,0.25)" stroke-width="1" stroke-dasharray="2,2"/>
+      <line x1="115" y1="108" x2="100" y2="100" stroke="rgba(162,155,254,0.2)" stroke-width="1" stroke-dasharray="2,2"/>
+      <line x1="125" y1="108" x2="140" y2="100" stroke="rgba(162,155,254,0.2)" stroke-width="1" stroke-dasharray="2,2"/>
+
+      <!-- 반지 -->
+      <circle cx="110" cy="215" r="7" fill="none" stroke="rgba(244,196,48,0.7)" stroke-width="2"/>
+      <circle cx="110" cy="215" r="3" fill="rgba(244,196,48,0.4)"/>
+      <!-- 반지 위 다이아 -->
+      <path d="M108,209 L110,205 L112,209 L110,212 Z" fill="rgba(200,230,255,0.8)"/>
+
+      <!-- 떠다니는 하트들 -->
+      <text x="28"  y="175" font-size="10" fill="rgba(244,196,48,0.5)">♡</text>
+      <text x="195" y="210" font-size="9"  fill="rgba(162,155,254,0.6)">♡</text>
+      <text x="55"  y="240" font-size="7"  fill="rgba(255,255,255,0.3)">♡</text>
+      <text x="175" y="155" font-size="8"  fill="rgba(244,196,48,0.4)">♡</text>
+
+      <!-- 바닥 장식선 -->
+      <line x1="30" y1="298" x2="210" y2="298" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+      <line x1="55" y1="303" x2="185" y2="303" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    </svg>
+
+    <!-- 하단 콘텐츠 -->
+    <div class="pc-content" style="position:relative;z-index:2;margin-top:auto;">
+
+      <!-- AI 뱃지 -->
+      <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(244,196,48,0.15);border:1px solid rgba(244,196,48,0.45);border-radius:20px;padding:4px 12px;margin-bottom:10px;">
+        <span style="font-size:10px;">✨</span>
+        <span style="font-size:9px;font-weight:700;color:var(--gold);letter-spacing:0.5px;">AI가 만드는 완벽한 청첩장</span>
+      </div>
+
+      <!-- 메인 타이틀 -->
+      <div style="font-family:'Montserrat',sans-serif;font-size:24px;font-weight:900;color:white;line-height:1.15;margin-bottom:8px;letter-spacing:-0.5px;">
+        AI Wedding<br><span style="color:#A29BFE;">Studio</span>
+      </div>
+
+      <!-- 로고 -->
+      <div style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.5);margin-bottom:8px;">
+        by MARRY<span style="color:var(--accent);">WELL</span>
+      </div>
+
+      <div class="pc-tagline" style="font-size:9.5px;margin-bottom:12px;line-height:1.65;">
+        기본 정보 입력만으로 모바일·종이 청첩장과<br>AI 영상, 하객 관리 페이지까지 자동 생성되는<br><strong style="color:white;">올인원 웨딩 플랫폼</strong>
+      </div>
+
+      <div class="pc-chips" style="margin-bottom:12px;">
+        <div class="chip chip-outline">📱 모바일 청첩장</div>
+        <div class="chip chip-fill">📄 종이 청첩장 PDF</div>
+        <div class="chip chip-outline">🎬 AI 영상 청첩장</div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /sheet1 -->
+
+
+<div class="label">▼ 뒷장 (INSIDE) — 펼쳤을 때 보이는 안쪽 면</div>
+
+<!-- ══════════════════════════════
+     SHEET 2 — 뒷장 (INSIDE)
+     [D: 불편함·Why] [E: 핵심서비스] [F: 가치·CTA]
+══════════════════════════════ -->
+<div class="sheet sheet2">
+
+  <!-- PANEL D : 불편함 & Why MARRYWELL -->
+  <div class="panel pd">
+    <div class="inner-eyebrow">Why MARRYWELL</div>
+    <div class="inner-title">결혼식,<br>아직도 <span>이렇게</span><br>불편한가요?</div>
+    <div class="inner-desc">
+      결혼을 앞둔 예비부부와<br>하객 모두 같은 불편함을 겪습니다.
+    </div>
+
+    <div class="pain-card">
+      <h4>💍 결혼 경험자의 고민</h4>
+      <div class="pain-item">이 친구가 내 결혼에 얼마나 했더라?</div>
+      <div class="pain-item">축의금을 누구한테 부탁하지?</div>
+      <div class="pain-item">답례품 받으러 가기도 귀찮은데…</div>
+    </div>
+
+    <div class="pain-card">
+      <h4>💒 결혼 예정자의 고민</h4>
+      <div class="pain-item">계좌번호 노출 없이 안전하게 받고 싶어</div>
+      <div class="pain-item">종이 방명록, 분실이 걱정돼</div>
+      <div class="pain-item">원하는 답례품을 직접 고르게 하고 싶어</div>
+    </div>
+
+    <div class="solution-arrow">
+      <div class="solution-line"></div>
+      <div class="solution-label">MARRYWELL 해결책 ↓</div>
+    </div>
+
+    <div class="solution-box">
+      <h4>AI Wedding Studio가 해결합니다</h4>
+      <div class="solution-row">📱 모바일 청첩장 — URL·QR 즉시 공유</div>
+      <div class="solution-row">📄 종이 청첩장 PDF — 고품질 자동 생성</div>
+      <div class="solution-row">🎬 AI 영상 청첩장 — 감성 영상 자동 편집</div>
+      <div class="solution-row" style="opacity:0.65;font-size:8.5px;">💸 축의금 간편 송금 <em>(향후 제공 예정)</em></div>
+    </div>
+  </div>
+
+  <!-- PANEL E : 핵심 서비스 3가지 -->
+  <div class="panel pe">
+    <div class="inner-eyebrow">Core Services</div>
+    <div class="inner-title">세 가지 형태로<br><span>자동 생성</span></div>
+    <div class="inner-desc" style="margin-bottom:12px;">
+      기본 정보 입력만으로 AI가 완성합니다.
+    </div>
+
+    <!-- 1. 모바일 청첩장 -->
+    <div class="service-card">
+      <div class="service-ico">📱</div>
+      <div class="service-text">
+        <h4>모바일 청첩장</h4>
+        <p>URL·QR 코드로 간편하게 공유하는 모바일 청첩장.</p>
+        <div class="service-tags">
+          <span class="stag">실시간 RSVP</span>
+          <span class="stag">지도 연동</span>
+          <span class="stag">축하 메시지</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 종이 청첩장 PDF -->
+    <div class="service-card">
+      <div class="service-ico">📄</div>
+      <div class="service-text">
+        <h4>종이 청첩장 PDF</h4>
+        <p>인쇄용 A5 사이즈 고품질 디자인. 인쇄 업체 연동까지.</p>
+        <div class="service-tags">
+          <span class="stag">프리미엄 템플릿</span>
+          <span class="stag">맞춤 편집</span>
+          <span class="stag">인쇄 연동</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. AI 영상 청첩장 -->
+    <div class="service-card">
+      <div class="service-ico">🎬</div>
+      <div class="service-text">
+        <h4>AI 영상 청첩장</h4>
+        <p>30-60초 감성 영상을 AI가 자동으로 생성·편집합니다.</p>
+        <div class="service-tags">
+          <span class="stag">자동 편집</span>
+          <span class="stag">음악 추가</span>
+          <span class="stag">SNS 최적화</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 축의금 향후 제공 -->
+    <div class="coming-soon-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="font-size:14px;">💸</span>
+        <span style="font-size:10px;font-weight:700;color:white;">스마트 축의금 송금</span>
+        <span class="cs-badge">향후 제공</span>
+      </div>
+      <p style="font-size:8.5px;color:rgba(255,255,255,0.6);line-height:1.5;">계좌번호 비노출 오픈뱅킹 기반 간편 송금 서비스 준비 중</p>
+    </div>
+
+    <div class="flow-banner">
+      <p>이용 플로우</p>
+      <div class="flow-steps">
+        <span class="flow-step">정보 입력</span>
+        <span class="flow-arrow">›</span>
+        <span class="flow-step">AI 자동 생성</span>
+        <span class="flow-arrow">›</span>
+        <span class="flow-step">발송·공유</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL F : 가치 & CTA -->
+  <div class="panel pf">
+    <div class="inner-eyebrow">Value for Everyone</div>
+    <div class="inner-title">모두에게<br><span>명확한 가치</span></div>
+    <div class="inner-desc" style="margin-bottom:12px;">신혼부부·웨딩홀·하객 모두가 만족합니다.</div>
+
+    <div class="value-card-small">
+      <div class="value-who">💑</div>
+      <div class="value-text">
+        <h4>신혼부부</h4>
+        <div class="value-li">특별한 온라인 결혼식 연출</div>
+        <div class="value-li">정확한 결혼식 정산 관리</div>
+        <div class="value-li">안전한 비노출 계좌 송금</div>
+        <div class="value-li">원하는 답례품 자유 선택</div>
+      </div>
+    </div>
+
+    <div class="value-card-small">
+      <div class="value-who">🏛️</div>
+      <div class="value-text">
+        <h4>웨딩홀</h4>
+        <div class="value-li">차별화된 특화 서비스 제공</div>
+        <div class="value-li">Paperless로 인건비 절감</div>
+        <div class="value-li">관리자 페이지로 운영 효율화</div>
+      </div>
+    </div>
+
+    <div class="value-card-small">
+      <div class="value-who">🎊</div>
+      <div class="value-text">
+        <h4>하객</h4>
+        <div class="value-li">비대면 참여 및 축의금 전달</div>
+        <div class="value-li">참석 여부 편리하게 전달</div>
+        <div class="value-li">원하는 답례품 직접 선택</div>
+      </div>
+    </div>
+
+    <!-- 서비스 특장점 요약 -->
+    <div class="benefit-list">
+      <div class="benefit-row"><span class="b-ico">🔒</span><div><strong>프라이버시 보호</strong><br><span>개인정보·계좌정보 안전하게 관리</span></div></div>
+      <div class="benefit-row"><span class="b-ico">📱</span><div><strong>100% 모바일 기반</strong><br><span>스마트폰 하나로 모든 것을 해결</span></div></div>
+      <div class="benefit-row"><span class="b-ico">♻️</span><div><strong>Paperless 친환경</strong><br><span>종이 없는 스마트한 결혼 문화</span></div></div>
+    </div>
+
+    <div class="cta-box">
+      <h3>AI Wedding Studio</h3>
+      <p>AI가 만드는 완벽한 청첩장,<br>특별한 하루를 함께 만들어 드립니다.</p>
+      <div class="cta-url">www.marrywell.co.kr</div>
+      <div class="cta-sub">데모 바로 체험 가능</div>
+    </div>
+  </div>
+
+</div><!-- /sheet2 -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs/dist/pptxgen.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  /* ── QR 코드 생성 (공개 홈페이지 URL) ── */
+  new QRCode(document.getElementById("qrcode"), {
+    text: "https://marrywell.co.kr/?ref=brochure",
+    width: 112, height: 112,
+    colorDark: "#4B3BC7", colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  /* ── PDF 저장 ── */
+  // A4 가로 (landscape) 기준
+  const LS_W_PX = 1123; const LS_W_MM = 297; const LS_H_MM = 210;
+  const GRAD_SEL = ['.pc-headline .hl'];
+  function fixGT(el){ const s=[]; GRAD_SEL.forEach(sel=>el.querySelectorAll(sel).forEach(e=>{ s.push({e,st:e.getAttribute('style')||''}); e.style.cssText+=';background:none!important;-webkit-text-fill-color:#fff!important;color:#fff!important;'; })); return s; }
+  function restoreGT(s){ s.forEach(({e,st})=>e.setAttribute('style',st)); }
+
+  async function captureSheet(sheet, bg) {
+    const saved = sheet.getAttribute('style') || '';
+    const gs = fixGT(sheet);
+    sheet.style.cssText += ';width:'+LS_W_PX+'px;margin:0;box-shadow:none;overflow:visible;';
+    const naturalH = sheet.scrollHeight || 794;
+    const canvas = await html2canvas(sheet, { scale: 3, width: LS_W_PX, height: naturalH, windowWidth: LS_W_PX, windowHeight: naturalH, useCORS: true, allowTaint: true, logging: false, backgroundColor: bg || '#ffffff' });
+    sheet.setAttribute('style', saved); restoreGT(gs);
+    return { canvas, pdfH: (naturalH / LS_W_PX) * LS_W_MM };
+  }
+  async function dlPDF(){
+    const bar  = document.querySelector('.dl-bar');
+    const btn  = document.getElementById('pdfBtn');
+    btn.disabled = true; btn.textContent = '⏳ PDF 생성 중...';
+    document.querySelectorAll('.label').forEach(el => el.style.visibility = 'hidden');
+    bar.style.visibility = 'hidden';
+    try {
+      const { jsPDF } = window.jspdf;
+      const sheets = document.querySelectorAll('.sheet');
+      let pdf = null;
+      for (let i = 0; i < sheets.length; i++) {
+        const bg = i === 0 ? '#1a0533' : '#fafbff';
+        const { canvas, pdfH } = await captureSheet(sheets[i], bg);
+        if (i === 0) { pdf = new jsPDF({ unit: 'mm', format: [LS_W_MM, pdfH], orientation: 'landscape' }); }
+        else { pdf.addPage([LS_W_MM, pdfH], 'landscape'); }
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, LS_W_MM, pdfH);
+      }
+      pdf.save('MARRYWELL_3단브로셔.pdf');
+    } catch(e) { alert('PDF 생성 오류 — 브라우저 인쇄(Ctrl+P → PDF 저장)를 이용해 주세요.'); }
+    document.querySelectorAll('.label').forEach(el => el.style.visibility = '');
+    bar.style.visibility = '';
+    btn.disabled = false; btn.textContent = '⬇ PDF 저장';
+  }
+
+  /* ── PPT 생성 : html2canvas로 브로셔 그대로 2슬라이드 캡처 ── */
+  async function downloadPPT() {
+    const btn = document.getElementById('dlBtn');
+    btn.disabled = true;
+
+    try {
+      // 캡처 전: 안내 레이블·버튼 숨기기
+      document.querySelectorAll('.label').forEach(el => el.style.visibility = 'hidden');
+      document.querySelector('.dl-bar').style.visibility = 'hidden';
+
+      const sheets = document.querySelectorAll('.sheet');
+
+      // A4 가로 (297mm × 210mm = 11.69" × 8.27")
+      const pptx = new PptxGenJS();
+      pptx.defineLayout({ name: 'A4L', width: 11.69, height: 8.27 });
+      pptx.layout = 'A4L';
+      pptx.title = 'MARRYWELL AI Wedding Studio 서비스 소개서';
+
+      for (let i = 0; i < sheets.length; i++) {
+        btn.textContent = `⏳ ${i + 1}/2 페이지 캡처 중...`;
+        await new Promise(r => setTimeout(r, 100)); // 렌더링 대기
+
+        const canvas = await html2canvas(sheets[i], {
+          scale: 3,
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          backgroundColor: i === 0 ? '#1a0533' : '#fafbff'
+        });
+
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        const slide = pptx.addSlide();
+        slide.addImage({ data: imgData, x: 0, y: 0, w: 11.69, h: 8.27 });
+      }
+
+      btn.textContent = '⏳ PPT 저장 중...';
+      await pptx.writeFile({ fileName: 'MARRYWELL_AI웨딩스튜디오_브로셔.pptx' });
+
+    } finally {
+      document.querySelectorAll('.label').forEach(el => el.style.visibility = '');
+      document.querySelector('.dl-bar').style.visibility = '';
+      btn.disabled = false;
+      btn.textContent = '⬇ PPT 다운로드';
+    }
+  }
+
+</script>
+</body>
+</html>
