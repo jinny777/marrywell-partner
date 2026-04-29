@@ -1610,6 +1610,7 @@ function codeChip(code,id){
 function actionBtns(p){
   let btns = `<button class="btn-sm btn-view" onclick="openModal(${p.id})">상세</button>`;
   if(p.code) btns += `<button class="btn-sm btn-code" onclick="openWelcomePage(${p.id})" title="안내 페이지 확인">📄 안내</button>`;
+  btns += `<button class="btn-sm" style="background:#EEF0FF;color:var(--p);border:1.5px solid var(--ac);" onclick="openWelcomeEditor(${p.id})" title="안내 페이지 편집">✏️ 편집</button>`;
   if(p.status==='pending') btns += `<button class="btn-sm btn-approve" onclick="changeStatus(${p.id},'review')">검토</button>`;
   if(p.status==='review')  btns += `<button class="btn-sm btn-approve" onclick="changeStatus(${p.id},'approved')">승인</button>`;
   if(p.status==='approved'&&!p.code) btns += `<button class="btn-sm btn-code" onclick="issueCode(${p.id})">코드발급</button>`;
@@ -1617,6 +1618,20 @@ function actionBtns(p){
   if(p.status!=='rejected'&&p.status!=='gold')
     btns += `<button class="btn-sm btn-reject" onclick="changeStatus(${p.id},'rejected')">거절</button>`;
   return `<div class="actions">${btns}</div>`;
+}
+
+function openWelcomeEditor(id){
+  const p = partners.find(x=>x.id===id);
+  if(!p) return;
+  // 안내 페이지 편집 탭으로 이동 후 이 파트너 자동 선택
+  showPage('welcome-mgmt');
+  setTimeout(()=>{
+    const sel = document.getElementById('gen-partner-sel');
+    if(sel){
+      sel.value = id;
+      loadPartnerToGen();
+    }
+  }, 100);
 }
 
 function openWelcomePage(id){
@@ -1873,6 +1888,29 @@ function clearHistory(){
 }
 
 // ── 상태 변경 ─────────────────────────────────────
+async function approveAndSendEmail(id){
+  const p = partners.find(p=>p.id===id);
+  if(!p) return;
+  // 코드가 없으면 먼저 발급
+  if(!p.code){
+    const code = 'MW-' + Math.random().toString(36).substr(2,4).toUpperCase();
+    p.code = code;
+    p.pw   = code;
+  }
+  p.status = 'approved';
+  await savePartners();
+  logHistory('status_change', `${p.name} 님 승인 + 이메일 발송`, { id: p.id, code: p.code });
+  updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
+  toast(`${p.name} 님 승인 완료`);
+  pushStatusToSheet(p.id, p.status, p.code);
+  // 편집된 안내 페이지 이메일 발송
+  if(p.email){
+    sendApprovalEmail(p, '');
+  } else {
+    toast('이메일 주소가 없어 이메일을 발송할 수 없습니다.', 'err');
+  }
+}
+
 async function changeStatus(id, status){
   const p = partners.find(p=>p.id===id);
   if(!p) return;
@@ -2000,8 +2038,9 @@ function openModal(id){
     <div class="modal-section">
       <h4>상태 변경</h4>
       <div class="status-btns">
-        ${p.status!=='approved'&&p.status!=='active'&&p.status!=='gold'?`<button class="sbt sbt-approve" onclick="changeStatus(${p.id},'approved');closeModalDirect()">✓ 승인</button>`:''}
+        ${p.status!=='approved'&&p.status!=='active'&&p.status!=='gold'?`<button class="sbt sbt-approve" onclick="approveAndSendEmail(${p.id});closeModalDirect()">✓ 승인 + 이메일발송</button>`:''}
         ${!p.code?`<button class="sbt sbt-code" onclick="issueCode(${p.id});closeModalDirect()">🔑 코드 발급</button>`:''}
+        ${p.code&&p.email?`<button class="sbt sbt-code" onclick="sendApprovalEmail(partners.find(x=>x.id===${p.id}),'');closeModalDirect()" style="background:#EEF0FF;color:var(--p);">📧 안내 이메일 재발송</button>`:''}
         ${p.status==='approved'||p.status==='review'?`<button class="sbt sbt-active" onclick="changeStatus(${p.id},'active');closeModalDirect()">▶ 활성화</button>`:''}
         ${p.status==='active'?`<button class="sbt sbt-gold" onclick="changeStatus(${p.id},'gold');closeModalDirect()">⭐ Gold 승격</button>`:''}
         ${p.status!=='rejected'?`<button class="sbt sbt-reject" onclick="changeStatus(${p.id},'rejected');closeModalDirect()">✕ 거절</button>`:''}
