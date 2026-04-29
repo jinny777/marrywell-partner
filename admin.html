@@ -1256,6 +1256,7 @@ tr:hover td{background:#FAFAFF;}
 // ── Google Apps Script URL ─────────────────────────
 // Code.gs 배포 후 아래 URL을 교체하세요
 const SCRIPT_URL = 'YOUR_SCRIPT_URL';
+const API_BASE = 'https://aiweddingstudio.onrender.com';
 
 // ── 데이터 ─────────────────────────────────────────
 
@@ -2188,16 +2189,11 @@ async function reloadReferrals(){
 }
 
 async function fetchReferrals(){
-  if(SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL'){
-    try{
-      const res  = await fetch(`${SCRIPT_URL}?action=allReferrals&token=mw_admin_2025`);
-      const data = await res.json();
-      if(Array.isArray(data)){ allReferrals = data; }
-    }catch(e){
-      const stored = JSON.parse(localStorage.getItem('mw_referrals') || '[]');
-      allReferrals = stored.length ? stored : DEMO_REFERRALS;
-    }
-  } else {
+  try{
+    const res  = await fetch(`${API_BASE}/api/partners/referrals?token=mw_admin_2025`);
+    const data = await res.json();
+    if(Array.isArray(data)){ allReferrals = data; }
+  }catch(e){
     const stored = JSON.parse(localStorage.getItem('mw_referrals') || '[]');
     allReferrals = stored.length ? stored : DEMO_REFERRALS;
   }
@@ -2296,9 +2292,13 @@ async function changeReferralStatus(id, status){
   r.status = status;
   renderReferralsStats();
   renderReferralsTable();
-  if(SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL'){
-    try{ await fetch(`${SCRIPT_URL}?action=updateReferral&id=${id}&status=${status}&token=mw_admin_2025`); }catch(e){}
-  }
+  try{
+    await fetch(`${API_BASE}/api/partners/referrals/${id}`, {
+      method: 'PATCH',
+      headers: {'Content-Type':'application/json','x-admin-token':'mw_admin_2025'},
+      body: JSON.stringify({status})
+    });
+  }catch(e){}
   toast(`${r.customerName} 고객 상태가 [${RF_STATUS_MAP[status]}]로 변경되었습니다.`);
 }
 
