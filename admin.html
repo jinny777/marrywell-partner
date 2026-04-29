@@ -856,9 +856,10 @@ tr:hover td{background:#FAFAFF;}
                 <div class="section-title">파트너 안내 페이지 관리</div>
                 <div class="section-sub">코드 발급 시 파트너에게 전달되는 welcome 페이지 내용을 관리합니다.</div>
               </div>
-              <div style="display:flex;gap:8px;">
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button class="btn-sm btn-view" onclick="previewWelcome()">미리보기</button>
                 <button class="btn-sm btn-approve" onclick="saveWelcomeSettings()">저장</button>
+                <button class="btn-sm" onclick="saveWelcomeSettings();showPage('partners')" style="background:var(--p);color:#fff;border:none;">← 저장 후 목록으로</button>
               </div>
             </div>
 
