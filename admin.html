@@ -1605,18 +1605,19 @@ function tierBadge(t){
 }
 function codeChip(code,id){
   if(code) return `<span class="code-chip" onclick="copyCode('${code}')" title="클릭하여 복사">${code}</span>`;
-  return `<span class="code-chip empty" onclick="issueCode(${id})">+ 코드 발급</span>`;
+  return `<span class="code-chip empty" onclick="issueCode('${id}')">+ 코드 발급</span>`;
 }
 function actionBtns(p){
-  let btns = `<button class="btn-sm btn-view" onclick="openModal(${p.id})">상세</button>`;
-  if(p.code) btns += `<button class="btn-sm btn-code" onclick="openWelcomePage(${p.id})" title="안내 페이지 확인">📄 안내</button>`;
-  btns += `<button class="btn-sm" style="background:#EEF0FF;color:var(--p);border:1.5px solid var(--ac);" onclick="openWelcomeEditor(${p.id})" title="안내 페이지 편집">✏️ 편집</button>`;
-  if(p.status==='pending') btns += `<button class="btn-sm btn-approve" onclick="changeStatus(${p.id},'review')">검토</button>`;
-  if(p.status==='review')  btns += `<button class="btn-sm btn-approve" onclick="changeStatus(${p.id},'approved')">승인</button>`;
-  if(p.status==='approved'&&!p.code) btns += `<button class="btn-sm btn-code" onclick="issueCode(${p.id})">코드발급</button>`;
-  if(p.status==='approved'&&p.code) btns += `<button class="btn-sm btn-code" onclick="changeStatus(${p.id},'active')">활성화</button>`;
+  const id = p.id;
+  let btns = `<button class="btn-sm btn-view" onclick="openModal('${id}')">상세</button>`;
+  if(p.code) btns += `<button class="btn-sm btn-code" onclick="openWelcomePage('${id}')" title="안내 페이지 확인">📄 안내</button>`;
+  btns += `<button class="btn-sm" style="background:#EEF0FF;color:var(--p);border:1.5px solid var(--ac);" onclick="openWelcomeEditor('${id}')" title="안내 페이지 편집">✏️ 편집</button>`;
+  if(p.status==='pending') btns += `<button class="btn-sm btn-approve" onclick="changeStatus('${id}','review')">검토</button>`;
+  if(p.status==='review')  btns += `<button class="btn-sm btn-approve" onclick="changeStatus('${id}','approved')">승인</button>`;
+  if(p.status==='approved'&&!p.code) btns += `<button class="btn-sm btn-code" onclick="issueCode('${id}')">코드발급</button>`;
+  if(p.status==='approved'&&p.code) btns += `<button class="btn-sm btn-code" onclick="changeStatus('${id}','active')">활성화</button>`;
   if(p.status!=='rejected'&&p.status!=='gold')
-    btns += `<button class="btn-sm btn-reject" onclick="changeStatus(${p.id},'rejected')">거절</button>`;
+    btns += `<button class="btn-sm btn-reject" onclick="changeStatus('${id}','rejected')">거절</button>`;
   return `<div class="actions">${btns}</div>`;
 }
 
@@ -2038,12 +2039,12 @@ function openModal(id){
     <div class="modal-section">
       <h4>상태 변경</h4>
       <div class="status-btns">
-        ${p.status!=='approved'&&p.status!=='active'&&p.status!=='gold'?`<button class="sbt sbt-approve" onclick="approveAndSendEmail(${p.id});closeModalDirect()">✓ 승인 + 이메일발송</button>`:''}
-        ${!p.code?`<button class="sbt sbt-code" onclick="issueCode(${p.id});closeModalDirect()">🔑 코드 발급</button>`:''}
-        ${p.code&&p.email?`<button class="sbt sbt-code" onclick="sendApprovalEmail(partners.find(x=>x.id===${p.id}),'');closeModalDirect()" style="background:#EEF0FF;color:var(--p);">📧 안내 이메일 재발송</button>`:''}
-        ${p.status==='approved'||p.status==='review'?`<button class="sbt sbt-active" onclick="changeStatus(${p.id},'active');closeModalDirect()">▶ 활성화</button>`:''}
-        ${p.status==='active'?`<button class="sbt sbt-gold" onclick="changeStatus(${p.id},'gold');closeModalDirect()">⭐ Gold 승격</button>`:''}
-        ${p.status!=='rejected'?`<button class="sbt sbt-reject" onclick="changeStatus(${p.id},'rejected');closeModalDirect()">✕ 거절</button>`:''}
+        ${p.status!=='approved'&&p.status!=='active'&&p.status!=='gold'?`<button class="sbt sbt-approve" onclick="approveAndSendEmail('${p.id}');closeModalDirect()">✓ 승인 + 이메일발송</button>`:''}
+        ${!p.code?`<button class="sbt sbt-code" onclick="issueCode('${p.id}');closeModalDirect()">🔑 코드 발급</button>`:''}
+        ${p.code&&p.email?`<button class="sbt sbt-code" onclick="sendApprovalEmail(partners.find(x=>x.id==='${p.id}'),'');closeModalDirect()" style="background:#EEF0FF;color:var(--p);">📧 안내 이메일 재발송</button>`:''}
+        ${p.status==='approved'||p.status==='review'?`<button class="sbt sbt-active" onclick="changeStatus('${p.id}','active');closeModalDirect()">▶ 활성화</button>`:''}
+        ${p.status==='active'?`<button class="sbt sbt-gold" onclick="changeStatus('${p.id}','gold');closeModalDirect()">⭐ Gold 승격</button>`:''}
+        ${p.status!=='rejected'?`<button class="sbt sbt-reject" onclick="changeStatus('${p.id}','rejected');closeModalDirect()">✕ 거절</button>`:''}
       </div>
     </div>`;
   document.getElementById('modal-overlay').classList.add('open');
