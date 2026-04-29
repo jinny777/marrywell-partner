@@ -859,7 +859,6 @@ tr:hover td{background:#FAFAFF;}
               <div style="display:flex;gap:8px;">
                 <button class="btn-sm btn-view" onclick="previewWelcome()">미리보기</button>
                 <button class="btn-sm btn-approve" onclick="saveWelcomeSettings()">저장</button>
-                <button class="btn-sm btn-code" onclick="saveWelcomeSettings();showPage('partners')">저장 후 목록으로</button>
               </div>
             </div>
 
@@ -922,6 +921,12 @@ tr:hover td{background:#FAFAFF;}
                   oninput="liveUpdateWelcomePreview()">
               </div>
             </div>
+
+            <!-- 저장 후 목록으로 -->
+            <button onclick="saveWelcomeSettings();showPage('partners')"
+              style="width:100%;padding:12px;margin-top:8px;background:var(--p);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+              ✅ 저장 후 파트너 목록으로 돌아가기
+            </button>
           </div>
 
           <!-- 오른쪽: 미리보기 & 링크 -->
