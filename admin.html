@@ -1497,6 +1497,38 @@ function doLogout(){
   document.getElementById('login-pw').value='';
 }
 
+// ── 서버 DB에서 파트너 목록 불러오기 ─────────────
+async function fetchPartnersFromServer(){
+  try {
+    const res = await fetch(`${API_BASE}/api/partners/list?token=mw_admin_2025`);
+    if(!res.ok) return;
+    const data = await res.json();
+    if(!Array.isArray(data) || data.length === 0) return;
+    partners = data.map(p => ({
+      id:        p.id || '',
+      name:      p.name || '',
+      email:     p.email || '',
+      phone:     p.phone || '',
+      sns:       p.sns || '',
+      bizName:   p.bizName || p.biz_name || '',
+      biz:       p.biz || '',
+      tier:      p.tier || '5-9',
+      channel:   p.channel || '',
+      msg:       p.msg || '',
+      date:      p.createdAt ? p.createdAt.slice(0,10) : '',
+      status:    p.status || 'pending',
+      code:      p.code || '',
+      pw:        p.pw || '',
+      referrals: parseInt(p.referralCount) || 0,
+      payback:   parseInt(p.payback) || 0
+    }));
+    await savePartners();
+    updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
+  } catch(e) {
+    console.error('서버 파트너 목록 로드 실패:', e);
+  }
+}
+
 // ── 초기화 ────────────────────────────────────────
 async function initApp(){
   document.getElementById('today-date').textContent = new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
@@ -1512,13 +1544,16 @@ async function initApp(){
   // 로드 직후 미처리 신청 체크
   checkPendingApplication();
 
+  // 서버 DB에서 최신 파트너 목록 로드 (우선순위 1)
+  await fetchPartnersFromServer();
+
   // 구글 시트에서 최신 데이터 로드
   await loadFromSheet();
 
-  // 창이 포커스될 때마다 새로고침 (다른 탭에서 신청이 들어올 경우)
-  window.addEventListener('focus', loadFromSheet);
+  // 창이 포커스될 때마다 새로고침
+  window.addEventListener('focus', fetchPartnersFromServer);
   // 30초마다 자동 새로고침
-  setInterval(loadFromSheet, 30000);
+  setInterval(fetchPartnersFromServer, 30000);
 }
 
 function updateStats(){
