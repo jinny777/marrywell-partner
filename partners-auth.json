@@ -1,1 +1,44 @@
-[]
+[
+  {
+    "code": "MW-LMII",
+    "pw": "715fa132e79610646a287db02423adf52f70b3f1dec55524cef86e15403c62b0",
+    "name": "이정이",
+    "tier": "5-9",
+    "email": "khjyeon@naver.com"
+  },
+  {
+    "code": "MW-266D",
+    "pw": "14503d49b0bbdd21f93f4cb2751a3584bf4e80e5e9e07269bed719019e47a4b7",
+    "name": "김지연",
+    "tier": "5-9",
+    "email": "khjyeon@naver.com"
+  },
+  {
+    "code": "MW-DPUK",
+    "pw": "f3c111e8903306a57fd4b23eedf44ceafd081b9b7e863a576e6d045e312b0a78",
+    "name": "테스트파트너",
+    "tier": "5-9",
+    "email": ""
+  },
+  {
+    "code": "MW-IYBE",
+    "pw": "e658d8b1bcf6ce9ada9b0c381e7f591fa047de74e7ea8510f7e51192cb18bd63",
+    "name": "김지연",
+    "tier": "5-9",
+    "email": "khjyeon@naver.com"
+  },
+  {
+    "code": "MW-FRAZ",
+    "pw": "1f0b6d2fb30d4db1ae53f99dc5248ff18ebe3644ac5a361e067eddcdfcb8b381",
+    "name": "최영환",
+    "tier": "5-9",
+    "email": ""
+  },
+  {
+    "code": "MW-IEFI",
+    "pw": "c89ac3e912c271ad4c5faeee5dd43089882447332187f646378f933ad5a39aad",
+    "name": "이정민",
+    "tier": "5-9",
+    "email": "khjyeon@naver.com"
+  }
+]
