@@ -623,7 +623,7 @@ tr:hover td{background:#FAFAFF;}
             </div>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>#</th><th>고객명</th><th>업체 유형</th><th>제출일</th><th>상태</th><th>예상 수익</th></tr></thead>
+                <thead><tr><th>#</th><th>고객명</th><th>전화번호</th><th>이메일</th><th>업체 유형</th><th>제출일</th><th>상태</th><th>예상 수익</th></tr></thead>
                 <tbody id="cust-tbody"></tbody>
               </table>
             </div>
@@ -1337,13 +1337,15 @@ function renderCustomerTable(){
   const ti    = tierInfo(session.tier);
   const tbody = document.getElementById('cust-tbody');
   if(!list.length){
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="ico">👤</div><p>등록된 고객이 없습니다<br><small style="font-size:11px;">"명단 추가" 탭에서 고객을 등록하세요</small></p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="ico">👤</div><p>등록된 고객이 없습니다<br><small style="font-size:11px;">"명단 추가" 탭에서 고객을 등록하세요</small></p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = list.map((c,i)=>`
     <tr>
       <td style="color:var(--gray);font-size:12px;">${i+1}</td>
       <td class="td-name">${c.customerName}</td>
+      <td>${c.customerPhone||'-'}</td>
+      <td>${c.customerEmail||'-'}</td>
       <td>${c.bizType||'-'}</td>
       <td>${fmtDate(c.submittedAt)}</td>
       <td>${statusBadge(c.status)}</td>
