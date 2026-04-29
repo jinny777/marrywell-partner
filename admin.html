@@ -1513,6 +1513,21 @@ async function pushStatusToSheet(id, status, code) {
   } catch(e) { /* 오프라인 시 무시 — 로컬에는 이미 반영됨 */ }
 }
 
+// ── 서버 DB 파트너 업데이트 ────────────────────────
+async function syncPartnerToDB(id, updates) {
+  try {
+    const res = await fetch(`${API_BASE}/api/partners/${id}?token=mw_admin_2025`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    });
+    if (!res.ok) console.warn('[Admin] 서버 파트너 업데이트 실패:', await res.text());
+    else console.log('[Admin] 서버 DB 업데이트 완료:', updates);
+  } catch(e) {
+    console.warn('[Admin] 서버 동기화 실패 (오프라인):', e);
+  }
+}
+
 // ── 로그인 ────────────────────────────────────────
 async function doLogin(){
   const id = document.getElementById('login-id').value;
@@ -1954,6 +1969,7 @@ async function approveAndSendEmail(id){
   updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
   toast(`${p.name} 님 승인 완료`);
   pushStatusToSheet(p.id, p.status, p.code);
+  syncPartnerToDB(p.id, { code: p.code, pw: p.pw || p.code, status: p.status }); // 서버 DB 동기화
   // 편집된 안내 페이지 이메일 발송
   if(p.email){
     sendApprovalEmail(p, '');
@@ -1971,7 +1987,8 @@ async function changeStatus(id, status){
   logHistory('status_change', `${p.name} 님 상태 변경: [${STATUS_MAP[prev]||prev}] → [${STATUS_MAP[status]}]`, { id: p.id, code: p.code||'미발급' });
   updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
   toast(`${p.name} 님 상태가 [${STATUS_MAP[status]}]으로 변경되었습니다.`);
-  pushStatusToSheet(id, status, null); // 구글 시트 동기화
+  pushStatusToSheet(id, status, null);
+  syncPartnerToDB(p.id, { status }); // 서버 DB 동기화
 }
 
 let _issueTargetId = null;
@@ -2009,6 +2026,7 @@ async function confirmIssueCode(){
   logHistory('code_issued', `${p.name} 님 파트너 코드 발급: ${code}`, { tier: p.tier, email: p.email||'없음' });
   updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
   pushStatusToSheet(p.id, p.status, code);
+  syncPartnerToDB(p.id, { code, pw: code, status: p.status }); // 서버 DB 동기화
   closeIssueModal();
   if(document.getElementById('modal-overlay').classList.contains('open')) closeModalDirect();
 
