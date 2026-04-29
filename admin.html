@@ -1031,19 +1031,23 @@ tr:hover td{background:#FAFAFF;}
             <!-- EmailJS 설정 -->
             <div id="email-setup-card" class="card" style="margin-bottom:14px;border-left:4px solid var(--gold);">
               <div class="card-header"><div class="card-title">⚙️ EmailJS 템플릿 설정</div></div>
-              <details style="margin-bottom:10px;">
-                <summary style="font-size:12px;font-weight:700;color:var(--p);cursor:pointer;">📋 HTML 이메일 템플릿 만드는 방법</summary>
-                <ol style="font-size:12px;color:var(--text);line-height:2;padding-left:18px;margin-top:8px;">
-                  <li><a href="https://dashboard.emailjs.com/admin/templates" target="_blank" style="color:var(--p);">EmailJS Templates</a> → Create New Template</li>
-                  <li><b>To Email:</b> <code style="background:#F0F0F8;padding:1px 5px;border-radius:4px;">{{to_email}}</code></li>
-                  <li><b>Subject:</b> <code style="background:#F0F0F8;padding:1px 5px;border-radius:4px;">{{subject}}</code></li>
-                  <li><b>Content 탭 → HTML 모드</b>로 변경 후 입력:<br>
-                    <code style="background:#F0F0F8;padding:3px 8px;border-radius:4px;display:inline-block;margin-top:4px;">{{{html_body}}}</code>
-                    <span style="font-size:11px;color:var(--err);margin-left:4px;">(중괄호 3개 ← 중요)</span>
+              <!-- 필수 안내 -->
+              <div style="background:#FFF3CD;border:1.5px solid #F4C430;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:12px;">
+                <b style="color:#92400E;">⚠️ 안내페이지 형식으로 이메일을 보내려면 EmailJS 템플릿 수정 필수</b>
+                <ol style="margin:8px 0 0;padding-left:16px;line-height:2;color:#1A1A2E;">
+                  <li><a href="https://dashboard.emailjs.com/admin/templates" target="_blank" style="color:var(--p);font-weight:700;">EmailJS Templates</a> 접속 → 현재 템플릿 클릭 → <b>Edit</b></li>
+                  <li><b>To Email</b>: <code style="background:#fff;padding:1px 6px;border-radius:4px;border:1px solid #ddd;">{{to_email}}</code></li>
+                  <li><b>Subject</b>: <code style="background:#fff;padding:1px 6px;border-radius:4px;border:1px solid #ddd;">{{subject}}</code></li>
+                  <li><b>Content 탭 → HTML 모드</b> 선택 → 기존 내용 전체 삭제 후 입력:<br>
+                    <code style="background:#fff;padding:4px 10px;border-radius:6px;border:2px solid #F4C430;display:inline-block;margin-top:4px;font-size:13px;letter-spacing:1px;">{{{html_body}}}</code>
+                    <span style="color:var(--err);font-weight:700;"> ← 중괄호 반드시 3개!</span>
                   </li>
-                  <li>Save → Template ID 복사 후 아래에 입력</li>
+                  <li><b>Save</b> 후 Template ID 복사 → 아래에 입력</li>
                 </ol>
-              </details>
+                <div style="margin-top:8px;padding-top:8px;border-top:1px solid #F4C430;font-size:11px;color:#92400E;">
+                  💡 <b>발송자 이메일</b>: EmailJS Dashboard → Email Services → 서비스 편집 → <b>From Email</b>에 <code>partners@marrywell.co.kr</code> 입력 (도메인 인증 필요)
+                </div>
+              </div>
               <div style="display:flex;gap:8px;align-items:center;">
                 <input id="email-tpl-id" type="text" placeholder="예: template_abc123"
                   style="flex:1;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;outline:none;font-family:'Noto Sans KR',sans-serif;"
