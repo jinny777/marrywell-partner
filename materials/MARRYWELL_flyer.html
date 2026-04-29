@@ -914,11 +914,11 @@
       <a href="https://ai.marrywell.co.kr/Contact" class="btn-outline">상담 문의하기</a>
     </div>
     <div class="qr-row">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&margin=4&data=https%3A%2F%2Fai.marrywell.co.kr"
+      <img id="fly-qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&margin=4&data=https%3A%2F%2Fai.marrywell.co.kr"
            alt="QR" style="width:80px;height:80px;border-radius:8px;background:#fff;" />
       <div class="qr-text">
         <strong>QR 코드로 바로 접속</strong>
-        <p>ai.marrywell.co.kr</p>
+        <p id="fly-qr-url">ai.marrywell.co.kr</p>
         <p style="margin-top:2px;font-size:11px;">AI 웨딩 스튜디오 · 무료 시작</p>
       </div>
     </div>
@@ -936,5 +936,17 @@
 
 </div><!-- /page 2 -->
 
+<script>
+(function(){
+  const p = new URLSearchParams(window.location.search);
+  const ref = p.get('ref') || '';
+  if(!ref) return;
+  const target = encodeURIComponent('https://ai.marrywell.co.kr/?ref=' + ref);
+  const img = document.getElementById('fly-qr-img');
+  const lbl = document.getElementById('fly-qr-url');
+  if(img) img.src = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&margin=4&data=${target}`;
+  if(lbl) lbl.textContent = `ai.marrywell.co.kr/?ref=${ref}`;
+})();
+</script>
 </body>
 </html>

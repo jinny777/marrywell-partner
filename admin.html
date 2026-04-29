@@ -1670,6 +1670,7 @@ function actionBtns(p){
   const welcomeUrl = `https://partners.marrywell.co.kr/welcome.html?code=${code}&name=${name}&tier=${tier}`;
   let btns = `<button class="btn-sm btn-view" onclick="openModal('${id}')">상세</button>`;
   if(code) btns += `<a class="btn-sm btn-code" href="${welcomeUrl}" target="_blank" style="text-decoration:none;padding:5px 12px;">📄 안내</a>`;
+  if(code) btns += `<button class="btn-sm" style="background:#FFF3E0;color:#E65100;border:1.5px solid #FFB74D;" onclick="openMarketingModal('${id}')">📢 마케팅</button>`;
   btns += `<button class="btn-sm" style="background:#EEF0FF;color:var(--p);border:1.5px solid var(--ac);" onclick="openWelcomeEditorDirect('${id}','${code}','${name}','${tier}')">✏️ 편집</button>`;
   if(p.status==='pending') btns += `<button class="btn-sm btn-approve" onclick="changeStatus('${id}','review')">검토</button>`;
   if(p.status==='review')  btns += `<button class="btn-sm btn-approve" onclick="changeStatus('${id}','approved')">승인</button>`;
@@ -1678,6 +1679,95 @@ function actionBtns(p){
   if(p.status!=='rejected'&&p.status!=='gold')
     btns += `<button class="btn-sm btn-reject" onclick="changeStatus('${id}','rejected')">거절</button>`;
   return `<div class="actions">${btns}</div>`;
+}
+
+/* ── 마케팅 자료 모달 ── */
+function openMarketingModal(id){
+  const p = partners.find(x=>x.id===id);
+  if(!p||!p.code) return;
+  const code = p.code;
+  const refUrl = `https://ai.marrywell.co.kr/?ref=${code}`;
+  const encoded = encodeURIComponent(refUrl);
+  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=6&data=${encoded}`;
+  const nameEnc = encodeURIComponent(p.name||'');
+
+  const base = 'https://partners.marrywell.co.kr/materials/';
+  const brochureUrl = `${base}MARRYWELL_brochure.html?ref=${code}&name=${nameEnc}`;
+  const flyerUrl    = `${base}MARRYWELL_flyer.html?ref=${code}&name=${nameEnc}`;
+  const trifoldUrl  = `${base}MARRYWELL_trifold.html?ref=${code}&name=${nameEnc}`;
+
+  // 모달 HTML 삽입
+  let modal = document.getElementById('marketing-modal');
+  if(!modal){
+    modal = document.createElement('div');
+    modal.id = 'marketing-modal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;';
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:20px;padding:32px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.25);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <div style="font-size:18px;font-weight:800;color:#1A1A2E;">📢 마케팅 자료</div>
+          <div style="font-size:13px;color:#6C757D;margin-top:2px;">${p.name} (${code})</div>
+        </div>
+        <button onclick="document.getElementById('marketing-modal').remove()"
+          style="background:#F4F4FC;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
+      </div>
+
+      <!-- 레퍼럴 링크 -->
+      <div style="background:#EEF0FF;border-radius:12px;padding:14px 16px;margin-bottom:20px;">
+        <div style="font-size:10px;font-weight:700;color:#4B3BC7;letter-spacing:1px;margin-bottom:6px;">레퍼럴 링크</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <code style="flex:1;font-size:12px;color:#1A1A2E;word-break:break-all;">${refUrl}</code>
+          <button onclick="navigator.clipboard.writeText('${refUrl}').then(()=>alert('복사됨!'))"
+            style="padding:6px 12px;background:#4B3BC7;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">복사</button>
+        </div>
+      </div>
+
+      <!-- QR 코드 -->
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:11px;font-weight:700;color:#6C757D;margin-bottom:10px;">QR 코드</div>
+        <img src="${qrSrc}" alt="QR" style="width:160px;height:160px;border-radius:12px;border:1px solid #EEF0FF;" />
+        <div style="font-size:10px;color:#6C757D;margin-top:6px;">ai.marrywell.co.kr/?ref=${code}</div>
+        <a href="${qrSrc}" download="QR_${code}.png"
+          style="display:inline-block;margin-top:8px;padding:6px 16px;background:#F4F4FC;color:#4B3BC7;border:1.5px solid #A29BFE;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;">⬇ QR 다운로드</a>
+      </div>
+
+      <!-- 마케팅 자료 링크 -->
+      <div style="font-size:11px;font-weight:700;color:#6C757D;margin-bottom:10px;">마케팅 자료 (파트너 코드 적용됨)</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="${brochureUrl}" target="_blank"
+          style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#F8F9FF;border:1.5px solid #E0E0F0;border-radius:12px;text-decoration:none;color:#1A1A2E;">
+          <span style="font-size:22px;">📄</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;">브로셔 (A4)</div>
+            <div style="font-size:11px;color:#6C757D;">서비스 소개 전체 브로셔</div>
+          </div>
+          <span style="margin-left:auto;font-size:12px;color:#4B3BC7;font-weight:600;">열기 →</span>
+        </a>
+        <a href="${flyerUrl}" target="_blank"
+          style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#F8F9FF;border:1.5px solid #E0E0F0;border-radius:12px;text-decoration:none;color:#1A1A2E;">
+          <span style="font-size:22px;">🗞️</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;">플라이어</div>
+            <div style="font-size:11px;color:#6C757D;">단면 홍보 리플렛</div>
+          </div>
+          <span style="margin-left:auto;font-size:12px;color:#4B3BC7;font-weight:600;">열기 →</span>
+        </a>
+        <a href="${trifoldUrl}" target="_blank"
+          style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#F8F9FF;border:1.5px solid #E0E0F0;border-radius:12px;text-decoration:none;color:#1A1A2E;">
+          <span style="font-size:22px;">📰</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;">3단 팸플릿</div>
+            <div style="font-size:11px;color:#6C757D;">3단 접지 상세 자료</div>
+          </div>
+          <span style="margin-left:auto;font-size:12px;color:#4B3BC7;font-weight:600;">열기 →</span>
+        </a>
+      </div>
+    </div>
+  `;
+  modal.onclick = e => { if(e.target===modal) modal.remove(); };
 }
 
 function openWelcomeEditorDirect(id, code, name, tier){

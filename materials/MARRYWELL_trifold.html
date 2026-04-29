@@ -1071,7 +1071,7 @@
       <div style="background:white;border-radius:14px;padding:16px;width:148px;">
         <div id="qrcode" style="margin:0 auto 10px;display:flex;justify-content:center;"></div>
         <div style="font-size:10px;font-weight:700;color:var(--text);margin-bottom:2px;">QR코드 스캔</div>
-        <div style="font-size:8px;color:var(--gray);line-height:1.5;word-break:break-all;">ai.marrywell.co.kr</div>
+        <div class="qr-url-text" style="font-size:8px;color:var(--gray);line-height:1.5;word-break:break-all;">ai.marrywell.co.kr</div>
       </div>
 
       <!-- 연락처 + 저작권 -->
@@ -1459,9 +1459,27 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-  /* ── QR 코드 생성 (공개 홈페이지 URL) ── */
+  /* ── URL 파라미터에서 파트너 코드 읽기 ── */
+  const _urlParams = new URLSearchParams(window.location.search);
+  const _refCode   = _urlParams.get('ref') || '';
+  const _partnerName = _urlParams.get('name') ? decodeURIComponent(_urlParams.get('name')) : '';
+  const _qrTarget  = _refCode
+    ? `https://ai.marrywell.co.kr/?ref=${_refCode}`
+    : 'https://ai.marrywell.co.kr';
+
+  /* URL 텍스트 업데이트 */
+  document.querySelectorAll('.qr-url-text').forEach(el => {
+    el.textContent = _refCode ? `ai.marrywell.co.kr/?ref=${_refCode}` : 'ai.marrywell.co.kr';
+  });
+  if (_partnerName) {
+    document.querySelectorAll('.partner-name-placeholder').forEach(el => {
+      el.textContent = _partnerName + ' 파트너 전용';
+    });
+  }
+
+  /* ── QR 코드 생성 ── */
   new QRCode(document.getElementById("qrcode"), {
-    text: "https://ai.marrywell.co.kr",
+    text: _qrTarget,
     width: 112, height: 112,
     colorDark: "#4B3BC7", colorLight: "#ffffff",
     correctLevel: QRCode.CorrectLevel.H

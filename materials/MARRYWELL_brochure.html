@@ -805,9 +805,9 @@
       <div class="footer-link">AI 청첩장 · AI 영상 · 스마트 답례 · ALL-IN-ONE</div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-left:auto;">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=72x72&margin=4&data=https%3A%2F%2Fai.marrywell.co.kr"
+      <img id="bro-qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=72x72&margin=4&data=https%3A%2F%2Fai.marrywell.co.kr"
            alt="QR" style="width:72px;height:72px;border-radius:6px;" />
-      <span style="font-size:8px;color:#888;">ai.marrywell.co.kr</span>
+      <span id="bro-qr-url" style="font-size:8px;color:#888;">ai.marrywell.co.kr</span>
     </div>
   </div>
 
@@ -857,6 +857,18 @@ async function dlPDF(){
   fab.style.pointerEvents = '';
 }
 function printPDF(){ window.print(); }
+
+/* ── 파트너 레퍼럴 QR 초기화 ── */
+(function(){
+  const p = new URLSearchParams(window.location.search);
+  const ref = p.get('ref') || '';
+  if(!ref) return;
+  const target = encodeURIComponent('https://ai.marrywell.co.kr/?ref=' + ref);
+  const img = document.getElementById('bro-qr-img');
+  const lbl = document.getElementById('bro-qr-url');
+  if(img) img.src = `https://api.qrserver.com/v1/create-qr-code/?size=72x72&margin=4&data=${target}`;
+  if(lbl) lbl.textContent = `ai.marrywell.co.kr/?ref=${ref}`;
+})();
 </script>
 </body>
 </html>
