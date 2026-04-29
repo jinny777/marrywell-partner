@@ -1163,16 +1163,16 @@ function openQRModal(){
 //  MATERIALS
 // ═══════════════════════════════════════════════
 let allMaterials     = [];
-let matLoaded        = false;
 let currentMatFilter = 'all';
 
 async function loadMaterials(){
-  if(matLoaded) return;
+  // 캐싱 없이 항상 최신 서버 데이터 조회
+  allMaterials = [];
 
   // QR 배너 초기화
   initMatQrBanner();
 
-  // 항상 서버에서 로드 (관리자가 노출 설정한 자료만 반환)
+  // 서버에서 로드 (관리자가 노출 설정한 자료만 반환)
   try {
     const res = await fetch(`${API_BASE}/api/partners/materials`);
     if(res.ok){
@@ -1189,7 +1189,6 @@ async function loadMaterials(){
     allMaterials = DEMO_MATERIALS.map(m => ({ ...m, url: toAbsoluteUrl(m.url) }));
   }
 
-  matLoaded = true;
   renderMaterials();
 }
 

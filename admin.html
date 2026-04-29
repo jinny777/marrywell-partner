@@ -2290,24 +2290,20 @@ const TYPE_BADGE  = {html:'<span style="background:#DCFCE7;color:#14532D;padding
 
 async function loadAdminMaterials(){
   if(matAdminLoaded) return;
-  migrateMaterials(); // 구버전 데모 데이터 자동 정리
-  // 서버에서 우선 로드
+  // 서버에서 우선 로드 (서버가 단일 소스)
   try {
     const res = await fetch(`${API_BASE}/api/admin/materials`, { headers: { 'x-admin-token': 'mw_admin_2025' } });
     if(res.ok){
       const data = await res.json();
-      if(Array.isArray(data) && data.length){ adminMaterials = data; localStorage.setItem('mw_materials', JSON.stringify(data)); }
+      if(Array.isArray(data) && data.length){
+        adminMaterials = data;
+      }
     }
   } catch(e){}
-  // 서버 데이터가 없으면 로컬 fallback
-  if(!adminMaterials.length){
-    const local = JSON.parse(localStorage.getItem('mw_materials')||'null');
-    if(local && local.length){ adminMaterials = local; saveMaterials(); }
-  }
-  // 그것도 없으면 기본 4종
+  // 서버 데이터가 없으면 기본 4종으로 초기화 (localStorage 무시 — 구버전 오염 방지)
   if(!adminMaterials.length){
     adminMaterials = WELCOME_MATERIALS.map(m=>({...m}));
-    saveMaterials();
+    saveMaterials(); // 서버에 저장
   }
   matAdminLoaded = true;
   renderAdminMaterials();
