@@ -342,6 +342,12 @@
     <p class="step-desc">소개할 업체 유형과 예상 규모를 알려주세요.</p>
 
     <div class="field">
+      <label>파트너명 (업체명) <span class="req">*</span></label>
+      <input type="text" id="biz-name" placeholder="예: 그랜드 웨딩홀, 스튜디오 김" maxlength="100">
+      <div class="err-msg" id="bizname-err">업체명을 입력해주세요.</div>
+    </div>
+
+    <div class="field">
       <label>소개 예정 업체 유형 <span class="req">*</span></label>
       <div class="radio-group" id="biz-type">
         <label class="radio-btn" onclick="selRadio(this,'biz-type')">
@@ -523,6 +529,11 @@ function validateStep(step) {
     return ok;
   }
   if (step === 2) {
+    const bizName = document.getElementById('biz-name').value.trim();
+    const biznameErr = document.getElementById('bizname-err');
+    if (!bizName) { biznameErr.style.display = 'block'; return false; }
+    biznameErr.style.display = 'none';
+
     const biz = document.querySelector('input[name="biz"]:checked');
     const errEl = document.getElementById('biz-err');
     if (!biz) { errEl.style.display = 'block'; return false; }
@@ -584,6 +595,7 @@ async function submitForm() {
     phone:   document.getElementById('phone').value.trim(),
     email:   document.getElementById('email').value.trim(),
     sns:     document.getElementById('sns').value.trim(),
+    bizName: document.getElementById('biz-name').value.trim(),
     biz:     biz  ? biz.value  : '',
     tier:    tier ? tier.value : '5-9',
     channel: (document.getElementById('channel') || {}).value || '',

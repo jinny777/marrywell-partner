@@ -542,7 +542,7 @@ tr:hover td{background:#FAFAFF;}
             <table>
               <thead>
                 <tr>
-                  <th>이름 / 연락처</th><th>업체 유형</th><th>예상 등급</th>
+                  <th>이름 / 연락처</th><th>업체명</th><th>업체 유형</th><th>예상 등급</th>
                   <th>신청일</th><th>상태</th><th>처리</th>
                 </tr>
               </thead>
@@ -591,7 +591,7 @@ tr:hover td{background:#FAFAFF;}
               <thead>
                 <tr>
                   <th>#</th><th>이름 / 이메일</th><th>연락처</th>
-                  <th>업체 유형</th><th>예상 등급</th><th>파트너 코드</th>
+                  <th>업체명</th><th>업체 유형</th><th>예상 등급</th><th>파트너 코드</th>
                   <th>신청일</th><th>상태</th><th>액션</th>
                 </tr>
               </thead>
@@ -1445,6 +1445,7 @@ async function loadFromSheet() {
         email:     p.email || '',
         phone:     p.phone || '',
         sns:       p.sns  || '',
+        bizName:   p.bizName || p.biz_name || '',
         biz:       p.biz  || '',
         tier:      p.tier || '5-9',
         channel:   p.channel || '',
@@ -1603,6 +1604,7 @@ function renderRecentTable(){
   tbody.innerHTML = pending.map(p=>`
     <tr>
       <td><div class="td-name">${p.name}</div><div class="td-sub">${p.email}</div></td>
+      <td style="font-size:12px;font-weight:600">${p.bizName||'—'}</td>
       <td>${p.biz}</td>
       <td>${tierBadge(p.tier)}</td>
       <td style="font-size:12px;color:var(--gray)">${p.date}</td>
@@ -1627,6 +1629,7 @@ function renderPartnerTable(){
       <td style="color:var(--gray);font-size:12px">${i+1}</td>
       <td><div class="td-name">${p.name}</div><div class="td-sub">${p.email}</div></td>
       <td style="font-size:12px">${p.phone}</td>
+      <td style="font-size:12px;font-weight:600">${p.bizName||'—'}</td>
       <td style="font-size:12px">${p.biz}</td>
       <td>${tierBadge(p.tier)}</td>
       <td>${codeChip(p.code,p.id)}</td>
