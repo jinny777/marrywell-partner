@@ -1227,7 +1227,7 @@ tr:hover td{background:#FAFAFF;}
       </div>
     </div>
     <div style="padding:16px 24px;border-top:1px solid #F0F0F8;display:flex;gap:8px;justify-content:flex-end;">
-      <button class="btn-primary" onclick="saveMaterial()">등록하기</button>
+      <button class="btn-primary" id="mat-save-btn" onclick="saveMaterial()">등록하기</button>
       <button class="btn-sm btn-view" onclick="closeMatModalDirect()" style="padding:8px 16px;">취소</button>
     </div>
   </div>
@@ -2207,18 +2207,38 @@ function renderAdminMaterials(){
       <td>
         <div class="actions">
           ${m.fileType==='html'?`<a class="btn-sm btn-view" href="${m.url}" target="_blank">미리보기</a>`:''}
-          ${m.fileType==='html'?`<a class="btn-sm" style="background:#EEF0FF;color:var(--p);font-weight:700;" href="${m.url}" target="_blank">PDF 저장</a>`:''}
+          <button class="btn-sm" style="background:#EEF0FF;color:var(--p);border:1.5px solid var(--ac);" onclick="openEditMaterialModal(${m.id})">✏️ 편집</button>
           <button class="btn-sm btn-reject" onclick="deleteAdminMaterial(${m.id})">삭제</button>
         </div>
       </td>
     </tr>`).join('');
 }
 
+let _editingMaterialId = null;
+
 function openAddMaterialModal(){
+  _editingMaterialId = null;
   ['mat-title','mat-url','mat-desc'].forEach(id=>{ document.getElementById(id).value=''; });
   document.getElementById('mat-category').value = 'brochure';
   document.getElementById('mat-filetype').value = 'html';
   document.getElementById('mat-visible').value  = 'all';
+  document.getElementById('mat-modal-title').textContent = '마케팅 자료 등록';
+  document.getElementById('mat-save-btn').textContent = '등록하기';
+  document.getElementById('mat-modal-overlay').classList.add('open');
+}
+
+function openEditMaterialModal(id){
+  const m = adminMaterials.find(x=>x.id===id);
+  if(!m) return;
+  _editingMaterialId = id;
+  document.getElementById('mat-title').value    = m.title || '';
+  document.getElementById('mat-url').value      = m.url || '';
+  document.getElementById('mat-desc').value     = m.description || m.desc || '';
+  document.getElementById('mat-category').value = m.category || 'brochure';
+  document.getElementById('mat-filetype').value = m.fileType || 'html';
+  document.getElementById('mat-visible').value  = m.visibleTo || 'all';
+  document.getElementById('mat-modal-title').textContent = '마케팅 자료 편집';
+  document.getElementById('mat-save-btn').textContent = '저장하기';
   document.getElementById('mat-modal-overlay').classList.add('open');
 }
 function closeMatModal(e){ if(e.target===document.getElementById('mat-modal-overlay')) closeMatModalDirect(); }
@@ -2235,6 +2255,26 @@ async function saveMaterial(){
   if(!title){ toast('자료명을 입력하세요.'); return; }
   if(!url)  { toast('파일 URL 또는 경로를 입력하세요.'); return; }
 
+  if(_editingMaterialId !== null) {
+    // 편집 모드
+    const m = adminMaterials.find(x=>x.id===_editingMaterialId);
+    if(m){
+      m.title       = title;
+      m.url         = url;
+      m.category    = category;
+      m.fileType    = fileType;
+      m.description = desc;
+      m.visibleTo   = visible;
+    }
+    saveMaterials();
+    renderAdminMaterials();
+    closeMatModalDirect();
+    toast(`"${title}" 자료가 수정되었습니다.`);
+    _editingMaterialId = null;
+    return;
+  }
+
+  // 등록 모드
   const newItem = {
     id: Date.now(), title, category, fileType,
     url, description:desc, visibleTo:visible,
