@@ -966,12 +966,33 @@ tr:hover td{background:#FAFAFF;}
                   style="width:100%;padding:9px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;outline:none;"
                   oninput="updateGenLink()">
               </div>
+              <!-- 레퍼럴 링크 + QR -->
+              <div style="background:var(--pale);border-radius:12px;padding:14px;margin-bottom:12px;border:1.5px solid var(--ac);">
+                <label style="font-size:11px;font-weight:700;color:var(--p);display:block;margin-bottom:6px;">📎 레퍼럴 링크 (고객 유입용)</label>
+                <div id="gen-reflink-box" style="font-size:12px;color:var(--p);word-break:break-all;margin-bottom:8px;min-height:20px;"></div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button onclick="copyRefLink()" class="btn-sm btn-approve" style="flex:1;">🔗 레퍼럴 링크 복사</button>
+                  <button onclick="showRefQR()" class="btn-sm btn-code" style="flex:1;">📱 QR 코드 생성</button>
+                </div>
+              </div>
+
+              <!-- QR 팝업 -->
+              <div id="ref-qr-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:none;align-items:center;justify-content:center;">
+                <div style="background:#fff;border-radius:20px;padding:28px 24px;text-align:center;max-width:300px;width:90%;position:relative;">
+                  <button onclick="document.getElementById('ref-qr-modal').style.display='none'" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--gray);">✕</button>
+                  <div style="font-size:13px;font-weight:700;color:var(--p);margin-bottom:14px;">📱 레퍼럴 QR 코드</div>
+                  <img id="ref-qr-img" src="" alt="QR" style="width:200px;height:200px;border-radius:12px;border:2px solid #E0E0F0;">
+                  <div id="ref-qr-caption" style="font-size:11px;color:var(--gray);margin:10px 0 14px;word-break:break-all;"></div>
+                  <a id="ref-qr-dl" href="#" download="referral-qr.png" class="btn-sm btn-approve" style="display:inline-block;text-decoration:none;padding:10px 20px;">⬇ PNG 다운로드</a>
+                </div>
+              </div>
+
               <div style="margin-bottom:14px;">
-                <label style="font-size:11px;font-weight:600;color:var(--gray);display:block;margin-bottom:4px;">생성된 링크</label>
+                <label style="font-size:11px;font-weight:600;color:var(--gray);display:block;margin-bottom:4px;">🔗 안내 페이지 링크</label>
                 <div id="gen-link-box" style="background:var(--pale);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--p);word-break:break-all;min-height:36px;"></div>
               </div>
               <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px;">
-                <button onclick="copyGenLink()" class="btn-sm btn-approve" style="padding:10px;">🔗 링크 복사</button>
+                <button onclick="copyGenLink()" class="btn-sm btn-approve" style="padding:10px;">🔗 안내 링크 복사</button>
                 <button onclick="shortenGenLink()" id="shorten-btn" class="btn-sm" style="padding:10px;background:var(--pale);color:var(--p);border:1.5px solid var(--ac);border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">✂️ URL 단축</button>
               </div>
               <!-- SNS 공유 -->
@@ -2597,15 +2618,37 @@ function updateGenLink(){
   const code = (document.getElementById('gen-code')||{}).value || '';
   const name = (document.getElementById('gen-name')||{}).value || '';
   const msg  = (document.getElementById('wm-common-msg')||{}).value || '';
+  const refEl = document.getElementById('gen-reflink-box');
   if(!code){
     (document.getElementById('gen-link-box')||{}).textContent='코드를 입력하면 링크가 생성됩니다.';
     (document.getElementById('gen-sms')||{}).value='';
+    if(refEl) refEl.textContent = '코드를 입력하면 레퍼럴 링크가 생성됩니다.';
     return;
   }
+  // 안내 페이지 링크
   const link = 'https://partners.marrywell.co.kr/welcome.html?code='+encodeURIComponent(code)+(name?'&name='+encodeURIComponent(name):'')+'&tier=5-9'+(msg?'&msg='+encodeURIComponent(msg):'');
   (document.getElementById('gen-link-box')||{}).textContent = link;
+  // 레퍼럴 링크 (고객 유입용)
+  const refLink = 'https://aiweddingstudio.onrender.com/?ref=' + encodeURIComponent(code);
+  if(refEl) refEl.textContent = refLink;
   const sms = `[메리웰파트너스] ${name||'파트너'}님 파트너 승인 완료🎉\n파트너코드: ${code}\n안내페이지: ${link}`;
   (document.getElementById('gen-sms')||{}).value = sms;
+}
+
+function copyRefLink(){
+  const link = (document.getElementById('gen-reflink-box')||{}).textContent||'';
+  if(!link||link.includes('입력')) return;
+  navigator.clipboard.writeText(link).then(()=>toast('레퍼럴 링크가 복사되었습니다.'));
+}
+
+function showRefQR(){
+  const link = (document.getElementById('gen-reflink-box')||{}).textContent||'';
+  if(!link||link.includes('입력')){ toast('코드를 먼저 입력해 주세요.','err'); return; }
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(link)}`;
+  document.getElementById('ref-qr-img').src = qrUrl;
+  document.getElementById('ref-qr-dl').href = qrUrl;
+  document.getElementById('ref-qr-caption').textContent = link;
+  document.getElementById('ref-qr-modal').style.display = 'flex';
 }
 
 function copyGenLink(){
