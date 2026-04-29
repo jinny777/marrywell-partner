@@ -969,6 +969,12 @@ tr:hover td{background:#FAFAFF;}
               <!-- 레퍼럴 링크 + QR -->
               <div style="background:var(--pale);border-radius:12px;padding:14px;margin-bottom:12px;border:1.5px solid var(--ac);">
                 <label style="font-size:11px;font-weight:700;color:var(--p);display:block;margin-bottom:6px;">📎 레퍼럴 링크 (고객 유입용)</label>
+                <div style="display:flex;gap:6px;margin-bottom:8px;">
+                  <input id="gen-biz-en" type="text" placeholder="영문 업체명 (선택, 예: Studio Kim)"
+                    style="flex:1;padding:7px 10px;border:1.5px solid var(--ac);border-radius:8px;font-size:12px;outline:none;font-family:'Noto Sans KR',sans-serif;"
+                    oninput="updateGenLink()" onblur="saveBizEnAdmin()">
+                  <button onclick="saveBizEnAdmin()" class="btn-sm btn-code" style="white-space:nowrap;">저장</button>
+                </div>
                 <div id="gen-reflink-box" style="font-size:12px;color:var(--p);word-break:break-all;margin-bottom:8px;min-height:20px;"></div>
                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
                   <button onclick="copyRefLink()" class="btn-sm btn-approve" style="flex:1;">🔗 레퍼럴 링크 복사</button>
@@ -1663,10 +1669,13 @@ function openWelcomeEditorDirect(id, code, name, tier){
   // 안내 페이지 편집 탭으로 이동 후 링크 생성기에 파트너 정보 직접 입력
   showPage('welcome-mgmt');
   setTimeout(()=>{
-    const codeEl = document.getElementById('gen-code');
-    const nameEl = document.getElementById('gen-name');
+    const codeEl  = document.getElementById('gen-code');
+    const nameEl  = document.getElementById('gen-name');
+    const bizEnEl = document.getElementById('gen-biz-en');
     if(codeEl) codeEl.value = code;
     if(nameEl) nameEl.value = decodeURIComponent(name);
+    // 해당 파트너 코드에 저장된 영문 업체명 로드
+    if(bizEnEl) bizEnEl.value = localStorage.getItem('mw_biz_en_' + code) || '';
     updateGenLink();
     // 프리뷰 iframe도 업데이트
     const iframe = document.getElementById('welcome-preview');
@@ -2649,15 +2658,20 @@ function loadPartnerToGen(){
   if(!p) return;
   document.getElementById('gen-code').value = p.code || '';
   document.getElementById('gen-name').value = p.name || '';
+  // 해당 파트너 코드에 저장된 영문 업체명 로드 (파트너별 독립 저장)
+  const savedBizEn = localStorage.getItem('mw_biz_en_' + (p.code||'')) || '';
+  const bizEnEl = document.getElementById('gen-biz-en');
+  if(bizEnEl) bizEnEl.value = savedBizEn;
   updateGenLink();
   refreshPreview();
   toast(`${p.name} 님 정보를 불러왔습니다.`);
 }
 
 function updateGenLink(){
-  const code = (document.getElementById('gen-code')||{}).value || '';
-  const name = (document.getElementById('gen-name')||{}).value || '';
-  const msg  = (document.getElementById('wm-common-msg')||{}).value || '';
+  const code  = (document.getElementById('gen-code')||{}).value || '';
+  const name  = (document.getElementById('gen-name')||{}).value || '';
+  const msg   = (document.getElementById('wm-common-msg')||{}).value || '';
+  const bizEn = (document.getElementById('gen-biz-en')||{}).value || '';
   const refEl = document.getElementById('gen-reflink-box');
   if(!code){
     (document.getElementById('gen-link-box')||{}).textContent='코드를 입력하면 링크가 생성됩니다.';
@@ -2668,11 +2682,20 @@ function updateGenLink(){
   // 안내 페이지 링크
   const link = 'https://partners.marrywell.co.kr/welcome.html?code='+encodeURIComponent(code)+(name?'&name='+encodeURIComponent(name):'')+'&tier=5-9'+(msg?'&msg='+encodeURIComponent(msg):'');
   (document.getElementById('gen-link-box')||{}).textContent = link;
-  // 레퍼럴 링크 (고객 유입용)
-  const refLink = 'https://aiweddingstudio.onrender.com/?ref=' + encodeURIComponent(code);
+  // 레퍼럴 링크 - 파트너 코드 + 업체 slug (해당 파트너 전용)
+  const slug = bizEn.toLowerCase().replace(/[^a-z0-9 \-]/g,'').trim().replace(/\s+/g,'-');
+  const refLink = 'https://aiweddingstudio.onrender.com/?ref=' + encodeURIComponent(code) + (slug ? '&from=' + encodeURIComponent(slug) : '');
   if(refEl) refEl.textContent = refLink;
   const sms = `[메리웰파트너스] ${name||'파트너'}님 파트너 승인 완료🎉\n파트너코드: ${code}\n안내페이지: ${link}`;
   (document.getElementById('gen-sms')||{}).value = sms;
+}
+
+function saveBizEnAdmin(){
+  const code = (document.getElementById('gen-code')||{}).value || '';
+  if(!code) return;
+  const val = (document.getElementById('gen-biz-en')||{}).value || '';
+  localStorage.setItem('mw_biz_en_' + code, val);
+  toast(val ? `"${code}" 업체명 저장됨` : `"${code}" 업체명 삭제됨`);
 }
 
 function copyRefLink(){
