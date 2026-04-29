@@ -2251,7 +2251,15 @@ const WELCOME_MATERIALS = [
 let adminMaterials = JSON.parse(localStorage.getItem('mw_materials') || 'null') || [];
 let matAdminLoaded = false;
 
-function saveMaterials(){ localStorage.setItem('mw_materials', JSON.stringify(adminMaterials)); }
+function saveMaterials(){
+  localStorage.setItem('mw_materials', JSON.stringify(adminMaterials));
+  // 서버에도 동기화
+  fetch(`${API_BASE}/api/admin/materials`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'x-admin-token': 'mw_admin_2025' },
+    body: JSON.stringify({ materials: adminMaterials }),
+  }).catch(()=>{});
+}
 
 // 기본 자료 불러오기 (welcome.html 4종으로 교체)
 function loadWelcomeMaterials(){
@@ -2283,17 +2291,22 @@ const TYPE_BADGE  = {html:'<span style="background:#DCFCE7;color:#14532D;padding
 async function loadAdminMaterials(){
   if(matAdminLoaded) return;
   migrateMaterials(); // 구버전 데모 데이터 자동 정리
-  if(SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL'){
-    try{
-      const res  = await fetch(`${SCRIPT_URL}?action=materials&tier=gold&token=${encodeURIComponent('mw_admin_2025')}`);
+  // 서버에서 우선 로드
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/materials`, { headers: { 'x-admin-token': 'mw_admin_2025' } });
+    if(res.ok){
       const data = await res.json();
-      if(Array.isArray(data)){ adminMaterials = data; saveMaterials(); }
-    }catch(e){}
-  } else if(!adminMaterials.length){
-    // 데모 초기 데이터 — 파트너 리플릿만 노출
-    adminMaterials = [
-      {id:1,title:'파트너 리플릿',category:'partner',fileType:'html',url:'materials/MARRYWELL_partner_leaflet.html',description:'파트너 소개 수익 프로그램 안내',visibleTo:'all',uploadedAt:'2026-04-17',active:true},
-    ];
+      if(Array.isArray(data) && data.length){ adminMaterials = data; localStorage.setItem('mw_materials', JSON.stringify(data)); }
+    }
+  } catch(e){}
+  // 서버 데이터가 없으면 로컬 fallback
+  if(!adminMaterials.length){
+    const local = JSON.parse(localStorage.getItem('mw_materials')||'null');
+    if(local && local.length){ adminMaterials = local; saveMaterials(); }
+  }
+  // 그것도 없으면 기본 4종
+  if(!adminMaterials.length){
+    adminMaterials = WELCOME_MATERIALS.map(m=>({...m}));
     saveMaterials();
   }
   matAdminLoaded = true;

@@ -1166,42 +1166,37 @@ let allMaterials     = [];
 let matLoaded        = false;
 let currentMatFilter = 'all';
 
-const BASE_MATERIALS = [
-  {id:'b1', title:'브로셔 (A4)', category:'brochure', fileType:'html', url:'https://partners.marrywell.co.kr/materials/MARRYWELL_brochure.html', description:'서비스 전체 소개 A4 브로셔'},
-  {id:'b2', title:'플라이어',    category:'flyer',    fileType:'html', url:'https://partners.marrywell.co.kr/materials/MARRYWELL_flyer.html',    description:'단면 홍보 리플렛'},
-  {id:'b3', title:'3단 팸플릿', category:'trifold',  fileType:'html', url:'https://partners.marrywell.co.kr/materials/MARRYWELL_trifold.html',  description:'3단 접지 상세 소개 자료'},
-  {id:'b4', title:'파트너 리플릿', category:'partner', fileType:'html', url:'https://partners.marrywell.co.kr/materials/MARRYWELL_partner_leaflet.html', description:'파트너 소개 수익 프로그램 안내'},
-];
-
 async function loadMaterials(){
   if(matLoaded) return;
 
   // QR 배너 초기화
   initMatQrBanner();
 
-  if(isDemoMode() && !session.isReal){
-    allMaterials = [...BASE_MATERIALS, ...DEMO_MATERIALS];
-  } else if(session.isReal){
-    // 관리자 자료관리탭(mw_materials, active 플래그) 우선, 없으면 wm_materials
-    try {
-      const mw = JSON.parse(localStorage.getItem('mw_materials') || 'null');
-      const wm = JSON.parse(localStorage.getItem('wm_materials') || 'null');
-      const src = (mw && mw.length) ? mw : (wm || []);
-      const extra = src
-        .filter(m => m.active !== false && m.enabled !== false)
-        .map(m => ({ id: m.id||0, title: m.name||m.title, description: m.desc||m.description||'', url: m.url, fileType: m.fileType||'html', category: m.category||'all', visibleTo:'all', active:true }));
-      allMaterials = [...BASE_MATERIALS, ...extra];
-    } catch(e){ allMaterials = [...BASE_MATERIALS]; }
-  } else {
-    try{
-      const tier = session.tier||'basic';
-      const res  = await fetch(`${SCRIPT_URL}?action=materials&tier=${encodeURIComponent(tier)}`);
-      const extra = await res.json();
-      allMaterials = [...BASE_MATERIALS, ...extra];
-    } catch(e){ allMaterials = [...BASE_MATERIALS]; }
+  // 항상 서버에서 로드 (관리자가 노출 설정한 자료만 반환)
+  try {
+    const res = await fetch(`${API_BASE}/api/partners/materials`);
+    if(res.ok){
+      const data = await res.json();
+      allMaterials = data.map(m => ({
+        ...m,
+        url: toAbsoluteUrl(m.url),
+      }));
+    }
+  } catch(e){}
+
+  // 서버 데이터가 없는 경우 데모 fallback
+  if(!allMaterials.length && isDemoMode()){
+    allMaterials = DEMO_MATERIALS.map(m => ({ ...m, url: toAbsoluteUrl(m.url) }));
   }
+
   matLoaded = true;
   renderMaterials();
+}
+
+function toAbsoluteUrl(url){
+  if(!url) return url;
+  if(url.startsWith('http')) return url;
+  return `https://partners.marrywell.co.kr/${url.replace(/^\//, '')}`;
 }
 
 function initMatQrBanner(){
