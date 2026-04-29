@@ -1609,30 +1609,37 @@ function codeChip(code,id){
 }
 function actionBtns(p){
   const id = p.id;
+  const code = p.code || '';
+  const name = encodeURIComponent(p.name || '');
+  const tier = encodeURIComponent(p.tier || '5-9');
+  const welcomeUrl = `https://partners.marrywell.co.kr/welcome.html?code=${code}&name=${name}&tier=${tier}`;
   let btns = `<button class="btn-sm btn-view" onclick="openModal('${id}')">상세</button>`;
-  if(p.code) btns += `<button class="btn-sm btn-code" onclick="openWelcomePage('${id}')" title="안내 페이지 확인">📄 안내</button>`;
-  btns += `<button class="btn-sm" style="background:#EEF0FF;color:var(--p);border:1.5px solid var(--ac);" onclick="openWelcomeEditor('${id}')" title="안내 페이지 편집">✏️ 편집</button>`;
+  if(code) btns += `<a class="btn-sm btn-code" href="${welcomeUrl}" target="_blank" style="text-decoration:none;padding:5px 12px;">📄 안내</a>`;
+  btns += `<button class="btn-sm" style="background:#EEF0FF;color:var(--p);border:1.5px solid var(--ac);" onclick="openWelcomeEditorDirect('${id}','${code}','${name}','${tier}')">✏️ 편집</button>`;
   if(p.status==='pending') btns += `<button class="btn-sm btn-approve" onclick="changeStatus('${id}','review')">검토</button>`;
   if(p.status==='review')  btns += `<button class="btn-sm btn-approve" onclick="changeStatus('${id}','approved')">승인</button>`;
-  if(p.status==='approved'&&!p.code) btns += `<button class="btn-sm btn-code" onclick="issueCode('${id}')">코드발급</button>`;
-  if(p.status==='approved'&&p.code) btns += `<button class="btn-sm btn-code" onclick="changeStatus('${id}','active')">활성화</button>`;
+  if(p.status==='approved'&&!code) btns += `<button class="btn-sm btn-code" onclick="issueCode('${id}')">코드발급</button>`;
+  if(p.status==='approved'&&code) btns += `<button class="btn-sm btn-code" onclick="changeStatus('${id}','active')">활성화</button>`;
   if(p.status!=='rejected'&&p.status!=='gold')
     btns += `<button class="btn-sm btn-reject" onclick="changeStatus('${id}','rejected')">거절</button>`;
   return `<div class="actions">${btns}</div>`;
 }
 
-function openWelcomeEditor(id){
-  const p = partners.find(x=>x.id===id);
-  if(!p) return;
-  // 안내 페이지 편집 탭으로 이동 후 이 파트너 자동 선택
+function openWelcomeEditorDirect(id, code, name, tier){
+  // 안내 페이지 편집 탭으로 이동 후 링크 생성기에 파트너 정보 직접 입력
   showPage('welcome-mgmt');
   setTimeout(()=>{
-    const sel = document.getElementById('gen-partner-sel');
-    if(sel){
-      sel.value = id;
-      loadPartnerToGen();
+    const codeEl = document.getElementById('gen-code');
+    const nameEl = document.getElementById('gen-name');
+    if(codeEl) codeEl.value = code;
+    if(nameEl) nameEl.value = decodeURIComponent(name);
+    updateGenLink();
+    // 프리뷰 iframe도 업데이트
+    const iframe = document.getElementById('welcome-preview');
+    if(iframe && code) {
+      iframe.src = `welcome.html?code=${code}&name=${name}&tier=${tier}`;
     }
-  }, 100);
+  }, 150);
 }
 
 function openWelcomePage(id){
