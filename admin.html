@@ -1523,7 +1523,9 @@ async function fetchPartnersFromServer(){
       referrals: parseInt(p.referralCount) || 0,
       payback:   parseInt(p.payback) || 0
     }));
-    await savePartners();
+    // GitHub 자동 push 없이 로컬 저장만
+    const enc = await encryptJSON(partners);
+    localStorage.setItem('mw_partners', enc);
     updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
   } catch(e) {
     console.error('서버 파트너 목록 로드 실패:', e);
