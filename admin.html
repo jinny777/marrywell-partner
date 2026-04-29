@@ -1322,7 +1322,7 @@ async function sha256hex(str){
 async function savePartners(){
   const enc = await encryptJSON(partners);
   localStorage.setItem('mw_partners', enc);
-  pushPartnersAuth();
+  // pushPartnersAuth는 명시적으로 필요할 때만 호출 (자동 호출 제거 - GitHub 로그인 팝업 방지)
 }
 
 async function loadPartners(){
