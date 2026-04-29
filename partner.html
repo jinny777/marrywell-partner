@@ -535,6 +535,25 @@ tr:hover td{background:#FAFAFF;}
 
       <!-- ════ MATERIALS ════ -->
       <div class="page" id="page-materials">
+
+        <!-- 레퍼럴 QR 배너 -->
+        <div id="mat-qr-banner" style="background:linear-gradient(135deg,#1e0840,#3A2DA0);border-radius:16px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+          <div style="background:#fff;border-radius:12px;padding:10px;flex-shrink:0;">
+            <img id="mat-qr-img" src="" alt="QR" style="width:96px;height:96px;display:block;" />
+          </div>
+          <div style="flex:1;min-width:200px;">
+            <div style="font-size:11px;font-weight:700;color:rgba(162,155,254,.8);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">내 레퍼럴 QR 코드</div>
+            <div id="mat-qr-url-text" style="font-size:13px;font-weight:700;color:#fff;word-break:break-all;margin-bottom:10px;"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button onclick="copyMatReflink()" style="padding:7px 16px;background:#F4C430;color:#1A1A2E;border:none;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">🔗 링크 복사</button>
+              <a id="mat-qr-dl" href="" download style="padding:7px 16px;background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.25);border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">⬇ QR 다운로드</a>
+            </div>
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,.4);line-height:1.6;min-width:160px;">
+            마케팅 자료를 열면<br>이 QR이 자동으로 포함됩니다
+          </div>
+        </div>
+
         <div class="card" style="overflow:visible;">
           <div class="card-header">
             <div class="card-title">📁 마케팅 자료</div>
@@ -1147,29 +1166,72 @@ let allMaterials     = [];
 let matLoaded        = false;
 let currentMatFilter = 'all';
 
+const BASE_MATERIALS = [
+  {id:'b1', title:'브로셔 (A4)', category:'brochure', fileType:'html', url:'https://partners.marrywell.co.kr/materials/MARRYWELL_brochure.html', description:'서비스 전체 소개 A4 브로셔'},
+  {id:'b2', title:'플라이어',    category:'flyer',    fileType:'html', url:'https://partners.marrywell.co.kr/materials/MARRYWELL_flyer.html',    description:'단면 홍보 리플렛'},
+  {id:'b3', title:'3단 팸플릿', category:'trifold',  fileType:'html', url:'https://partners.marrywell.co.kr/materials/MARRYWELL_trifold.html',  description:'3단 접지 상세 소개 자료'},
+  {id:'b4', title:'파트너 리플릿', category:'partner', fileType:'html', url:'https://partners.marrywell.co.kr/materials/MARRYWELL_partner_leaflet.html', description:'파트너 소개 수익 프로그램 안내'},
+];
+
 async function loadMaterials(){
   if(matLoaded) return;
+
+  // QR 배너 초기화
+  initMatQrBanner();
+
   if(isDemoMode() && !session.isReal){
-    allMaterials = DEMO_MATERIALS;
+    allMaterials = [...BASE_MATERIALS, ...DEMO_MATERIALS];
   } else if(session.isReal){
     // 관리자 자료관리탭(mw_materials, active 플래그) 우선, 없으면 wm_materials
     try {
       const mw = JSON.parse(localStorage.getItem('mw_materials') || 'null');
       const wm = JSON.parse(localStorage.getItem('wm_materials') || 'null');
       const src = (mw && mw.length) ? mw : (wm || []);
-      allMaterials = src
+      const extra = src
         .filter(m => m.active !== false && m.enabled !== false)
         .map(m => ({ id: m.id||0, title: m.name||m.title, description: m.desc||m.description||'', url: m.url, fileType: m.fileType||'html', category: m.category||'all', visibleTo:'all', active:true }));
-    } catch(e){ allMaterials = []; }
+      allMaterials = [...BASE_MATERIALS, ...extra];
+    } catch(e){ allMaterials = [...BASE_MATERIALS]; }
   } else {
     try{
       const tier = session.tier||'basic';
       const res  = await fetch(`${SCRIPT_URL}?action=materials&tier=${encodeURIComponent(tier)}`);
-      allMaterials = await res.json();
-    } catch(e){ allMaterials = []; }
+      const extra = await res.json();
+      allMaterials = [...BASE_MATERIALS, ...extra];
+    } catch(e){ allMaterials = [...BASE_MATERIALS]; }
   }
   matLoaded = true;
   renderMaterials();
+}
+
+function initMatQrBanner(){
+  const code = session?.code || '';
+  if(!code) return;
+  const refUrl = `${REFERRAL_BASE}${code}`;
+  const encoded = encodeURIComponent(refUrl);
+  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=96x96&margin=4&data=${encoded}`;
+  const img  = document.getElementById('mat-qr-img');
+  const lbl  = document.getElementById('mat-qr-url-text');
+  const dl   = document.getElementById('mat-qr-dl');
+  if(img) img.src = qrSrc;
+  if(lbl) lbl.textContent = refUrl;
+  if(dl)  dl.href = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=8&data=${encoded}`;
+}
+
+function copyMatReflink(){
+  const code = session?.code || '';
+  if(!code) return;
+  const url = `${REFERRAL_BASE}${code}`;
+  navigator.clipboard.writeText(url)
+    .then(()=>showToast('레퍼럴 링크가 복사되었습니다!'))
+    .catch(()=>showToast('복사 실패. 직접 복사해 주세요.','err'));
+}
+
+function matUrlWithRef(url){
+  const code = session?.code || '';
+  if(!code || !url) return url;
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}ref=${encodeURIComponent(code)}`;
 }
 
 function filterMaterials(cat, btn){
@@ -1189,7 +1251,9 @@ function renderMaterials(){
   }
 
   const typeIco = {html:'🌐', pptx:'📊', pdf:'📄'};
-  grid.innerHTML = list.map(m=>`
+  grid.innerHTML = list.map(m=>{
+    const mUrl = m.fileType==='html' ? matUrlWithRef(m.url) : m.url;
+    return `
     <div class="mat-card">
       <div class="mat-thumb">
         <span>${typeIco[m.fileType]||'📄'}</span>
@@ -1199,33 +1263,35 @@ function renderMaterials(){
         <div class="mat-title">${m.title}</div>
         <div class="mat-desc">${m.description||''}</div>
         <div class="mat-footer">
-          ${m.fileType==='html' ? `<button class="mat-btn mat-btn-preview" onclick="openMatPreview(${m.id})">미리보기</button>` : ''}
-          ${m.fileType==='html' ? `<a class="mat-btn mat-btn-download" href="${m.url}" target="_blank">PDF 저장</a>` : `<a class="mat-btn mat-btn-download" href="${m.url}" download>다운로드</a>`}
+          ${m.fileType==='html' ? `<button class="mat-btn mat-btn-preview" onclick="openMatPreview('${m.id}')">미리보기</button>` : ''}
+          ${m.fileType==='html' ? `<a class="mat-btn mat-btn-download" href="${mUrl}" target="_blank">PDF 저장</a>` : `<a class="mat-btn mat-btn-download" href="${mUrl}" download>다운로드</a>`}
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function openMatPreview(id){
-  const m = allMaterials.find(x=>x.id===id);
+  const m = allMaterials.find(x=>String(x.id)===String(id));
   if(!m) return;
+  const mUrl = m.fileType==='html' ? matUrlWithRef(m.url) : m.url;
   document.getElementById('mat-modal-title').textContent = m.title;
   const pdfBtn = document.getElementById('mat-modal-pdf');
   const dlBtn  = document.getElementById('mat-modal-dl');
   if(m.fileType==='html'){
-    pdfBtn.href = m.url;
+    pdfBtn.href = mUrl;
     pdfBtn.style.display = '';
-    dlBtn.href = m.url;
+    dlBtn.href = mUrl;
     dlBtn.removeAttribute('download');
   } else {
     pdfBtn.style.display = 'none';
-    dlBtn.href = m.url;
+    dlBtn.href = mUrl;
     dlBtn.setAttribute('download','');
     dlBtn.textContent = '⬇ 다운로드';
   }
   const content = document.getElementById('mat-modal-content');
   if(m.fileType==='html'){
-    content.innerHTML = `<div class="iframe-wrap"><iframe src="${m.url}" title="${m.title}" loading="lazy"></iframe></div>`;
+    content.innerHTML = `<div class="iframe-wrap"><iframe src="${mUrl}" title="${m.title}" loading="lazy"></iframe></div>`;
   } else {
     content.innerHTML = `<div class="empty-state"><div class="ico">📥</div><p>${m.fileType.toUpperCase()} 파일은 미리보기가 지원되지 않습니다.<br>아래 버튼으로 다운로드하세요.</p></div>`;
   }
