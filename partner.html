@@ -1001,8 +1001,7 @@ async function doLogin(){
       }
     }
     err.textContent = '파트너 코드 또는 비밀번호가 올바르지 않습니다.';
-      err.style.display = 'block';
-    }
+    err.style.display = 'block';
   } catch(e){
     err.textContent = '서버 연결 오류. 잠시 후 다시 시도해 주세요.';
     err.style.display = 'block';
