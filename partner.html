@@ -934,78 +934,41 @@ async function doLogin(){
   err.style.display = 'none';
   if(!code || !pw){ err.style.display='block'; return; }
 
-  if(isDemoMode()){
-    // 1) admin 같은 브라우저 localStorage (plain JSON만, ENC: 암호화 데이터는 건너뜀)
-    let stored = [];
-    try {
-      const raw = localStorage.getItem('mw_partners') || '[]';
-      if (!raw.startsWith('ENC:')) stored = JSON.parse(raw);
-    } catch(e) {}
-    const found  = stored.find(p => p.code && p.code.toUpperCase() === code);
-    if(found){
-      const validPw = found.pw || found.code;
-      if(pw === validPw || pw === found.code){
-        setSession({ code: found.code, name: found.name, tier: found.tier || 'basic', email: found.email || '', pw: validPw, isReal: true });
-        startApp(); return;
-      }
-    }
-    // 2) partners-auth.json (배포된 인증 파일)
-    const authList = await fetchAuthList();
-    const authEntry = authList.find(p => p.code && p.code.toUpperCase() === code);
-    if(authEntry){
-      const storedPw = authEntry.pw || authEntry.code;
-      const pwHash = await sha256hex(pw);
-      // storedPw가 해시(64자 hex)이면 해시 비교, 아니면 평문 비교 (구버전 호환)
-      const isHash = /^[0-9a-f]{64}$/.test(storedPw);
-      const pwMatch = isHash ? (pwHash === storedPw) : (pw === storedPw || pw === authEntry.code);
-      if(pwMatch){
-        setSession({ code: authEntry.code, name: authEntry.name||authEntry.code, tier: authEntry.tier||'5-9', email: authEntry.email||'', pw: storedPw, isReal: true });
-        startApp(); return;
-      } else {
-        err.textContent = '비밀번호가 올바르지 않습니다.\n(초기 비밀번호는 파트너 코드와 동일합니다)';
-        err.style.display = 'block'; return;
-      }
-    }
-    // 3) 데모 계정
-    if(code === DEMO_PARTNER.code && pw === DEMO_PARTNER.pw){
-      setSession(DEMO_PARTNER);
-      startApp();
-    } else {
-      err.textContent = '파트너 코드 또는 비밀번호가 올바르지 않습니다.\n(초기 비밀번호는 파트너 코드와 동일합니다)';
-      err.style.display = 'block';
-    }
-    return;
+  // 데모 계정
+  if(code === DEMO_PARTNER.code && pw === DEMO_PARTNER.pw){
+    setSession(DEMO_PARTNER); startApp(); return;
   }
 
   btn.disabled = true; btn.textContent = '확인 중...';
-  // 서버 API 우선 시도 (isDemoMode 여부와 무관)
+
+  // 1) 서버 API 시도 (항상 우선)
   try {
     const res  = await fetch(`${API_BASE}/api/partners/login?code=${encodeURIComponent(code)}&pw=${encodeURIComponent(pw)}`);
     const data = await res.json();
     if(data.success){
       setSession({...data.partner, isReal: true});
-      startApp();
-      return;
+      startApp(); return;
     }
-    // 서버에서 실패 → partners-auth.json fallback
-    const authList = await fetchAuthList();
+  } catch(e){ /* 서버 연결 실패 → fallback */ }
+
+  // 2) partners-auth.json fallback
+  try {
+    const authList  = await fetchAuthList();
     const authEntry = authList.find(p => p.code && p.code.toUpperCase() === code);
     if(authEntry){
       const storedPw = authEntry.pw || authEntry.code;
-      const pwHash = await sha256hex(pw);
-      const isHash = /^[0-9a-f]{64}$/.test(storedPw);
-      const pwMatch = isHash ? (pwHash === storedPw) : (pw === storedPw || pw === authEntry.code);
+      const pwHash   = await sha256hex(pw);
+      const isHash   = /^[0-9a-f]{64}$/.test(storedPw);
+      const pwMatch  = isHash ? (pwHash === storedPw) : (pw === storedPw || pw === authEntry.code);
       if(pwMatch){
         setSession({ code: authEntry.code, name: authEntry.name||authEntry.code, tier: authEntry.tier||'5-9', email: authEntry.email||'', pw: storedPw, isReal: true });
         startApp(); return;
       }
     }
-    err.textContent = '파트너 코드 또는 비밀번호가 올바르지 않습니다.';
-    err.style.display = 'block';
-  } catch(e){
-    err.textContent = '서버 연결 오류. 잠시 후 다시 시도해 주세요.';
-    err.style.display = 'block';
-  }
+  } catch(e){}
+
+  err.textContent = '파트너 코드 또는 비밀번호가 올바르지 않습니다. (초기 비밀번호는 파트너 코드와 동일합니다)';
+  err.style.display = 'block';
   btn.disabled = false; btn.textContent = '로그인';
 }
 
