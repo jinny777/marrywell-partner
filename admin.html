@@ -2260,12 +2260,33 @@ function openModal(id){
         ${p.status==='approved'||p.status==='review'?`<button class="sbt sbt-active" onclick="changeStatus('${p.id}','active');closeModalDirect()">▶ 활성화</button>`:''}
         ${p.status==='active'?`<button class="sbt sbt-gold" onclick="changeStatus('${p.id}','gold');closeModalDirect()">⭐ Gold 승격</button>`:''}
         ${p.status!=='rejected'?`<button class="sbt sbt-reject" onclick="changeStatus('${p.id}','rejected');closeModalDirect()">✕ 거절</button>`:''}
+        ${p.code?`<button class="sbt" style="background:#FEF3C7;color:#92400E;border-color:#FCD34D;" onclick="resetPassword('${p.id}','${p.code}')">🔑 비밀번호 재설정</button>`:''}
       </div>
     </div>`;
   document.getElementById('modal-overlay').classList.add('open');
 }
 function closeModal(e){ if(e.target===document.getElementById('modal-overlay')) closeModalDirect(); }
 function closeModalDirect(){ document.getElementById('modal-overlay').classList.remove('open'); }
+
+async function resetPassword(id, code){
+  const newPw = prompt(`새 비밀번호를 입력하세요.\n(비워두면 파트너 코드(${code})로 초기화됩니다):`) ?? null;
+  if(newPw === null) return; // 취소
+  const pw = newPw.trim() || code;
+  try {
+    const res = await fetch(`${API_BASE}/api/partners/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'x-admin-token': 'mw_admin_2025' },
+      body: JSON.stringify({ pw }),
+    });
+    if(!res.ok) throw new Error((await res.json()).error || res.status);
+    const p = partners.find(x => x.id === id);
+    if(p) p.pw = pw;
+    toast(`비밀번호가 "${pw}"(으)로 변경됐습니다.`);
+    closeModalDirect();
+  } catch(e) {
+    toast('비밀번호 변경 실패: ' + e.message, 'err');
+  }
+}
 
 // ── 유틸 ─────────────────────────────────────────
 function copyCode(code){
