@@ -858,9 +858,9 @@ const fmtMoney = n => '₩' + Number(n).toLocaleString('ko-KR');
 const fmtDate  = s => s ? s.slice(0,10) : '-';
 
 function tierInfo(tier){
-  if(tier==='gold'||tier==='10+') return {label:'Gold',cls:'t-gold',rate:70000};
-  if(tier==='silver'||tier==='5-9') return {label:'Silver',cls:'t-silver',rate:50000};
-  return {label:'Basic',cls:'t-basic',rate:30000};
+  if(tier==='gold'||tier==='10+') return {label:'Gold',cls:'t-gold',rate:20000};
+  if(tier==='silver'||tier==='5-9') return {label:'Silver',cls:'t-silver',rate:15000};
+  return {label:'Basic',cls:'t-basic',rate:10000};
 }
 
 function statusBadge(s){
