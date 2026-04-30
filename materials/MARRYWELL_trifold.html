@@ -642,10 +642,15 @@
   .flow-banner p { font-size: 9px; color: rgba(255,255,255,0.65); margin-bottom: 6px; text-align: center; }
   .flow-steps {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  .flow-row {
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 4px;
-    flex-wrap: wrap;
   }
   .flow-step {
     background: rgba(255,255,255,0.15);
@@ -654,6 +659,7 @@
     font-size: 9px;
     font-weight: 600;
     color: white;
+    white-space: nowrap;
   }
   .flow-arrow { font-size: 10px; color: rgba(255,255,255,0.4); }
 
@@ -983,7 +989,8 @@
   .stag                         { font-size: 10.5px; padding: 3px 9px; }
   .cs-badge                     { font-size: 10px; }
   .flow-banner p                { font-size: 11px; }
-  .flow-step                    { font-size: 11px; }
+  .flow-row                     { gap: 5px; }
+  .flow-step                    { font-size: 11px; padding: 4px 10px; }
   .flow-arrow                   { font-size: 12px; }
 
   /* PANEL F */
@@ -1401,15 +1408,18 @@
     <div class="flow-banner">
       <p>이용 플로우</p>
       <div class="flow-steps">
-        <span class="flow-step">🙋 회원가입</span>
-        <span class="flow-arrow">›</span>
-        <span class="flow-step">✏️ 정보 입력</span>
-        <span class="flow-arrow">›</span>
-        <span class="flow-step">🤖 AI 자동 생성</span>
-        <span class="flow-arrow">›</span>
-        <span class="flow-step">📤 URL·QR 발송</span>
-        <span class="flow-arrow">›</span>
-        <span class="flow-step">👥 하객 관리·답례</span>
+        <div class="flow-row">
+          <span class="flow-step">🙋 회원가입</span>
+          <span class="flow-arrow">›</span>
+          <span class="flow-step">✏️ 정보 입력</span>
+          <span class="flow-arrow">›</span>
+          <span class="flow-step">🤖 AI 자동 생성</span>
+        </div>
+        <div class="flow-row">
+          <span class="flow-step">📤 URL·QR 발송</span>
+          <span class="flow-arrow">›</span>
+          <span class="flow-step">👥 하객 관리·답례</span>
+        </div>
       </div>
     </div>
   </div>
