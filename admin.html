@@ -2290,21 +2290,30 @@ const TYPE_BADGE  = {html:'<span style="background:#DCFCE7;color:#14532D;padding
 
 async function loadAdminMaterials(){
   if(matAdminLoaded) return;
-  // 서버에서 우선 로드 (서버가 단일 소스)
+  // 서버에서 우선 로드
   try {
     const res = await fetch(`${API_BASE}/api/admin/materials`, { headers: { 'x-admin-token': 'mw_admin_2025' } });
     if(res.ok){
       const data = await res.json();
-      if(Array.isArray(data) && data.length){
-        adminMaterials = data;
-      }
+      if(Array.isArray(data) && data.length) adminMaterials = data;
     }
   } catch(e){}
-  // 서버 데이터가 없으면 기본 4종으로 초기화 (localStorage 무시 — 구버전 오염 방지)
+
+  // 서버 데이터가 없으면 기본 4종 전체 활성화
   if(!adminMaterials.length){
-    adminMaterials = WELCOME_MATERIALS.map(m=>({...m}));
-    saveMaterials(); // 서버에 저장
+    adminMaterials = WELCOME_MATERIALS.map(m=>({...m, active:true}));
+    saveMaterials();
+  } else {
+    // 서버에 있지만 WELCOME_MATERIALS 중 누락된 항목을 비활성 상태로 추가
+    const existingUrls = new Set(adminMaterials.map(m => m.url));
+    const missing = WELCOME_MATERIALS.filter(m => !existingUrls.has(m.url))
+      .map(m => ({...m, active: false}));
+    if(missing.length){
+      adminMaterials = [...adminMaterials, ...missing];
+      saveMaterials(); // 누락 항목 포함하여 서버 업데이트
+    }
   }
+
   matAdminLoaded = true;
   renderAdminMaterials();
 }
