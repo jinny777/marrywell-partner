@@ -860,13 +860,21 @@
   }
   .benefit-row {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 10px;
     background: var(--purple-pale);
     border-radius: 8px;
-    padding: 10px 12px;
+    padding: 0 12px;
+    min-height: 52px;
+    box-sizing: border-box;
   }
-  .b-ico { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .b-ico { font-size: 18px; flex-shrink: 0; }
+  .benefit-row div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 8px 0;
+  }
   .benefit-row div strong {
     display: block;
     font-size: 10px;
@@ -1000,8 +1008,9 @@
   .pf .value-text h4            { font-size: 11.5px; margin-bottom: 2px; }
   .pf .value-li                 { font-size: 10px; padding: 2px 0; }
   .pf .benefit-list             { gap: 4px; margin: 7px 0 8px; }
-  .pf .benefit-row              { padding: 6px 9px; }
+  .pf .benefit-row              { padding: 0 9px; min-height: 46px; }
   .pf .b-ico                    { font-size: 15px; }
+  .pf .benefit-row div          { padding: 5px 0; }
   .pf .benefit-row div strong   { font-size: 10.5px; }
   .pf .benefit-row div span     { font-size: 9.5px; }
   .pf .cta-box                  { padding: 10px 13px; margin-top: 4px; margin-bottom: 14px; border-radius: 10px; }
