@@ -1397,7 +1397,7 @@ function renderCustomerTable(){
   const ti    = tierInfo(session.tier);
   const tbody = document.getElementById('cust-tbody');
   if(!list.length){
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="ico">👤</div><p>등록된 고객이 없습니다<br><small style="font-size:11px;">"명단 추가" 탭에서 고객을 등록하세요</small></p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="ico">👤</div><p>등록된 고객이 없습니다<br><small style="font-size:11px;">"명단 추가" 탭에서 고객을 등록하세요</small></p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = list.map((c,i)=>`
@@ -1410,7 +1410,36 @@ function renderCustomerTable(){
       <td>${fmtDate(c.submittedAt)}</td>
       <td>${statusBadge(c.status)}</td>
       <td>${(c.status==='purchased'||c.status==='settled') ? fmtMoney(ti.rate) : '-'}</td>
+      <td>
+        <button onclick="deleteCustomer('${c.id}','${encodeURIComponent(c.customerName||'')}')"
+          style="padding:4px 10px;background:#FEE2E2;color:#DC2626;border:1px solid #FCA5A5;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+          🗑
+        </button>
+      </td>
     </tr>`).join('');
+}
+
+// ── 고객 삭제 ───────────────────────────────────
+async function deleteCustomer(id, nameEnc){
+  const name = decodeURIComponent(nameEnc);
+  if(!confirm(`"${name}" 고객을 삭제하시겠습니까?`)) return;
+  try {
+    if(!isDemoMode() || session.isReal){
+      const res = await fetch(
+        `${API_BASE}/api/partners/referrals/${id}?code=${encodeURIComponent(session.code)}`,
+        { method: 'DELETE' }
+      );
+      if(!res.ok){
+        const err = await res.json().catch(()=>({}));
+        showToast(err.error || '삭제 실패', 'err'); return;
+      }
+    }
+    allCustomers = allCustomers.filter(c => String(c.id) !== String(id));
+    renderCustomers();
+    showToast(`"${name}" 고객이 삭제되었습니다.`);
+  } catch(e) {
+    showToast('서버 오류가 발생했습니다.', 'err');
+  }
 }
 
 // ── 단건 추가 ───────────────────────────────────

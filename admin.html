@@ -827,6 +827,7 @@ tr:hover td{background:#FAFAFF;}
                 </div>
                 <button class="btn-outline" onclick="reloadReferrals()" style="white-space:nowrap;padding:7px 14px;font-size:12px;">↺ 새로고침</button>
                 <button class="btn-outline" onclick="exportReferralsCSV()" style="white-space:nowrap;padding:7px 14px;font-size:12px;">⬇ CSV</button>
+                <button onclick="deleteAllReferrals()" style="white-space:nowrap;padding:7px 14px;font-size:12px;background:#FEE2E2;color:#DC2626;border:1.5px solid #FCA5A5;border-radius:100px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-weight:700;">🗑 전체 삭제</button>
               </div>
             </div>
           </div>
@@ -836,7 +837,7 @@ tr:hover td{background:#FAFAFF;}
                 <tr>
                   <th>#</th><th>파트너</th><th>고객명</th><th>연락처</th>
                   <th>이메일</th><th>업체 유형</th><th>메모</th>
-                  <th>제출일</th><th>상태</th><th>상태 변경</th>
+                  <th>제출일</th><th>상태</th><th>상태 변경</th><th>삭제</th>
                 </tr>
               </thead>
               <tbody id="referrals-tbody"></tbody>
@@ -1678,6 +1679,7 @@ function actionBtns(p){
   if(p.status==='approved'&&code) btns += `<button class="btn-sm btn-code" onclick="changeStatus('${id}','active')">활성화</button>`;
   if(p.status!=='rejected'&&p.status!=='gold')
     btns += `<button class="btn-sm btn-reject" onclick="changeStatus('${id}','rejected')">거절</button>`;
+  btns += `<button class="btn-sm" style="background:#FEE2E2;color:#DC2626;border:1.5px solid #FCA5A5;" onclick="deletePartner('${id}','${encodeURIComponent(p.name||'')}')">🗑 삭제</button>`;
   return `<div class="actions">${btns}</div>`;
 }
 
@@ -2571,6 +2573,7 @@ function renderReferralsTable(){
           <option value="settled"    ${r.status==='settled'   ?'selected':''}>정산완료</option>
         </select>
       </td>
+      <td><button class="btn-sm btn-reject" onclick="deleteReferral('${r.id}','${r.customerName||''}')">🗑 삭제</button></td>
     </tr>`).join('');
 }
 
@@ -2589,6 +2592,60 @@ function exportReferralsCSV(){
   a.href = URL.createObjectURL(blob);
   a.download = `고객명단_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
+}
+
+async function deleteReferral(id, name){
+  if(!confirm(`"${decodeURIComponent(name)}" 고객 데이터를 삭제하시겠습니까?`)) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/partners/referrals/${id}`, {
+      method: 'DELETE',
+      headers: { 'x-admin-token': 'mw_admin_2025' },
+    });
+    if(!res.ok) throw new Error((await res.json()).error || res.status);
+    allReferrals = allReferrals.filter(r => String(r.id) !== String(id));
+    renderReferralsStats();
+    renderReferralsTable();
+    toast(`고객 데이터가 삭제되었습니다.`);
+  } catch(e: any) {
+    toast(`삭제 실패: ${e.message}`, 'err');
+  }
+}
+
+async function deleteAllReferrals(){
+  const count = allReferrals.length;
+  if(!count){ toast('삭제할 데이터가 없습니다.'); return; }
+  if(!confirm(`고객 명단 전체 ${count}건을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/partners/referrals`, {
+      method: 'DELETE',
+      headers: { 'x-admin-token': 'mw_admin_2025' },
+    });
+    if(!res.ok) throw new Error((await res.json()).error || res.status);
+    allReferrals = [];
+    renderReferralsStats();
+    renderReferralsTable();
+    toast(`고객 명단 ${count}건이 모두 삭제되었습니다.`);
+  } catch(e: any) {
+    toast(`삭제 실패: ${e.message}`, 'err');
+  }
+}
+
+async function deletePartner(id, nameEnc){
+  const name = decodeURIComponent(nameEnc);
+  if(!confirm(`"${name}" 파트너를 삭제하시겠습니까?\n관련 고객 데이터도 함께 삭제됩니다.`)) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/partners/${id}`, {
+      method: 'DELETE',
+      headers: { 'x-admin-token': 'mw_admin_2025' },
+    });
+    if(!res.ok) throw new Error((await res.json()).error || res.status);
+    partners = partners.filter(p => p.id !== id);
+    updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
+    logHistory('partner_deleted', `${name} 파트너 삭제`, { id });
+    toast(`${name} 파트너가 삭제되었습니다.`);
+  } catch(e: any) {
+    toast(`삭제 실패: ${e.message}`, 'err');
+  }
 }
 
 async function changeReferralStatus(id, status){
