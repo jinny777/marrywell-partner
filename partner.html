@@ -1362,29 +1362,32 @@ async function loadSettlement(){
 }
 
 function renderSettlement(data){
-  const done  = data.filter(s=>s.status==='done');
-  const total = done.reduce((a,b)=>a+(Number(b.amount)||0),0);
-  const curr  = data.find(s=>s.status==='upcoming');
-  const now   = new Date();
-  const next  = new Date(now.getFullYear(), now.getMonth()+1, 15);
+  const paid    = data.filter(s => s.status === 'paid');
+  const pending = data.filter(s => s.status === 'pending');
+  const total   = paid.reduce((a,b) => a + Number(b.amount||0), 0);
+  const currAmt = pending.reduce((a,b) => a + Number(b.amount||0), 0);
+  const now     = new Date();
+  const next    = new Date(now.getFullYear(), now.getMonth()+1, 15);
 
-  document.getElementById('s-month').textContent = fmtMoney(curr?.amount||0);
+  document.getElementById('s-month').textContent = fmtMoney(currAmt);
   document.getElementById('s-next').textContent  = next.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
   document.getElementById('s-total').textContent = fmtMoney(total);
 
   const tbody = document.getElementById('settle-tbody');
   if(!data.length){
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="ico">💰</div><p>정산 내역이 없습니다</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="ico">💰</div><p>정산 내역이 없습니다<br><small>구매완료 고객이 생기면 자동으로 표시됩니다</small></p></div></td></tr>`;
     return;
   }
-  tbody.innerHTML = data.map(s=>`
+
+  const STATUS = { paid:'<span class="status s-active">정산완료</span>', pending:'<span class="status s-pending">정산대기</span>' };
+  tbody.innerHTML = data.map(s => `
     <tr>
       <td class="td-name">${s.month}</td>
-      <td>${s.count}건</td>
+      <td>${s.referralCount || s.count || 0}건</td>
       <td style="font-weight:700;">${fmtMoney(s.amount||0)}</td>
-      <td>${statusBadge(s.status)}</td>
-      <td>${s.payDate||'-'}</td>
-      <td>${s.status==='upcoming' ? `<button class="btn-outline" style="font-size:11px;padding:4px 10px;" onclick="openDispute('${s.month}')">이의제기</button>` : '-'}</td>
+      <td>${STATUS[s.status] || s.status}</td>
+      <td>${s.payDate || '-'}</td>
+      <td>${s.note || '-'}</td>
     </tr>`).join('');
 }
 

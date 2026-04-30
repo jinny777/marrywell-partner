@@ -458,6 +458,10 @@ tr:hover td{background:#FAFAFF;}
         <span class="sb-ico">📋</span> 고객 명단 현황
         <span class="sb-badge" id="referrals-badge" style="display:none">0</span>
       </a>
+      <a class="sb-item" onclick="showPage('settlements')">
+        <span class="sb-ico">💸</span> 정산 관리
+        <span class="sb-badge" id="settlements-badge" style="display:none">0</span>
+      </a>
       <a class="sb-item" onclick="showPage('welcome-mgmt')">
         <span class="sb-ico">📨</span> 파트너 안내 페이지
       </a>
@@ -784,6 +788,52 @@ tr:hover td{background:#FAFAFF;}
           </div>
         </div>
       </div>
+
+      <!-- ════ PAGE: SETTLEMENTS ════ -->
+      <div class="page" id="page-settlements">
+        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
+          <div class="stat-card purple">
+            <div class="stat-label">정산 대기 건수</div>
+            <div class="stat-num" id="st-pending">0</div>
+            <div class="stat-sub">입금 처리 필요</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">대기 금액 합계</div>
+            <div class="stat-num" id="st-pending-amount" style="font-size:20px;">₩0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">누적 정산 완료</div>
+            <div class="stat-num" id="st-done-amount" style="font-size:20px;">₩0</div>
+          </div>
+        </div>
+
+        <!-- 대기중 -->
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header">
+            <div class="card-title">⏳ 정산 대기</div>
+            <button class="btn-outline" onclick="loadSettlements(true)" style="font-size:12px;padding:6px 14px;">↺ 새로고침</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>파트너</th><th>정산 월</th><th>소개 건수</th><th>금액</th><th>처리</th></tr></thead>
+              <tbody id="st-pending-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 완료 -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">✅ 정산 완료</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>파트너</th><th>정산 월</th><th>소개 건수</th><th>금액</th><th>입금일</th><th>메모</th><th>취소</th></tr></thead>
+              <tbody id="st-done-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /settlements -->
 
       <!-- ════ PAGE: REFERRALS ════ -->
       <div class="page" id="page-referrals">
@@ -1635,6 +1685,7 @@ function showPage(name){
     dashboard:'대시보드', partners:'파트너 목록',
     process:'처리 프로세스', payback:'페이백 현황',
     materials:'마케팅 자료 관리', referrals:'고객 명단 현황',
+    settlements:'정산 관리',
     'welcome-mgmt':'파트너 안내 페이지', 'email-send':'이메일 발송',
     history:'변경 이력'
   };
@@ -1644,11 +1695,12 @@ function showPage(name){
       if(i.getAttribute('onclick')&&i.getAttribute('onclick').includes(name)) i.classList.add('active');
     });
   }
-  if(name==='materials') loadAdminMaterials();
-  if(name==='referrals') loadAdminReferrals();
-  if(name==='email-send') initEmailSend();
+  if(name==='materials')   loadAdminMaterials();
+  if(name==='referrals')   loadAdminReferrals();
+  if(name==='settlements') loadSettlements();
+  if(name==='email-send')  initEmailSend();
   if(name==='welcome-mgmt') populatePartnerSelect();
-  if(name==='history') renderHistory();
+  if(name==='history')     renderHistory();
 }
 
 // ── TABLE ROW ─────────────────────────────────────
@@ -2592,6 +2644,93 @@ function exportReferralsCSV(){
   a.href = URL.createObjectURL(blob);
   a.download = `고객명단_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
+}
+
+// ═══════════════════════════════════════════════
+//  정산 관리
+// ═══════════════════════════════════════════════
+let stLoaded = false;
+
+async function loadSettlements(force){
+  if(stLoaded && !force) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/settlements`, { headers:{'x-admin-token':'mw_admin_2025'} });
+    if(!res.ok) throw new Error(await res.text());
+    const { pending, settled } = await res.json();
+    renderSettlements(pending || [], settled || []);
+    stLoaded = true;
+    const badge = document.getElementById('settlements-badge');
+    if(badge){ badge.textContent = pending.length; badge.style.display = pending.length > 0 ? 'inline' : 'none'; }
+  } catch(e) { toast('정산 데이터 로드 실패: ' + e.message, 'err'); }
+}
+
+function fmtMoney(n){ return '₩' + Number(n||0).toLocaleString(); }
+
+function renderSettlements(pending, settled){
+  // 요약
+  const pAmt = pending.reduce((a,b)=>a+Number(b.amount||0),0);
+  const dAmt = settled.reduce((a,b)=>a+Number(b.amount||0),0);
+  document.getElementById('st-pending').textContent       = pending.length;
+  document.getElementById('st-pending-amount').textContent = fmtMoney(pAmt);
+  document.getElementById('st-done-amount').textContent    = fmtMoney(dAmt);
+
+  // 대기
+  const pt = document.getElementById('st-pending-tbody');
+  pt.innerHTML = pending.length ? pending.map(s=>`
+    <tr>
+      <td><div class="td-name">${s.partnerName||s.partnerCode}</div><div class="td-sub">${s.partnerCode}</div></td>
+      <td>${s.month}</td>
+      <td>${s.referralCount}건</td>
+      <td style="font-weight:700;color:var(--warn);">${fmtMoney(s.amount)}</td>
+      <td>
+        <button class="btn-sm btn-approve" onclick="processSettlement('${s.partnerCode}','${s.partnerName||''}','${s.month}',${s.referralCount},${s.amount})">
+          💸 입금 처리
+        </button>
+      </td>
+    </tr>`).join('')
+    : `<tr><td colspan="5"><div class="empty-state"><div class="ico">✅</div><p>대기 중인 정산이 없습니다</p></div></td></tr>`;
+
+  // 완료
+  const dt = document.getElementById('st-done-tbody');
+  dt.innerHTML = settled.length ? settled.map(s=>`
+    <tr>
+      <td><div class="td-name">${s.partnerName||s.partnerCode}</div><div class="td-sub">${s.partnerCode}</div></td>
+      <td>${s.month}</td>
+      <td>${s.referralCount}건</td>
+      <td style="font-weight:700;color:var(--ok);">${fmtMoney(s.amount)}</td>
+      <td>${s.payDate||'-'}</td>
+      <td style="font-size:11px;color:var(--gray);">${s.note||'-'}</td>
+      <td><button class="btn-sm btn-reject" onclick="cancelSettlement('${s.id}')">취소</button></td>
+    </tr>`).join('')
+    : `<tr><td colspan="7"><div class="empty-state"><div class="ico">💰</div><p>정산 완료 내역이 없습니다</p></div></td></tr>`;
+}
+
+async function processSettlement(code, name, month, count, amount){
+  const payDate = prompt(`[${name||code}] ${month} 정산\n금액: ₩${Number(amount).toLocaleString()}\n\n입금일을 입력하세요 (예: 2026-05-15):`, new Date().toISOString().slice(0,10));
+  if(!payDate) return;
+  const note = prompt('메모 (선택사항):') || '';
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/settlements`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-admin-token':'mw_admin_2025'},
+      body: JSON.stringify({ partnerCode:code, partnerName:name, month, referralCount:count, amount, payDate, note }),
+    });
+    if(!res.ok) throw new Error((await res.json()).error || res.status);
+    toast(`${name||code} ${month} 정산 처리 완료 (₩${Number(amount).toLocaleString()})`);
+    loadSettlements(true);
+  } catch(e){ toast('정산 처리 실패: ' + e.message, 'err'); }
+}
+
+async function cancelSettlement(id){
+  if(!confirm('정산 완료를 취소하시겠습니까?')) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/settlements/${id}`, {
+      method:'DELETE', headers:{'x-admin-token':'mw_admin_2025'},
+    });
+    if(!res.ok) throw new Error((await res.json()).error || res.status);
+    toast('정산이 취소됐습니다.');
+    loadSettlements(true);
+  } catch(e){ toast('취소 실패: ' + e.message, 'err'); }
 }
 
 async function deleteReferral(id, name){
