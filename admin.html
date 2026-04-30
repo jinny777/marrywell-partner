@@ -2218,11 +2218,12 @@ function copyCode(code){
   navigator.clipboard.writeText(code).then(()=>toast(`코드 [${code}] 복사됨!`));
 }
 
-function toast(msg){
+function toast(msg, type){
   const t = document.getElementById('toast');
-  t.textContent = '✓  ' + msg;
+  t.textContent = (type==='err' ? '⚠  ' : '✓  ') + msg;
+  t.style.background = type==='err' ? '#DC2626' : '';
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2800);
+  setTimeout(()=>{ t.classList.remove('show'); t.style.background=''; }, 3200);
 }
 
 function exportPayback(){
