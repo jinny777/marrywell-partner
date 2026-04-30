@@ -2606,7 +2606,7 @@ async function deleteReferral(id, name){
     renderReferralsStats();
     renderReferralsTable();
     toast(`고객 데이터가 삭제되었습니다.`);
-  } catch(e: any) {
+  } catch(e) {
     toast(`삭제 실패: ${e.message}`, 'err');
   }
 }
@@ -2625,7 +2625,7 @@ async function deleteAllReferrals(){
     renderReferralsStats();
     renderReferralsTable();
     toast(`고객 명단 ${count}건이 모두 삭제되었습니다.`);
-  } catch(e: any) {
+  } catch(e) {
     toast(`삭제 실패: ${e.message}`, 'err');
   }
 }
@@ -2643,7 +2643,7 @@ async function deletePartner(id, nameEnc){
     updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
     logHistory('partner_deleted', `${name} 파트너 삭제`, { id });
     toast(`${name} 파트너가 삭제되었습니다.`);
-  } catch(e: any) {
+  } catch(e) {
     toast(`삭제 실패: ${e.message}`, 'err');
   }
 }
