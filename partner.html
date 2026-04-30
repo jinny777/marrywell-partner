@@ -546,7 +546,7 @@ tr:hover td{background:#FAFAFF;}
             <div id="mat-qr-url-text" style="font-size:13px;font-weight:700;color:#fff;word-break:break-all;margin-bottom:10px;"></div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
               <button onclick="copyMatReflink()" style="padding:7px 16px;background:#F4C430;color:#1A1A2E;border:none;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;">🔗 링크 복사</button>
-              <a id="mat-qr-dl" href="" download style="padding:7px 16px;background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.25);border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">⬇ QR 다운로드</a>
+              <button id="mat-qr-dl-btn" onclick="downloadMatQR()" style="padding:7px 16px;background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.25);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">⬇ QR 다운로드</button>
             </div>
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,.4);line-height:1.6;min-width:160px;">
@@ -1152,11 +1152,29 @@ function copyReflink(){
 
 function openQRModal(){
   const url    = buildReflink();
-  const qrUrl  = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=10&data=${encodeURIComponent(url)}`;
-  document.getElementById('qr-img').src         = qrUrl;
-  document.getElementById('qr-dl-link').href    = qrUrl;
+  const qrUrl  = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=10&data=${encodeURIComponent(url)}`;
+  document.getElementById('qr-img').src = qrUrl;
   document.getElementById('qr-caption').textContent = session.code + ' 레퍼럴 QR코드';
+  // 다운로드 버튼에 qrUrl 저장
+  const dlBtn = document.getElementById('qr-dl-link');
+  dlBtn.href = '#';
+  dlBtn.onclick = (e) => { e.preventDefault(); downloadQR(qrUrl, `QR_${session.code}.png`); };
   document.getElementById('qr-modal').classList.add('open');
+}
+
+async function downloadQR(qrUrl, filename){
+  try {
+    const res = await fetch(qrUrl);
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename || 'qr.png';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  } catch(e) {
+    showToast('다운로드 실패. 다시 시도해 주세요.', 'err');
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -1204,12 +1222,20 @@ function initMatQrBanner(){
   const refUrl = `${REFERRAL_BASE}${code}`;
   const encoded = encodeURIComponent(refUrl);
   const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=96x96&margin=4&data=${encoded}`;
-  const img  = document.getElementById('mat-qr-img');
-  const lbl  = document.getElementById('mat-qr-url-text');
-  const dl   = document.getElementById('mat-qr-dl');
+  const img = document.getElementById('mat-qr-img');
+  const lbl = document.getElementById('mat-qr-url-text');
   if(img) img.src = qrSrc;
   if(lbl) lbl.textContent = refUrl;
-  if(dl)  dl.href = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=8&data=${encoded}`;
+  // 다운로드용 고해상도 URL 저장
+  window._matQrDownloadUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=8&data=${encoded}`;
+  window._matQrFilename = `QR_${code}.png`;
+}
+
+async function downloadMatQR(){
+  const url = window._matQrDownloadUrl;
+  const filename = window._matQrFilename || 'qr.png';
+  if(!url){ showToast('QR 코드를 먼저 생성해 주세요.', 'err'); return; }
+  await downloadQR(url, filename);
 }
 
 function copyMatReflink(){
