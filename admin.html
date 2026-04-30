@@ -2307,7 +2307,7 @@ async function loadAdminMaterials(){
     // 서버에 있지만 WELCOME_MATERIALS 중 누락된 항목을 비활성 상태로 추가
     const existingUrls = new Set(adminMaterials.map(m => m.url));
     const missing = WELCOME_MATERIALS.filter(m => !existingUrls.has(m.url))
-      .map(m => ({...m, active: false}));
+      .map(m => ({...m, active: true}));
     if(missing.length){
       adminMaterials = [...adminMaterials, ...missing];
       saveMaterials(); // 누락 항목 포함하여 서버 업데이트
