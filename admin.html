@@ -2638,7 +2638,7 @@ function renderReferralsTable(){
       <td style="font-size:12px;color:var(--gray)">${(r.submittedAt||'').slice(0,10)}</td>
       <td><span class="status ${RF_STATUS_CLS[r.status]||'s-pending'}">${RF_STATUS_MAP[r.status]||r.status}</span></td>
       <td>
-        <select onchange="changeReferralStatus(${r.id},this.value)"
+        <select onchange="changeReferralStatus('${r.id}',this.value)"
           style="padding:5px 8px;border:1.5px solid #E0E0F0;border-radius:8px;font-size:11px;font-family:'Noto Sans KR',sans-serif;background:#FAFAFF;">
           <option value="submitted"  ${r.status==='submitted' ?'selected':''}>접수됨</option>
           <option value="contacted"  ${r.status==='contacted' ?'selected':''}>연락중</option>
@@ -2809,19 +2809,36 @@ async function deletePartner(id, nameEnc){
 }
 
 async function changeReferralStatus(id, status){
-  const r = allReferrals.find(x=>Number(x.id)===Number(id));
+  const r = allReferrals.find(x => String(x.id) === String(id));
   if(!r) return;
+  const prev = r.status;
   r.status = status;
   renderReferralsStats();
   renderReferralsTable();
   try{
-    await fetch(`${API_BASE}/api/partners/referrals/${id}`, {
+    const res = await fetch(`${API_BASE}/api/partners/referrals/${id}`, {
       method: 'PATCH',
       headers: {'Content-Type':'application/json','x-admin-token':'mw_admin_2025'},
       body: JSON.stringify({status})
     });
-  }catch(e){}
-  toast(`${r.customerName} 고객 상태가 [${RF_STATUS_MAP[status]}]로 변경되었습니다.`);
+    if(!res.ok){
+      r.status = prev; // 실패 시 롤백
+      renderReferralsStats();
+      renderReferralsTable();
+      toast(`상태 변경 실패 (${res.status})`, 'err');
+      return;
+    }
+    toast(`${r.customerName} 고객 상태가 [${RF_STATUS_MAP[status]}]로 변경됐습니다.`);
+    // 정산 관리 탭도 갱신 (purchased/settled 변경 시)
+    if(status === 'purchased' || status === 'settled' || prev === 'purchased' || prev === 'settled'){
+      stLoaded = false; // 정산 캐시 초기화 → 다음 탭 진입 시 재조회
+    }
+  }catch(e){
+    r.status = prev;
+    renderReferralsStats();
+    renderReferralsTable();
+    toast('서버 연결 오류로 상태 변경에 실패했습니다.', 'err');
+  }
 }
 
 // ── apply.html에서 넘어온 신규 신청 처리 ─────────
