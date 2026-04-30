@@ -389,6 +389,7 @@ tr:hover td{background:#FAFAFF;}
   .login-card{padding:36px 24px;width:calc(100vw - 40px);}
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -539,7 +540,7 @@ tr:hover td{background:#FAFAFF;}
         <!-- 레퍼럴 QR 배너 -->
         <div id="mat-qr-banner" style="background:linear-gradient(135deg,#1e0840,#3A2DA0);border-radius:16px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
           <div style="background:#fff;border-radius:12px;padding:10px;flex-shrink:0;">
-            <img id="mat-qr-img" src="" alt="QR" style="width:96px;height:96px;display:block;" />
+            <div id="mat-qr-canvas-box" style="width:96px;height:96px;"></div>
           </div>
           <div style="flex:1;min-width:200px;">
             <div style="font-size:11px;font-weight:700;color:rgba(162,155,254,.8);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">내 레퍼럴 QR 코드</div>
@@ -785,11 +786,11 @@ tr:hover td{background:#FAFAFF;}
     </div>
     <div class="modal-body">
       <div class="qr-center">
-        <img id="qr-img" src="" alt="QR Code" style="width:200px;height:200px;">
+        <div id="qr-canvas-box" style="background:#fff;padding:12px;border-radius:12px;display:inline-block;"></div>
         <div class="qr-caption" id="qr-caption">내 레퍼럴 링크 QR코드</div>
       </div>
       <div style="text-align:center;margin-top:8px;">
-        <a id="qr-dl-link" href="#" download="marrywell-partner-qr.png" class="btn-primary" style="justify-content:center;">⬇ PNG 다운로드</a>
+        <button onclick="downloadQRCanvas()" class="btn-primary" style="justify-content:center;border:none;cursor:pointer;">⬇ PNG 다운로드</button>
       </div>
     </div>
   </div>
@@ -1150,31 +1151,36 @@ function copyReflink(){
     .catch(()=>showToast('복사 실패. 직접 복사해 주세요.','err'));
 }
 
+let _qrInstance = null;
+let _qrFilename  = 'qr.png';
+
 function openQRModal(){
-  const url    = buildReflink();
-  const qrUrl  = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=10&data=${encodeURIComponent(url)}`;
-  document.getElementById('qr-img').src = qrUrl;
+  const url = buildReflink();
+  _qrFilename = `QR_${session.code}.png`;
   document.getElementById('qr-caption').textContent = session.code + ' 레퍼럴 QR코드';
-  // 다운로드 버튼에 qrUrl 저장
-  const dlBtn = document.getElementById('qr-dl-link');
-  dlBtn.href = '#';
-  dlBtn.onclick = (e) => { e.preventDefault(); downloadQR(qrUrl, `QR_${session.code}.png`); };
+
+  const box = document.getElementById('qr-canvas-box');
+  box.innerHTML = '';
+  if(_qrInstance){ try{ _qrInstance.clear(); }catch(e){} }
+  _qrInstance = new QRCode(box, {
+    text: url,
+    width: 200, height: 200,
+    colorDark: '#1A1A2E', colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
   document.getElementById('qr-modal').classList.add('open');
 }
 
-async function downloadQR(qrUrl, filename){
-  try {
-    const res = await fetch(qrUrl);
-    const blob = await res.blob();
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename || 'qr.png';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-  } catch(e) {
-    showToast('다운로드 실패. 다시 시도해 주세요.', 'err');
-  }
+function downloadQRCanvas(){
+  const box    = document.getElementById('qr-canvas-box');
+  const canvas = box.querySelector('canvas');
+  if(!canvas){ showToast('QR 코드를 먼저 생성해 주세요.', 'err'); return; }
+  const a = document.createElement('a');
+  a.href     = canvas.toDataURL('image/png');
+  a.download = _qrFilename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 }
 
 // ═══════════════════════════════════════════════
@@ -1216,26 +1222,38 @@ function toAbsoluteUrl(url){
   return `https://partners.marrywell.co.kr/${url.replace(/^\//, '')}`;
 }
 
+let _matQrInstance = null;
+
 function initMatQrBanner(){
   const code = session?.code || '';
   if(!code) return;
   const refUrl = `${REFERRAL_BASE}${code}`;
-  const encoded = encodeURIComponent(refUrl);
-  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=96x96&margin=4&data=${encoded}`;
-  const img = document.getElementById('mat-qr-img');
   const lbl = document.getElementById('mat-qr-url-text');
-  if(img) img.src = qrSrc;
   if(lbl) lbl.textContent = refUrl;
-  // 다운로드용 고해상도 URL 저장
-  window._matQrDownloadUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=8&data=${encoded}`;
-  window._matQrFilename = `QR_${code}.png`;
+
+  const box = document.getElementById('mat-qr-canvas-box');
+  if(!box) return;
+  box.innerHTML = '';
+  if(_matQrInstance){ try{ _matQrInstance.clear(); }catch(e){} }
+  _matQrInstance = new QRCode(box, {
+    text: refUrl,
+    width: 96, height: 96,
+    colorDark: '#1A1A2E', colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+  window._matQrCode = code;
 }
 
-async function downloadMatQR(){
-  const url = window._matQrDownloadUrl;
-  const filename = window._matQrFilename || 'qr.png';
-  if(!url){ showToast('QR 코드를 먼저 생성해 주세요.', 'err'); return; }
-  await downloadQR(url, filename);
+function downloadMatQR(){
+  const box    = document.getElementById('mat-qr-canvas-box');
+  const canvas = box ? box.querySelector('canvas') : null;
+  if(!canvas){ showToast('QR 코드를 먼저 생성해 주세요.', 'err'); return; }
+  const a = document.createElement('a');
+  a.href     = canvas.toDataURL('image/png');
+  a.download = `QR_${window._matQrCode || 'marrywell'}.png`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 }
 
 function copyMatReflink(){
