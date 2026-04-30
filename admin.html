@@ -2251,14 +2251,24 @@ const WELCOME_MATERIALS = [
 let adminMaterials = JSON.parse(localStorage.getItem('mw_materials') || 'null') || [];
 let matAdminLoaded = false;
 
-function saveMaterials(){
+async function saveMaterials(){
   localStorage.setItem('mw_materials', JSON.stringify(adminMaterials));
-  // 서버에도 동기화
-  fetch(`${API_BASE}/api/admin/materials`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', 'x-admin-token': 'mw_admin_2025' },
-    body: JSON.stringify({ materials: adminMaterials }),
-  }).catch(()=>{});
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/materials`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'x-admin-token': 'mw_admin_2025' },
+      body: JSON.stringify({ materials: adminMaterials }),
+    });
+    if(!res.ok){
+      const err = await res.json().catch(()=>({message: res.status}));
+      toast(`⚠ 서버 저장 실패: ${err.message}`, 'err');
+      return false;
+    }
+    return true;
+  } catch(e){
+    toast('⚠ 서버 연결 실패 — 변경사항이 저장되지 않았습니다.', 'err');
+    return false;
+  }
 }
 
 // 기본 자료 불러오기 (welcome.html 4종으로 교체)
@@ -2433,12 +2443,9 @@ async function toggleAdminMaterial(id, active){
   const m = adminMaterials.find(x=>x.id===id);
   if(!m) return;
   m.active = active;
-  saveMaterials();
   renderAdminMaterials();
-  if(SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL'){
-    try{ await fetch(`${SCRIPT_URL}?action=toggleMaterial&id=${id}&active=${active}&token=mw_admin_2025`); }catch(e){}
-  }
-  toast(`자료를 ${active?'노출':'숨김'} 처리했습니다.`);
+  const ok = await saveMaterials();
+  if(ok) toast(`자료를 ${active?'노출':'숨김'} 처리했습니다.`);
 }
 
 async function deleteAdminMaterial(id){
