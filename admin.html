@@ -1767,7 +1767,7 @@ async function loadReviews(){
         <td>${r.reviewer_name||'익명'}</td>
         <td style="color:#F4C430;font-size:15px;">${stars(r.rating)}</td>
         <td style="max-width:220px;">${r.review_text||''}</td>
-        <td style="text-align:center;">${r.recommend==='yes'?'👍':'r.recommend==='no'?'👎':'—'}</td>
+        <td style="text-align:center;">${r.recommend==='yes'?'👍':r.recommend==='no'?'👎':'—'}</td>
         <td style="font-size:12px;color:var(--gray);">${r.good_points||'—'}</td>
         <td style="font-size:12px;color:var(--gray);max-width:160px;">${r.improvement||'—'}</td>
       </tr>`).join('');
