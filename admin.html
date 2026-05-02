@@ -468,6 +468,10 @@ tr:hover td{background:#FAFAFF;}
       <a class="sb-item" onclick="showPage('email-send')">
         <span class="sb-ico">✉️</span> 이메일 발송
       </a>
+      <a class="sb-item" onclick="showPage('reviews')">
+        <span class="sb-ico">⭐</span> 고객 후기
+        <span class="sb-badge" id="reviews-badge" style="display:none">0</span>
+      </a>
       <div class="sb-section">기록</div>
       <a class="sb-item" onclick="showPage('history')">
         <span class="sb-ico">🗂</span> 변경 이력
@@ -1198,6 +1202,39 @@ tr:hover td{background:#FAFAFF;}
         </div>
       </div><!-- /page-email-send -->
 
+      <!-- ════ PAGE: REVIEWS ════ -->
+      <div class="page" id="page-reviews">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div style="background:var(--pale);border-radius:12px;padding:10px 20px;text-align:center;">
+              <div style="font-size:11px;color:var(--gray);margin-bottom:2px;">총 후기 수</div>
+              <div style="font-size:22px;font-weight:800;color:var(--p)" id="rev-total">0</div>
+            </div>
+            <div style="background:var(--pale);border-radius:12px;padding:10px 20px;text-align:center;">
+              <div style="font-size:11px;color:var(--gray);margin-bottom:2px;">평균 별점</div>
+              <div style="font-size:22px;font-weight:800;color:#F4C430" id="rev-avg">-</div>
+            </div>
+          </div>
+          <button class="btn-outline" onclick="loadReviews()" style="font-size:12px;padding:8px 16px;">↺ 새로고침</button>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">⭐ 고객 후기 목록</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>날짜</th><th>이름</th><th>별점</th><th>한줄 후기</th>
+                <th>추천</th><th>좋았던 점</th><th>개선사항</th>
+              </tr>
+            </thead>
+            <tbody id="reviews-tbody">
+              <tr><td colspan="7" style="text-align:center;color:var(--gray);padding:24px;">데이터를 불러오는 중...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /page-reviews -->
+
       <!-- ════ PAGE: HISTORY ════ -->
       <div class="page" id="page-history">
         <!-- 필터 + 내보내기 툴바 -->
@@ -1685,7 +1722,7 @@ function showPage(name){
     dashboard:'대시보드', partners:'파트너 목록',
     process:'처리 프로세스', payback:'페이백 현황',
     materials:'마케팅 자료 관리', referrals:'고객 명단 현황',
-    settlements:'정산 관리',
+    settlements:'정산 관리', reviews:'고객 후기',
     'welcome-mgmt':'파트너 안내 페이지', 'email-send':'이메일 발송',
     history:'변경 이력'
   };
@@ -1701,6 +1738,42 @@ function showPage(name){
   if(name==='email-send')  initEmailSend();
   if(name==='welcome-mgmt') populatePartnerSelect();
   if(name==='history')     renderHistory();
+  if(name==='reviews')     loadReviews();
+}
+
+// ── 고객 후기 ─────────────────────────────────────
+async function loadReviews(){
+  const tbody = document.getElementById('reviews-tbody');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:24px;">불러오는 중...</td></tr>';
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/reviews?token=${ADMIN_TOKEN}`);
+    const list = await res.json();
+    document.getElementById('rev-total').textContent = list.length;
+    if(list.length){
+      const avg = (list.reduce((s,r)=>s+r.rating,0)/list.length).toFixed(1);
+      document.getElementById('rev-avg').textContent = avg + ' ★';
+      const badge = document.getElementById('reviews-badge');
+      badge.textContent = list.length;
+      badge.style.display = 'inline';
+    }
+    if(!list.length){
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:24px;">후기가 없습니다.</td></tr>';
+      return;
+    }
+    const stars = n => '★'.repeat(n) + '☆'.repeat(5-n);
+    tbody.innerHTML = list.map(r=>`
+      <tr>
+        <td style="white-space:nowrap;font-size:12px;">${(r.created_at||'').slice(0,10)}</td>
+        <td>${r.reviewer_name||'익명'}</td>
+        <td style="color:#F4C430;font-size:15px;">${stars(r.rating)}</td>
+        <td style="max-width:220px;">${r.review_text||''}</td>
+        <td style="text-align:center;">${r.recommend==='yes'?'👍':'r.recommend==='no'?'👎':'—'}</td>
+        <td style="font-size:12px;color:var(--gray);">${r.good_points||'—'}</td>
+        <td style="font-size:12px;color:var(--gray);max-width:160px;">${r.improvement||'—'}</td>
+      </tr>`).join('');
+  } catch(e){
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--err);padding:24px;">불러오기 실패</td></tr>';
+  }
 }
 
 // ── TABLE ROW ─────────────────────────────────────
