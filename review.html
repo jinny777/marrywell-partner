@@ -229,17 +229,7 @@
       <div class="divider"></div>
 
       <div class="survey-item">
-        <div class="input-label">Q3. 다음에도 이용하시겠어요? <span class="required">*</span></div>
-        <div class="yn-group">
-          <div class="yn-btn yes" onclick="selectYN(this, 'reuse', 'yes')">✅ 네, 또 쓸게요</div>
-          <div class="yn-btn no"  onclick="selectYN(this, 'reuse', 'no')">고민해볼게요</div>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="survey-item">
-        <div class="input-label">Q4. 개선이 필요한 점이 있나요? (선택)</div>
+        <div class="input-label">Q3. 개선이 필요한 점이 있나요? (선택)</div>
         <textarea id="improvement" rows="2" placeholder="불편하셨던 점이나 바라시는 기능을 알려주세요"></textarea>
       </div>
     </div>
@@ -308,7 +298,6 @@ async function submitReview() {
   if (reviewText.length < 10) return alert('✏️ 한줄 후기를 10자 이상 입력해 주세요.');
   if (!survey.recommend) return alert('Q1 답변을 선택해 주세요.');
   if (goodPoints.length === 0) return alert('Q2 좋았던 점을 하나 이상 선택해 주세요.');
-  if (!survey.reuse) return alert('Q3 답변을 선택해 주세요.');
 
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
