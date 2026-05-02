@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이용 후기 작성 | 메리웰 AI 청첩장</title>
+<style>
+  :root {
+    --purple: #6C49FF;
+    --purple-l: #9B7FFF;
+    --purple-d: #4B2FD9;
+    --gold: #F5C842;
+    --text: #1A1A2E;
+    --gray: #6B7280;
+    --bg: #F8F7FF;
+    --card: #FFFFFF;
+    --border: #E8E4FF;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Apple SD Gothic Neo', 'Pretendard', sans-serif; background: var(--bg); color: var(--text); }
+
+  /* ── 히어로 ── */
+  .hero {
+    background: linear-gradient(135deg, var(--purple-d) 0%, var(--purple) 60%, var(--purple-l) 100%);
+    color: white;
+    text-align: center;
+    padding: 56px 24px 48px;
+  }
+  .hero-logo { font-size: 13px; letter-spacing: 3px; opacity: .7; margin-bottom: 16px; }
+  .hero h1 { font-size: 26px; font-weight: 800; line-height: 1.35; margin-bottom: 12px; }
+  .hero p { font-size: 14px; opacity: .85; line-height: 1.7; }
+  .hero-heart { font-size: 36px; margin-bottom: 16px; }
+
+  /* ── 이용안내 ── */
+  .section { max-width: 520px; margin: 0 auto; padding: 40px 20px; }
+  .section-title {
+    font-size: 18px; font-weight: 800; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::after { content:''; flex:1; height:2px; background: var(--border); }
+
+  .guide-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .guide-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 14px; text-align: center;
+  }
+  .guide-icon { font-size: 28px; margin-bottom: 8px; }
+  .guide-item h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; color: var(--purple); }
+  .guide-item p { font-size: 12px; color: var(--gray); line-height: 1.5; }
+
+  /* ── 카드 ── */
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px 24px; margin-bottom: 16px;
+  }
+  .card-title { font-size: 15px; font-weight: 700; margin-bottom: 20px; }
+
+  /* ── 별점 ── */
+  .stars { display: flex; gap: 6px; margin-bottom: 6px; }
+  .star {
+    font-size: 36px; cursor: pointer; transition: transform .15s;
+    color: #D1D5DB; line-height: 1;
+  }
+  .star.active { color: var(--gold); }
+  .star:hover { transform: scale(1.15); }
+  .star-label { font-size: 13px; color: var(--gray); height: 20px; }
+
+  /* ── 인풋 ── */
+  textarea, input[type=text] {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; font-size: 14px; font-family: inherit;
+    outline: none; transition: border-color .2s; resize: none;
+    background: #FAFAFA;
+  }
+  textarea:focus, input[type=text]:focus { border-color: var(--purple); background: white; }
+  .input-label { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+  .input-hint { font-size: 12px; color: var(--gray); margin-top: 6px; }
+
+  /* ── 설문 ── */
+  .survey-item { margin-bottom: 22px; }
+  .survey-item:last-child { margin-bottom: 0; }
+  .choice-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .choice {
+    border: 1.5px solid var(--border); border-radius: 20px;
+    padding: 7px 16px; font-size: 13px; cursor: pointer;
+    transition: all .15s; background: white; color: var(--gray);
+    font-weight: 500;
+  }
+  .choice.selected { border-color: var(--purple); background: var(--purple); color: white; }
+  .yn-group { display: flex; gap: 10px; }
+  .yn-btn {
+    flex: 1; border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 12px; font-size: 14px; cursor: pointer; text-align: center;
+    transition: all .15s; background: white; font-weight: 600;
+  }
+  .yn-btn.yes.selected { border-color: var(--purple); background: var(--purple); color: white; }
+  .yn-btn.no.selected  { border-color: #EF4444; background: #EF4444; color: white; }
+
+  /* ── 제출 버튼 ── */
+  .submit-btn {
+    width: 100%; padding: 16px; border: none; border-radius: 14px;
+    background: linear-gradient(90deg, var(--purple-d), var(--purple));
+    color: white; font-size: 16px; font-weight: 700; cursor: pointer;
+    transition: opacity .2s; margin-top: 8px;
+  }
+  .submit-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .submit-btn:not(:disabled):hover { opacity: .9; }
+
+  /* ── 완료 화면 ── */
+  .done-screen {
+    display: none; text-align: center;
+    max-width: 520px; margin: 60px auto; padding: 40px 24px;
+  }
+  .done-screen .done-icon { font-size: 64px; margin-bottom: 20px; }
+  .done-screen h2 { font-size: 22px; font-weight: 800; margin-bottom: 12px; }
+  .done-screen p { font-size: 14px; color: var(--gray); line-height: 1.7; }
+  .done-badge {
+    display: inline-block; margin-top: 24px;
+    background: linear-gradient(90deg, var(--purple-d), var(--purple));
+    color: white; border-radius: 20px; padding: 10px 24px;
+    font-size: 13px; font-weight: 700; text-decoration: none;
+  }
+
+  .required { color: var(--purple); }
+  .divider { height: 1px; background: var(--border); margin: 0 0 16px; }
+
+  @media (max-width: 400px) {
+    .guide-grid { grid-template-columns: 1fr 1fr; }
+    .hero h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 히어로 -->
+<div class="hero">
+  <div class="hero-logo">MARRYWELL AI WEDDING</div>
+  <div class="hero-heart">💌</div>
+  <h1>이용해 주셔서<br>진심으로 감사드립니다</h1>
+  <p>소중한 결혼을 함께할 수 있어 영광이었습니다.<br>짧은 후기와 설문이 더 나은 서비스를 만드는<br>큰 힘이 됩니다. 🙏</p>
+</div>
+
+<!-- 메인 폼 -->
+<div id="main-content">
+
+  <!-- 이용안내 -->
+  <div class="section" style="padding-bottom: 0;">
+    <div class="section-title">서비스 이용안내</div>
+    <div class="guide-grid">
+      <div class="guide-item">
+        <div class="guide-icon">🤖</div>
+        <h4>AI 자동 생성</h4>
+        <p>정보 입력 후<br>AI가 청첩장을 완성</p>
+      </div>
+      <div class="guide-item">
+        <div class="guide-icon">📱</div>
+        <h4>모바일 최적화</h4>
+        <p>스마트폰에서<br>바로 확인 가능</p>
+      </div>
+      <div class="guide-item">
+        <div class="guide-icon">🔗</div>
+        <h4>URL·QR 공유</h4>
+        <p>링크 하나로<br>하객 전원 공유</p>
+      </div>
+      <div class="guide-item">
+        <div class="guide-icon">📊</div>
+        <h4>하객 관리</h4>
+        <p>참석 여부 확인·<br>답례 문자 발송</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+
+    <!-- 후기 작성 -->
+    <div class="card">
+      <div class="card-title">⭐ 서비스 후기 작성</div>
+
+      <div style="margin-bottom: 20px;">
+        <div class="input-label">만족도 <span class="required">*</span></div>
+        <div class="stars" id="stars">
+          <span class="star" data-v="1">★</span>
+          <span class="star" data-v="2">★</span>
+          <span class="star" data-v="3">★</span>
+          <span class="star" data-v="4">★</span>
+          <span class="star" data-v="5">★</span>
+        </div>
+        <div class="star-label" id="star-label">별점을 선택해 주세요</div>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <div class="input-label">한줄 후기 <span class="required">*</span></div>
+        <textarea id="review-text" rows="3" placeholder="서비스 이용 소감을 자유롭게 작성해 주세요 😊"></textarea>
+        <div class="input-hint">최소 10자 이상 입력해 주세요</div>
+      </div>
+
+      <div>
+        <div class="input-label">이름 (선택)</div>
+        <input type="text" id="reviewer-name" placeholder="홍길동 (익명 가능)">
+      </div>
+    </div>
+
+    <!-- 만족도 설문 -->
+    <div class="card">
+      <div class="card-title">📋 간단 설문 (1분 소요)</div>
+
+      <div class="survey-item">
+        <div class="input-label">Q1. 지인에게 추천하시겠어요? <span class="required">*</span></div>
+        <div class="yn-group">
+          <div class="yn-btn yes" onclick="selectYN(this, 'recommend', 'yes')">👍 추천할게요</div>
+          <div class="yn-btn no"  onclick="selectYN(this, 'recommend', 'no')">아직은 글쎄요</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="survey-item">
+        <div class="input-label">Q2. 가장 좋았던 점은? <span class="required">*</span></div>
+        <div class="choice-group" id="good-points">
+          <div class="choice" onclick="toggleChoice(this)">🤖 AI 자동 생성</div>
+          <div class="choice" onclick="toggleChoice(this)">📱 모바일 청첩장</div>
+          <div class="choice" onclick="toggleChoice(this)">⚡ 빠른 제작</div>
+          <div class="choice" onclick="toggleChoice(this)">💰 합리적 가격</div>
+          <div class="choice" onclick="toggleChoice(this)">🔗 간편한 공유</div>
+          <div class="choice" onclick="toggleChoice(this)">📊 하객 관리</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="survey-item">
+        <div class="input-label">Q3. 다음에도 이용하시겠어요? <span class="required">*</span></div>
+        <div class="yn-group">
+          <div class="yn-btn yes" onclick="selectYN(this, 'reuse', 'yes')">✅ 네, 또 쓸게요</div>
+          <div class="yn-btn no"  onclick="selectYN(this, 'reuse', 'no')">고민해볼게요</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="survey-item">
+        <div class="input-label">Q4. 개선이 필요한 점이 있나요? (선택)</div>
+        <textarea id="improvement" rows="2" placeholder="불편하셨던 점이나 바라시는 기능을 알려주세요"></textarea>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitReview()">후기 & 설문 제출하기 ✉️</button>
+    <p style="text-align:center; font-size:12px; color:var(--gray); margin-top:12px;">
+      소중한 의견은 서비스 개선에만 활용됩니다.
+    </p>
+  </div>
+</div>
+
+<!-- 완료 화면 -->
+<div class="done-screen" id="done-screen">
+  <div class="done-icon">🎉</div>
+  <h2>소중한 후기 감사드립니다!</h2>
+  <p>
+    작성해 주신 후기와 설문은<br>
+    더 좋은 서비스를 만드는 데 소중히 활용됩니다.<br><br>
+    결혼을 진심으로 축하드립니다. 💍<br>
+    행복한 결혼 생활 되세요 🥂
+  </p>
+  <a href="https://ai.marrywell.co.kr" class="done-badge">메리웰 AI 청첩장 바로가기</a>
+</div>
+
+<script>
+const API = 'https://ai.marrywell.co.kr';
+const starLabels = ['', '별로였어요', '조금 아쉬워요', '보통이에요', '만족스러워요', '최고예요! 😍'];
+let selectedRating = 0;
+const survey = { recommend: '', reuse: '' };
+
+// 별점
+document.querySelectorAll('.star').forEach(s => {
+  s.addEventListener('click', () => {
+    selectedRating = +s.dataset.v;
+    document.querySelectorAll('.star').forEach((st, i) => st.classList.toggle('active', i < selectedRating));
+    document.getElementById('star-label').textContent = starLabels[selectedRating];
+  });
+  s.addEventListener('mouseover', () => {
+    const v = +s.dataset.v;
+    document.querySelectorAll('.star').forEach((st, i) => st.classList.toggle('active', i < v));
+  });
+  s.addEventListener('mouseout', () => {
+    document.querySelectorAll('.star').forEach((st, i) => st.classList.toggle('active', i < selectedRating));
+  });
+});
+
+function selectYN(el, key, val) {
+  const group = el.parentElement;
+  group.querySelectorAll('.yn-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  survey[key] = val;
+}
+
+function toggleChoice(el) {
+  el.classList.toggle('selected');
+}
+
+async function submitReview() {
+  const reviewText = document.getElementById('review-text').value.trim();
+  const name = document.getElementById('reviewer-name').value.trim();
+  const improvement = document.getElementById('improvement').value.trim();
+  const goodPoints = [...document.querySelectorAll('#good-points .choice.selected')].map(el => el.textContent.trim());
+
+  // 유효성 검사
+  if (!selectedRating) return alert('⭐ 만족도 별점을 선택해 주세요.');
+  if (reviewText.length < 10) return alert('✏️ 한줄 후기를 10자 이상 입력해 주세요.');
+  if (!survey.recommend) return alert('Q1 답변을 선택해 주세요.');
+  if (goodPoints.length === 0) return alert('Q2 좋았던 점을 하나 이상 선택해 주세요.');
+  if (!survey.reuse) return alert('Q3 답변을 선택해 주세요.');
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = '제출 중...';
+
+  try {
+    const res = await fetch(`${API}/api/reviews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        rating: selectedRating,
+        reviewText,
+        reviewerName: name || '익명',
+        recommend: survey.recommend,
+        goodPoints,
+        reuse: survey.reuse,
+        improvement,
+      }),
+    });
+    if (!res.ok) throw new Error('서버 오류');
+    document.getElementById('main-content').style.display = 'none';
+    document.getElementById('done-screen').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) {
+    alert('제출 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+    btn.disabled = false;
+    btn.textContent = '후기 & 설문 제출하기 ✉️';
+  }
+}
+</script>
+</body>
+</html>
