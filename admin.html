@@ -1749,7 +1749,7 @@ async function loadReviews(){
   const tbody = document.getElementById('reviews-tbody');
   tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:24px;">불러오는 중...</td></tr>';
   try {
-    const res = await fetch(`${API_BASE}/api/admin/reviews?token=${ADMIN_TOKEN}`);
+    const res = await fetch(`${API_BASE}/api/admin/reviews?token=mw_admin_2025`);
     const list = await res.json();
     document.getElementById('rev-total').textContent = list.length;
     if(list.length){
