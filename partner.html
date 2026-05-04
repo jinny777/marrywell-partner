@@ -390,6 +390,7 @@ tr:hover td{background:#FAFAFF;}
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -552,6 +553,31 @@ tr:hover td{background:#FAFAFF;}
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,.4);line-height:1.6;min-width:160px;">
             마케팅 자료를 열면<br>이 QR이 자동으로 포함됩니다
+          </div>
+        </div>
+
+        <!-- 고객 후기 공유 카드 -->
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header">
+            <div class="card-title">⭐ 고객 후기 링크 공유</div>
+          </div>
+          <div style="padding:16px 20px;">
+            <div style="background:#F8F7FF;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;color:#4B3BC7;word-break:break-all;margin-bottom:14px;" id="review-link-text">—</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button onclick="copyReviewLink()"
+                style="padding:9px 18px;background:#F4C430;color:#1A1A2E;border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+                🔗 링크 복사
+              </button>
+              <button onclick="shareKakao()"
+                style="padding:9px 18px;background:#FEE500;color:#3C1E1E;border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+                💬 카카오톡 공유
+              </button>
+              <button onclick="shareEmail()"
+                style="padding:9px 18px;background:#6C49FF;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+                ✉️ 이메일 공유
+              </button>
+            </div>
+            <p style="font-size:11px;color:#9CA3AF;margin-top:10px;">고객에게 링크를 전달하면 후기 작성 후 자동으로 파트너 코드와 연결됩니다.</p>
           </div>
         </div>
 
@@ -983,6 +1009,41 @@ function doLogout(){
 // ═══════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════
+function getReviewLink(){
+  return `https://jinny777.github.io/marrywell-partner/review.html?ref=${session?.code||''}`;
+}
+
+function copyReviewLink(){
+  navigator.clipboard.writeText(getReviewLink()).then(()=>alert('✅ 후기 링크가 복사됐습니다!'));
+}
+
+function shareKakao(){
+  if(!window.Kakao?.isInitialized()) {
+    Kakao.init('6a9fdb60b3c2b0b72c19bc0b6bde0e2c');
+  }
+  Kakao.Share.sendDefault({
+    objectType: 'feed',
+    content: {
+      title: '메리웰 AI 청첩장 - 이용 후기 작성',
+      description: '소중한 후기를 남겨주세요 😊 파트너: ' + (session?.name||''),
+      imageUrl: 'https://ai.marrywell.co.kr/og-image.png',
+      link: { mobileWebUrl: getReviewLink(), webUrl: getReviewLink() },
+    },
+    buttons: [{ title: '후기 작성하기', link: { mobileWebUrl: getReviewLink(), webUrl: getReviewLink() } }],
+  });
+}
+
+function shareEmail(){
+  const link = getReviewLink();
+  const subject = encodeURIComponent('[메리웰] 이용 후기를 남겨주세요 ⭐');
+  const body = encodeURIComponent(
+    `안녕하세요!\n\n메리웰 AI 청첩장을 이용해 주셔서 감사합니다.\n` +
+    `짧은 후기를 남겨주시면 더 나은 서비스를 만드는 데 큰 힘이 됩니다 🙏\n\n` +
+    `▶ 후기 작성 링크: ${link}\n\n감사합니다.`
+  );
+  window.location.href = `mailto:?subject=${subject}&body=${body}`;
+}
+
 function startApp(){
   session = getSession();
   document.getElementById('login-screen').style.display = 'none';
@@ -991,6 +1052,10 @@ function startApp(){
   document.getElementById('sb-avatar').textContent = (session.name||'?').charAt(0);
   document.getElementById('sb-name').textContent   = session.name || '-';
   document.getElementById('sb-code').textContent   = session.code || '-';
+
+  // 후기 링크 표시
+  const rl = document.getElementById('review-link-text');
+  if(rl) rl.textContent = getReviewLink();
 
   const ti = tierInfo(session.tier);
   const tb = document.getElementById('topbar-tier');
