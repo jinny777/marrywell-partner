@@ -1245,7 +1245,13 @@ tr:hover td{background:#FAFAFF;}
               <div style="font-size:22px;font-weight:800;color:#F4C430" id="rev-avg">-</div>
             </div>
           </div>
-          <button class="btn-outline" onclick="loadReviews()" style="font-size:12px;padding:8px 16px;">↺ 새로고침</button>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select id="review-partner-filter" onchange="loadReviews()"
+              style="padding:8px 12px;border:1.5px solid #E0E0F0;border-radius:8px;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;background:white;">
+              <option value="">전체 파트너</option>
+            </select>
+            <button class="btn-outline" onclick="loadReviews()" style="font-size:12px;padding:8px 16px;">↺ 새로고침</button>
+          </div>
         </div>
         <div class="card">
           <div class="card-header">
@@ -1254,12 +1260,12 @@ tr:hover td{background:#FAFAFF;}
           <table>
             <thead>
               <tr>
-                <th>날짜</th><th>이름</th><th>별점</th><th>한줄 후기</th>
+                <th>날짜</th><th>파트너</th><th>이름</th><th>별점</th><th>한줄 후기</th>
                 <th>추천</th><th>좋았던 점</th><th>개선사항</th>
               </tr>
             </thead>
             <tbody id="reviews-tbody">
-              <tr><td colspan="7" style="text-align:center;color:var(--gray);padding:24px;">데이터를 불러오는 중...</td></tr>
+              <tr><td colspan="8" style="text-align:center;color:var(--gray);padding:24px;">데이터를 불러오는 중...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1801,8 +1807,19 @@ async function loadReviews(){
   const tbody = document.getElementById('reviews-tbody');
   tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:24px;">불러오는 중...</td></tr>';
   try {
-    const res = await fetch(`${API_BASE}/api/admin/reviews?token=mw_admin_2025`);
+    const filterEl = document.getElementById('review-partner-filter');
+    const partnerCode = filterEl ? filterEl.value : '';
+    const url = `${API_BASE}/api/admin/reviews?token=mw_admin_2025${partnerCode ? '&partnerCode='+partnerCode : ''}`;
+    const res = await fetch(url);
     const list = await res.json();
+
+    // 파트너 목록 드롭다운 갱신 (전체 조회 시에만)
+    if (!partnerCode && filterEl) {
+      const codes = [...new Set(list.map(r => r.partner_code).filter(Boolean))];
+      const current = filterEl.value;
+      filterEl.innerHTML = '<option value="">전체 파트너</option>' +
+        codes.map(c => `<option value="${c}" ${c===current?'selected':''}>${c}</option>`).join('');
+    }
     document.getElementById('rev-total').textContent = list.length;
     if(list.length){
       const avg = (list.reduce((s,r)=>s+r.rating,0)/list.length).toFixed(1);
@@ -1812,13 +1829,14 @@ async function loadReviews(){
       badge.style.display = 'inline';
     }
     if(!list.length){
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:24px;">후기가 없습니다.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:24px;">후기가 없습니다.</td></tr>';
       return;
     }
     const stars = n => '★'.repeat(n) + '☆'.repeat(5-n);
     tbody.innerHTML = list.map(r=>`
       <tr>
         <td style="white-space:nowrap;font-size:12px;">${(r.created_at||'').slice(0,10)}</td>
+        <td style="font-size:12px;font-weight:700;color:var(--p);">${r.partner_code||'—'}</td>
         <td>${r.reviewer_name||'익명'}</td>
         <td style="color:#F4C430;font-size:15px;">${stars(r.rating)}</td>
         <td style="max-width:220px;">${r.review_text||''}</td>
@@ -1827,7 +1845,7 @@ async function loadReviews(){
         <td style="font-size:12px;color:var(--gray);max-width:160px;">${r.improvement||'—'}</td>
       </tr>`).join('');
   } catch(e){
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--err);padding:24px;">불러오기 실패</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--err);padding:24px;">불러오기 실패</td></tr>';
   }
 }
 
