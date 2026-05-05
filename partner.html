@@ -443,6 +443,9 @@ tr:hover td{background:#FAFAFF;}
       <button class="sb-item" id="sb-materials" onclick="showPage('materials',this)">
         <span class="sb-ico">📁</span> 마케팅 자료
       </button>
+      <button class="sb-item" id="sb-review-share" onclick="showPage('review-share',this)">
+        <span class="sb-ico">⭐</span> 고객 후기 공유
+      </button>
       <div class="sb-section">정산</div>
       <button class="sb-item" id="sb-settlement" onclick="showPage('settlement',this)">
         <span class="sb-ico">💰</span> 정산 현황
@@ -556,8 +559,26 @@ tr:hover td{background:#FAFAFF;}
           </div>
         </div>
 
-        <!-- 고객 후기 공유 카드 -->
-        <div class="card" style="margin-bottom:20px;">
+        <div class="card" style="overflow:visible;">
+          <div class="card-header">
+            <div class="card-title">📁 마케팅 자료</div>
+            <div class="filter-tabs" id="mat-filter-tabs">
+              <button class="ftab active" onclick="filterMaterials('all',this)">전체</button>
+              <button class="ftab" onclick="filterMaterials('trifold',this)">3단 브로셔</button>
+              <button class="ftab" onclick="filterMaterials('brochure',this)">브로셔</button>
+              <button class="ftab" onclick="filterMaterials('flyer',this)">플라이어</button>
+              <button class="ftab" onclick="filterMaterials('partner',this)">파트너 전용</button>
+            </div>
+          </div>
+          <div class="mat-grid" id="mat-grid">
+            <div class="empty-state" style="grid-column:1/-1;"><div class="ico">⏳</div><p>자료를 불러오는 중입니다...</p></div>
+          </div>
+        </div>
+      </div><!-- /materials -->
+
+      <!-- ════ REVIEW SHARE ════ -->
+      <div class="page" id="page-review-share">
+        <div class="card" style="max-width:480px;">
           <div class="card-header">
             <div class="card-title">⭐ 고객 후기 링크 공유</div>
           </div>
@@ -580,23 +601,7 @@ tr:hover td{background:#FAFAFF;}
             <p style="font-size:11px;color:#9CA3AF;margin-top:10px;">고객에게 링크를 전달하면 후기 작성 후 자동으로 파트너 코드와 연결됩니다.</p>
           </div>
         </div>
-
-        <div class="card" style="overflow:visible;">
-          <div class="card-header">
-            <div class="card-title">📁 마케팅 자료</div>
-            <div class="filter-tabs" id="mat-filter-tabs">
-              <button class="ftab active" onclick="filterMaterials('all',this)">전체</button>
-              <button class="ftab" onclick="filterMaterials('trifold',this)">3단 브로셔</button>
-              <button class="ftab" onclick="filterMaterials('brochure',this)">브로셔</button>
-              <button class="ftab" onclick="filterMaterials('flyer',this)">플라이어</button>
-              <button class="ftab" onclick="filterMaterials('partner',this)">파트너 전용</button>
-            </div>
-          </div>
-          <div class="mat-grid" id="mat-grid">
-            <div class="empty-state" style="grid-column:1/-1;"><div class="ico">⏳</div><p>자료를 불러오는 중입니다...</p></div>
-          </div>
-        </div>
-      </div><!-- /materials -->
+      </div>
 
       <!-- ════ SETTLEMENT ════ -->
       <div class="page" id="page-settlement">
@@ -778,6 +783,9 @@ tr:hover td{background:#FAFAFF;}
     </button>
     <button class="mtab" id="mt-materials" onclick="showPage('materials',document.getElementById('sb-materials'));setMTab(this)">
       <span class="mico">📁</span><span class="mlbl">마케팅</span>
+    </button>
+    <button class="mtab" id="mt-review-share" onclick="showPage('review-share',document.getElementById('sb-review-share'));setMTab(this)">
+      <span class="mico">⭐</span><span class="mlbl">후기공유</span>
     </button>
     <button class="mtab" id="mt-settlement" onclick="showPage('settlement',document.getElementById('sb-settlement'));setMTab(this)">
       <span class="mico">💰</span><span class="mlbl">정산</span>
