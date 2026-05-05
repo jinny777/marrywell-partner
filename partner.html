@@ -787,6 +787,43 @@ tr:hover td{background:#FAFAFF;}
   </div>
 </div>
 
+<!-- 후기 요청 이메일 모달 -->
+<div class="modal-overlay" id="review-email-modal" onclick="if(event.target===this)closeReviewEmailModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:500px;width:90%;">
+    <div class="modal-header">
+      <h3>✉️ 후기 요청 이메일 확인</h3>
+      <button class="modal-close" onclick="closeReviewEmailModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px 24px;">
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:700;color:#6B7280;display:block;margin-bottom:6px;">받는 사람</label>
+        <input id="rev-email-to" type="email" readonly
+          style="width:100%;padding:10px 14px;border:1.5px solid #E8E4FF;border-radius:10px;font-size:13px;background:#F8F7FF;box-sizing:border-box;font-family:'Noto Sans KR',sans-serif;">
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:700;color:#6B7280;display:block;margin-bottom:6px;">제목</label>
+        <input id="rev-email-subject" type="text"
+          style="width:100%;padding:10px 14px;border:1.5px solid #E8E4FF;border-radius:10px;font-size:13px;box-sizing:border-box;font-family:'Noto Sans KR',sans-serif;outline:none;">
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="font-size:12px;font-weight:700;color:#6B7280;display:block;margin-bottom:6px;">내용 <span style="font-weight:400;">(수정 가능)</span></label>
+        <textarea id="rev-email-body" rows="8"
+          style="width:100%;padding:10px 14px;border:1.5px solid #E8E4FF;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;resize:vertical;box-sizing:border-box;line-height:1.7;"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="closeReviewEmailModal()"
+          style="flex:1;padding:12px;border:1.5px solid #E8E4FF;border-radius:10px;background:white;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+          취소
+        </button>
+        <button onclick="doSendReviewEmail()"
+          style="flex:2;padding:12px;border:none;border-radius:10px;background:linear-gradient(90deg,#3A2DA0,#6C49FF);color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+          ✉️ 이메일 앱으로 발송
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- 자료 미리보기 모달 -->
 <div class="modal-overlay" id="mat-modal" onclick="closeMatModal(event)">
   <div class="modal modal-lg" onclick="event.stopPropagation()">
@@ -1529,15 +1566,27 @@ function sendReviewRequest(emailEnc, nameEnc){
   const email = decodeURIComponent(emailEnc);
   const name  = decodeURIComponent(nameEnc) || '고객';
   const link  = getReviewLink();
-  const subject = encodeURIComponent('[메리웰] 이용 후기를 남겨주세요 ⭐');
-  const body = encodeURIComponent(
+  document.getElementById('rev-email-to').value = email;
+  document.getElementById('rev-email-subject').value = '[메리웰] 이용 후기를 남겨주세요 ⭐';
+  document.getElementById('rev-email-body').value =
     `안녕하세요, ${name}님!\n\n` +
     `메리웰 AI 청첩장을 이용해 주셔서 감사합니다.\n` +
     `짧은 후기를 남겨주시면 더 나은 서비스를 만드는 데 큰 힘이 됩니다 🙏\n\n` +
     `▶ 후기 작성 링크: ${link}\n\n` +
-    `감사합니다.`
-  );
-  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+    `감사합니다.`;
+  document.getElementById('review-email-modal').classList.add('open');
+}
+
+function closeReviewEmailModal(){
+  document.getElementById('review-email-modal').classList.remove('open');
+}
+
+function doSendReviewEmail(){
+  const to      = document.getElementById('rev-email-to').value;
+  const subject = encodeURIComponent(document.getElementById('rev-email-subject').value);
+  const body    = encodeURIComponent(document.getElementById('rev-email-body').value);
+  window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+  closeReviewEmailModal();
 }
 
 // ── 고객 삭제 ───────────────────────────────────
