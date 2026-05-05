@@ -443,9 +443,6 @@ tr:hover td{background:#FAFAFF;}
       <button class="sb-item" id="sb-materials" onclick="showPage('materials',this)">
         <span class="sb-ico">📁</span> 마케팅 자료
       </button>
-      <button class="sb-item" id="sb-review-share" onclick="showPage('review-share',this)">
-        <span class="sb-ico">⭐</span> 고객 후기 공유
-      </button>
       <div class="sb-section">정산</div>
       <button class="sb-item" id="sb-settlement" onclick="showPage('settlement',this)">
         <span class="sb-ico">💰</span> 정산 현황
@@ -674,7 +671,7 @@ tr:hover td{background:#FAFAFF;}
             </div>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>#</th><th>고객명</th><th>전화번호</th><th>이메일</th><th>업체 유형</th><th>제출일</th><th>상태</th><th>예상 수익</th></tr></thead>
+                <thead><tr><th>#</th><th>고객명</th><th>전화번호</th><th>이메일</th><th>업체 유형</th><th>제출일</th><th>상태</th><th>예상 수익</th><th>후기 요청</th></tr></thead>
                 <tbody id="cust-tbody"></tbody>
               </table>
             </div>
@@ -783,9 +780,6 @@ tr:hover td{background:#FAFAFF;}
     </button>
     <button class="mtab" id="mt-materials" onclick="showPage('materials',document.getElementById('sb-materials'));setMTab(this)">
       <span class="mico">📁</span><span class="mlbl">마케팅</span>
-    </button>
-    <button class="mtab" id="mt-review-share" onclick="showPage('review-share',document.getElementById('sb-review-share'));setMTab(this)">
-      <span class="mico">⭐</span><span class="mlbl">후기공유</span>
     </button>
     <button class="mtab" id="mt-settlement" onclick="showPage('settlement',document.getElementById('sb-settlement'));setMTab(this)">
       <span class="mico">💰</span><span class="mlbl">정산</span>
@@ -1083,7 +1077,7 @@ window.addEventListener('load', ()=>{ const s = getSession(); if(s){ startApp();
 // ═══════════════════════════════════════════════
 //  PAGE NAVIGATION
 // ═══════════════════════════════════════════════
-const PAGE_TITLES = {dashboard:'대시보드',materials:'마케팅 자료',settlement:'정산 현황',customers:'고객 명단'};
+const PAGE_TITLES = {dashboard:'대시보드',materials:'마케팅 자료',settlement:'정산 현황',customers:'고객 명단','review-share':'고객 후기 공유'};
 
 function showPage(name, btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1494,7 +1488,7 @@ function renderCustomerTable(){
   const ti    = tierInfo(session.tier);
   const tbody = document.getElementById('cust-tbody');
   if(!list.length){
-    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="ico">👤</div><p>등록된 고객이 없습니다<br><small style="font-size:11px;">"명단 추가" 탭에서 고객을 등록하세요</small></p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="ico">👤</div><p>등록된 고객이 없습니다<br><small style="font-size:11px;">"명단 추가" 탭에서 고객을 등록하세요</small></p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = list.map((c,i)=>`
@@ -1513,7 +1507,32 @@ function renderCustomerTable(){
           🗑
         </button>
       </td>
+      <td>
+        ${c.customerEmail
+          ? `<button onclick="sendReviewRequest('${encodeURIComponent(c.customerEmail)}','${encodeURIComponent(c.customerName||'')}')"
+              style="padding:4px 10px;background:#EEF0FF;color:#4B3BC7;border:1px solid #C4B5FD;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+              ⭐ 요청
+            </button>`
+          : `<span style="font-size:11px;color:#D1D5DB;">이메일 없음</span>`
+        }
+      </td>
     </tr>`).join('');
+}
+
+// ── 고객 후기 요청 이메일 ───────────────────────────
+function sendReviewRequest(emailEnc, nameEnc){
+  const email = decodeURIComponent(emailEnc);
+  const name  = decodeURIComponent(nameEnc) || '고객';
+  const link  = getReviewLink();
+  const subject = encodeURIComponent('[메리웰] 이용 후기를 남겨주세요 ⭐');
+  const body = encodeURIComponent(
+    `안녕하세요, ${name}님!\n\n` +
+    `메리웰 AI 청첩장을 이용해 주셔서 감사합니다.\n` +
+    `짧은 후기를 남겨주시면 더 나은 서비스를 만드는 데 큰 힘이 됩니다 🙏\n\n` +
+    `▶ 후기 작성 링크: ${link}\n\n` +
+    `감사합니다.`
+  );
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
 }
 
 // ── 고객 삭제 ───────────────────────────────────
