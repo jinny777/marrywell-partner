@@ -1600,9 +1600,11 @@ async function doSendReviewEmail(){
       closeReviewEmailModal();
     } else {
       showToast('발송 실패: ' + (data.error || '오류'), 'err');
+      alert('발송 실패 상세: ' + (data.error || '알 수 없는 오류'));
     }
   } catch(e) {
     showToast('발송 중 오류가 발생했습니다.', 'err');
+    alert('오류: ' + e.message);
   } finally {
     btn.disabled = false;
     btn.textContent = '✉️ 바로 발송';
