@@ -1488,7 +1488,7 @@ function renderCustomerTable(){
   const ti    = tierInfo(session.tier);
   const tbody = document.getElementById('cust-tbody');
   if(!list.length){
-    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="ico">👤</div><p>등록된 고객이 없습니다<br><small style="font-size:11px;">"명단 추가" 탭에서 고객을 등록하세요</small></p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="ico">👤</div><p>등록된 고객이 없습니다<br><small style="font-size:11px;">"명단 추가" 탭에서 고객을 등록하세요</small></p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = list.map((c,i)=>`
@@ -1502,21 +1502,26 @@ function renderCustomerTable(){
       <td>${statusBadge(c.status)}</td>
       <td>${(c.status==='purchased'||c.status==='settled') ? fmtMoney(ti.rate) : '-'}</td>
       <td>
-        <button onclick="deleteCustomer('${c.id}','${encodeURIComponent(c.customerName||'')}')"
-          style="padding:4px 10px;background:#FEE2E2;color:#DC2626;border:1px solid #FCA5A5;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
-          🗑
-        </button>
-      </td>
-      <td>
-        ${c.customerEmail
-          ? `<button onclick="sendReviewRequest('${encodeURIComponent(c.customerEmail)}','${encodeURIComponent(c.customerName||'')}')"
-              style="padding:4px 10px;background:#EEF0FF;color:#4B3BC7;border:1px solid #C4B5FD;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
-              ⭐ 요청
-            </button>`
-          : `<span style="font-size:11px;color:#D1D5DB;">이메일 없음</span>`
-        }
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+          <button onclick="copyReviewLinkDirect()"
+            style="padding:4px 8px;background:#F4C430;color:#1A1A2E;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+            🔗 복사
+          </button>
+          ${c.customerEmail
+            ? `<button onclick="sendReviewRequest('${encodeURIComponent(c.customerEmail)}','${encodeURIComponent(c.customerName||'')}')"
+                style="padding:4px 8px;background:#EEF0FF;color:#4B3BC7;border:1px solid #C4B5FD;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+                ✉️ 발송
+              </button>`
+            : `<span style="font-size:11px;color:#D1D5DB;">-</span>`
+          }
+        </div>
       </td>
     </tr>`).join('');
+}
+
+// ── 후기 링크 직접 복사 ────────────────────────────
+function copyReviewLinkDirect(){
+  navigator.clipboard.writeText(getReviewLink()).then(()=>showToast('✅ 후기 링크가 복사됐습니다!','ok'));
 }
 
 // ── 고객 후기 요청 이메일 ───────────────────────────
