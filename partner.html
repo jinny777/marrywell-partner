@@ -815,9 +815,9 @@ tr:hover td{background:#FAFAFF;}
           style="flex:1;padding:12px;border:1.5px solid #E8E4FF;border-radius:10px;background:white;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
           취소
         </button>
-        <button onclick="doSendReviewEmail()"
+        <button onclick="doSendReviewEmail()" id="rev-send-btn"
           style="flex:2;padding:12px;border:none;border-radius:10px;background:linear-gradient(90deg,#3A2DA0,#6C49FF);color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
-          ✉️ 이메일 앱으로 발송
+          ✉️ 바로 발송
         </button>
       </div>
     </div>
@@ -1581,12 +1581,32 @@ function closeReviewEmailModal(){
   document.getElementById('review-email-modal').classList.remove('open');
 }
 
-function doSendReviewEmail(){
+async function doSendReviewEmail(){
   const to      = document.getElementById('rev-email-to').value;
-  const subject = encodeURIComponent(document.getElementById('rev-email-subject').value);
-  const body    = encodeURIComponent(document.getElementById('rev-email-body').value);
-  window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
-  closeReviewEmailModal();
+  const subject = document.getElementById('rev-email-subject').value;
+  const message = document.getElementById('rev-email-body').value;
+  const btn = document.getElementById('rev-send-btn');
+  btn.disabled = true;
+  btn.textContent = '발송 중...';
+  try {
+    const res = await fetch(`${API_BASE}/api/send-review-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ toEmail: to, toName: '', subject, message }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ 이메일이 발송됐습니다!', 'ok');
+      closeReviewEmailModal();
+    } else {
+      showToast('발송 실패: ' + (data.error || '오류'), 'err');
+    }
+  } catch(e) {
+    showToast('발송 중 오류가 발생했습니다.', 'err');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✉️ 바로 발송';
+  }
 }
 
 // ── 고객 삭제 ───────────────────────────────────
