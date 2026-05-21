@@ -3953,7 +3953,7 @@ async function sendFlyerEmail() {
       try {
         logEl.innerHTML = `<span style="color:var(--gray)">📤 ${email} 발송 중...</span>`;
         console.log('[Flyer] sending to:', email);
-        await emailjs.send('fkzWaCQ71hVots0UrCsSX', tplId, {
+        await emailjs.send('service_lq3rtgf', tplId, {
           to_email:  email,
           subject:   subject,
           html_body: html,
