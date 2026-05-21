@@ -468,6 +468,9 @@ tr:hover td{background:#FAFAFF;}
       <a class="sb-item" onclick="showPage('email-send')">
         <span class="sb-ico">✉️</span> 이메일 발송
       </a>
+      <a class="sb-item" onclick="showPage('flyer-send')">
+        <span class="sb-ico">📄</span> 플라이어 발송
+      </a>
       <a class="sb-item" onclick="showPage('welcome-email')">
         <span class="sb-ico">📧</span> 웰컴 이메일 발송
       </a>
@@ -1208,6 +1211,84 @@ tr:hover td{background:#FAFAFF;}
         </div>
       </div><!-- /page-email-send -->
 
+      <!-- ════ PAGE: FLYER SEND ════ -->
+      <div class="page" id="page-flyer-send">
+        <div style="display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start;">
+
+          <!-- ① 설정 패널 -->
+          <div style="display:flex;flex-direction:column;gap:14px;">
+
+            <!-- 플라이어 선택 -->
+            <div class="card">
+              <div class="card-header"><div class="card-title">📄 플라이어 선택</div></div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <label id="flyer-opt-1" onclick="selectFlyer(1)" style="display:flex;align-items:flex-start;gap:12px;padding:14px;border:2px solid var(--p);border-radius:12px;cursor:pointer;background:var(--pale);">
+                  <input type="radio" name="flyer" value="1" checked style="margin-top:3px;accent-color:var(--p);">
+                  <div>
+                    <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:3px;">파트너 모집 플라이어 (다크 ver.)</div>
+                    <div style="font-size:11px;color:var(--gray);">건당 최대 7만원 · 등급별 수익 구조 · 프리미엄 다크 디자인</div>
+                  </div>
+                </label>
+                <label id="flyer-opt-2" onclick="selectFlyer(2)" style="display:flex;align-items:flex-start;gap:12px;padding:14px;border:2px solid #E0E0F0;border-radius:12px;cursor:pointer;background:#fff;">
+                  <input type="radio" name="flyer" value="2" style="margin-top:3px;accent-color:var(--p);">
+                  <div>
+                    <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:3px;">파트너 모집 플라이어 (A4 ver.)</div>
+                    <div style="font-size:11px;color:var(--gray);">등급표·혜택·참여 방법 상세 · 인쇄용 A4 디자인</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- 수신자 입력 -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">👥 수신자 설정</div>
+                <button onclick="importFlyerRecipients()" class="btn-sm btn-view">파트너 목록에서 가져오기</button>
+              </div>
+              <div style="margin-bottom:10px;">
+                <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:5px;">이메일 주소 입력 <span style="color:var(--gray);font-weight:400;">(쉼표 또는 줄바꿈으로 구분)</span></label>
+                <textarea id="flyer-recipients" rows="6" placeholder="예시:&#10;hong@example.com&#10;kim@naver.com, lee@gmail.com"
+                  style="width:100%;padding:10px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;resize:vertical;line-height:1.7;"
+                  onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'"
+                  oninput="updateFlyerRecipientCount()"></textarea>
+              </div>
+              <div id="flyer-recipient-count" style="padding:8px 12px;background:var(--pale);border-radius:10px;font-size:12px;color:var(--p);font-weight:600;">수신자: 0명</div>
+            </div>
+
+            <!-- 이메일 제목 -->
+            <div class="card">
+              <div class="card-header"><div class="card-title">✏️ 이메일 제목</div></div>
+              <input id="flyer-subject" type="text" value="[MARRYWELL] 파트너 수익 프로그램 안내"
+                style="width:100%;padding:10px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;"
+                onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'">
+            </div>
+
+            <!-- 발송 버튼 -->
+            <div id="flyer-send-result" style="display:none;padding:12px 16px;border-radius:12px;font-size:13px;"></div>
+            <button onclick="sendFlyerEmail()" id="flyer-send-btn"
+              style="width:100%;padding:16px;background:linear-gradient(135deg,var(--pd),var(--pl));color:#fff;border:none;border-radius:100px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Noto Sans KR',sans-serif;box-shadow:0 4px 16px rgba(75,59,199,.3);">
+              📤 플라이어 이메일 발송
+            </button>
+            <div id="flyer-log" style="background:#fff;border-radius:12px;padding:14px;font-size:12px;color:var(--text);line-height:1.9;min-height:48px;border:1.5px solid #E0E0F0;">
+              <span style="color:var(--gray);">발송 결과가 여기에 표시됩니다.</span>
+            </div>
+          </div>
+
+          <!-- ② 미리보기 -->
+          <div class="card" style="position:sticky;top:20px;">
+            <div class="card-header">
+              <div class="card-title">👁 플라이어 미리보기</div>
+              <button onclick="reloadFlyerPreview()" class="btn-sm btn-view">🔄 새로고침</button>
+            </div>
+            <iframe id="flyer-preview-frame"
+              style="width:100%;height:700px;border:none;border-radius:8px;border:1px solid #E0E0F0;"
+              src="https://partners.marrywell.co.kr/materials/MARRYWELL_partners_flyer.html">
+            </iframe>
+          </div>
+
+        </div>
+      </div><!-- /page-flyer-send -->
+
       <!-- ════ PAGE: WELCOME EMAIL ════ -->
       <div class="page" id="page-welcome-email">
         <div class="card" style="max-width:480px;">
@@ -1760,6 +1841,7 @@ function showPage(name){
     materials:'마케팅 자료 관리', referrals:'고객 명단 현황',
     settlements:'정산 관리', reviews:'고객 후기', 'welcome-email':'웰컴 이메일 발송',
     'welcome-mgmt':'파트너 안내 페이지', 'email-send':'이메일 발송',
+    'flyer-send':'플라이어 발송',
     history:'변경 이력'
   };
   document.getElementById('page-title').textContent = titles[name]||name;
@@ -3795,6 +3877,96 @@ async function submitAddPartner(){
   updateStats(); renderRecentTable(); renderPartnerTable();
   closeAddPartnerModal();
   toast(`${name} 님이 파트너로 등록되었습니다.`);
+}
+
+// ══════════════════════════════════════════════════════
+//  플라이어 발송
+// ══════════════════════════════════════════════════════
+const FLYER_URLS = {
+  1: 'https://partners.marrywell.co.kr/materials/MARRYWELL_partners_flyer.html',
+  2: 'https://partners.marrywell.co.kr/materials/MARRYWELL_partner_flyer_A4.html',
+};
+let selectedFlyer = 1;
+
+function selectFlyer(num) {
+  selectedFlyer = num;
+  document.getElementById('flyer-opt-1').style.borderColor = num===1 ? 'var(--p)' : '#E0E0F0';
+  document.getElementById('flyer-opt-1').style.background  = num===1 ? 'var(--pale)' : '#fff';
+  document.getElementById('flyer-opt-2').style.borderColor = num===2 ? 'var(--p)' : '#E0E0F0';
+  document.getElementById('flyer-opt-2').style.background  = num===2 ? 'var(--pale)' : '#fff';
+  document.getElementById('flyer-preview-frame').src = FLYER_URLS[num];
+}
+
+function reloadFlyerPreview() {
+  document.getElementById('flyer-preview-frame').src = FLYER_URLS[selectedFlyer] + '?t=' + Date.now();
+}
+
+function updateFlyerRecipientCount() {
+  const raw = document.getElementById('flyer-recipients').value;
+  const emails = raw.split(/[\n,]+/).map(e=>e.trim()).filter(e=>e.includes('@'));
+  document.getElementById('flyer-recipient-count').textContent = `수신자: ${emails.length}명`;
+}
+
+function importFlyerRecipients() {
+  if (!partners || !partners.length) { alert('파트너 목록을 먼저 로드해주세요.\n(대시보드 또는 파트너 목록 페이지를 먼저 방문해주세요.)'); return; }
+  const emails = partners
+    .filter(p => p.email && p.email.includes('@'))
+    .map(p => p.email);
+  const ta = document.getElementById('flyer-recipients');
+  ta.value = emails.join('\n');
+  updateFlyerRecipientCount();
+  toast(`파트너 ${emails.length}명의 이메일을 불러왔습니다.`);
+}
+
+async function sendFlyerEmail() {
+  const raw = document.getElementById('flyer-recipients').value;
+  const recipients = raw.split(/[\n,]+/).map(e=>e.trim()).filter(e=>e.includes('@'));
+  const subject    = document.getElementById('flyer-subject').value.trim() || '[MARRYWELL] 파트너 수익 프로그램 안내';
+  const resultEl   = document.getElementById('flyer-send-result');
+  const logEl      = document.getElementById('flyer-log');
+  const btn        = document.getElementById('flyer-send-btn');
+
+  if (!recipients.length) { alert('수신자 이메일을 입력해주세요.'); return; }
+
+  if (!confirm(`총 ${recipients.length}명에게 플라이어 이메일을 발송합니다.\n계속하시겠습니까?`)) return;
+
+  btn.disabled = true;
+  btn.textContent = '📤 발송 중...';
+  resultEl.style.display = 'none';
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action:     'sendFlyer',
+        token:      'mw_admin_2025',
+        flyerUrl:   FLYER_URLS[selectedFlyer],
+        recipients: recipients,
+        subject:    subject,
+      })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      resultEl.style.cssText = 'display:block;padding:12px 16px;border-radius:12px;font-size:13px;background:#DCFCE7;color:#16A34A;font-weight:700;';
+      resultEl.textContent = `✅ ${data.sent}명 발송 완료${data.failed ? ` · 실패 ${data.failed}명` : ''}`;
+      logEl.innerHTML = `<b style="color:var(--ok)">✅ 발송 완료 (${new Date().toLocaleTimeString('ko-KR')})</b><br>` +
+        `제목: ${subject}<br>` +
+        `수신자 ${data.sent}명 성공` +
+        (data.failedList?.length ? `<br><span style="color:var(--err)">실패: ${data.failedList.join(', ')}</span>` : '');
+      toast(`플라이어 ${data.sent}명 발송 완료!`);
+    } else {
+      resultEl.style.cssText = 'display:block;padding:12px 16px;border-radius:12px;font-size:13px;background:#FEE2E2;color:#DC2626;font-weight:700;';
+      resultEl.textContent = `❌ 발송 실패: ${data.error}`;
+      logEl.innerHTML = `<span style="color:var(--err)">❌ 오류: ${data.error}</span>`;
+    }
+  } catch(e) {
+    resultEl.style.cssText = 'display:block;padding:12px 16px;border-radius:12px;font-size:13px;background:#FEE2E2;color:#DC2626;';
+    resultEl.textContent = `❌ 오류: ${e.message}`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📤 플라이어 이메일 발송';
+  }
 }
 </script>
 

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARRYWELL 파트너스 — 소개만 해도 수익이 생깁니다</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #f0ebe4; font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrapper { max-width: 600px; margin: 0 auto; background: #fff; }
+
+  /* HERO */
+  .hero {
+    background: #0f0f1a;
+    padding: 52px 48px 48px;
+    position: relative; overflow: hidden;
+  }
+  .hero-ring1 {
+    position: absolute; top: -100px; right: -100px;
+    width: 320px; height: 320px; border-radius: 50%;
+    border: 60px solid rgba(212,175,100,0.07);
+  }
+  .hero-ring2 {
+    position: absolute; bottom: -80px; left: -80px;
+    width: 240px; height: 240px; border-radius: 50%;
+    border: 40px solid rgba(212,175,100,0.06);
+  }
+  .logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
+  .logo-mark {
+    width: 32px; height: 32px; border: 1.5px solid rgba(212,175,100,0.6);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #d4af64; font-weight: 700;
+  }
+  .logo-text { font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 4px; text-transform: uppercase; font-weight: 500; }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(212,175,100,0.12); border: 1px solid rgba(212,175,100,0.35);
+    color: #d4af64; font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
+    padding: 6px 16px; border-radius: 2px; margin-bottom: 28px; font-weight: 600;
+  }
+  .hero-title { font-size: 38px; font-weight: 800; color: #fff; line-height: 1.25; margin-bottom: 16px; letter-spacing: -1px; }
+  .hero-title .accent { color: #d4af64; }
+  .hero-subtitle { font-size: 15px; color: rgba(255,255,255,0.6); line-height: 1.75; font-weight: 400; margin-bottom: 36px; }
+  .hero-subtitle strong { color: rgba(255,255,255,0.9); font-weight: 700; }
+  .amount-pre { font-size: 13px; color: rgba(255,255,255,0.35); margin-bottom: 6px; font-weight: 500; letter-spacing: 1px; display: block; }
+  .amount-row { display: flex; align-items: flex-end; margin-bottom: 40px; }
+  .amount-num { font-size: 64px; font-weight: 900; color: #d4af64; line-height: 1; letter-spacing: -2px; }
+  .amount-unit { font-size: 20px; color: #d4af64; font-weight: 600; margin-bottom: 8px; margin-left: 4px; }
+  .cta-btn {
+    display: inline-block; background: #d4af64; color: #0f0f1a;
+    font-size: 14px; font-weight: 800; padding: 16px 36px; border-radius: 3px;
+    text-decoration: none; letter-spacing: 0.5px;
+  }
+  .tags { margin-top: 18px; display: flex; flex-wrap: wrap; }
+  .tag { font-size: 11px; color: rgba(255,255,255,0.3); padding: 0 12px; border-right: 1px solid rgba(255,255,255,0.1); font-weight: 400; }
+  .tag:first-child { padding-left: 0; }
+  .tag:last-child { border-right: none; }
+
+  /* SECTIONS */
+  .section { padding: 44px 48px; border-bottom: 1px solid #f0ebe4; }
+  .section-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #d4af64; margin-bottom: 24px; font-weight: 700; }
+
+  /* STEPS */
+  .steps-row { display: table; width: 100%; table-layout: fixed; }
+  .step { display: table-cell; padding-right: 20px; position: relative; vertical-align: top; }
+  .step-arrow { display: table-cell; width: 20px; vertical-align: top; padding-top: 16px; color: #d4af64; font-size: 16px; font-weight: 700; }
+  .step-num { font-size: 10px; color: #d4af64; letter-spacing: 2px; margin-bottom: 12px; font-weight: 700; }
+  .step-title { font-size: 16px; font-weight: 800; color: #111; margin-bottom: 8px; }
+  .step-desc { font-size: 12px; color: #777; line-height: 1.7; font-weight: 400; }
+
+  /* PLANS */
+  .plans { display: table; width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 10px; margin: -10px; }
+  .plan { display: table-cell; border: 1.5px solid #e8e2d8; border-radius: 6px; padding: 24px 16px; position: relative; background: #faf8f5; vertical-align: top; }
+  .plan.featured { border-color: #d4af64; background: #0f0f1a; }
+  .plan-badge {
+    display: block; text-align: center;
+    background: #d4af64; color: #0f0f1a; font-size: 9px; font-weight: 800;
+    padding: 3px 10px; border-radius: 20px; letter-spacing: 1.5px;
+    margin-bottom: 12px; margin-top: -6px;
+  }
+  .plan-name { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: #bbb; margin-bottom: 8px; font-weight: 700; }
+  .plan.featured .plan-name { color: rgba(212,175,100,0.6); }
+  .plan-range { font-size: 12px; color: #bbb; margin-bottom: 16px; font-weight: 500; }
+  .plan.featured .plan-range { color: rgba(255,255,255,0.35); }
+  .plan-amount { font-size: 28px; font-weight: 900; color: #111; line-height: 1; margin-bottom: 4px; letter-spacing: -1px; }
+  .plan.featured .plan-amount { color: #d4af64; }
+  .plan-per { font-size: 11px; color: #aaa; margin-bottom: 16px; font-weight: 500; }
+  .plan.featured .plan-per { color: rgba(255,255,255,0.35); }
+  .plan-min { font-size: 10px; color: #ccc; border-top: 1px solid #e8e2d8; padding-top: 14px; line-height: 1.6; font-weight: 500; }
+  .plan.featured .plan-min { border-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.25); }
+
+  /* INDUSTRIES */
+  .industries { display: table; width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 8px; margin: -8px; }
+  .industries-row { display: table-row; }
+  .industry { display: table-cell; text-align: center; padding: 16px 8px; border: 1.5px solid #f0ebe4; border-radius: 6px; background: #faf8f5; }
+  .industry-icon { font-size: 22px; margin-bottom: 8px; display: block; }
+  .industry-name { font-size: 11px; color: #444; font-weight: 700; }
+
+  /* BENEFITS */
+  .benefits-grid { display: table; width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 12px; margin: -12px; }
+  .benefits-row { display: table-row; }
+  .benefit { display: table-cell; padding: 20px; background: #faf8f5; border-radius: 6px; border: 1.5px solid #f0ebe4; vertical-align: top; }
+  .benefit-icon { font-size: 20px; margin-bottom: 10px; display: block; }
+  .benefit-title { font-size: 14px; font-weight: 800; color: #111; margin-bottom: 6px; display: block; }
+  .benefit-desc { font-size: 12px; color: #777; line-height: 1.6; font-weight: 400; }
+
+  /* FOOTER */
+  .footer { background: #0f0f1a; padding: 44px 48px; text-align: center; }
+  .footer-title { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 10px; letter-spacing: -0.5px; line-height: 1.4; }
+  .footer-title .accent { color: #d4af64; }
+  .footer-subtitle { font-size: 12px; color: rgba(255,255,255,0.3); margin-bottom: 28px; font-weight: 500; }
+  .footer-cta {
+    display: inline-block; background: #d4af64; color: #0f0f1a;
+    font-size: 14px; font-weight: 800; padding: 16px 40px; border-radius: 3px;
+    text-decoration: none; letter-spacing: 0.5px; margin-bottom: 24px;
+  }
+  .footer-url { font-size: 11px; color: rgba(255,255,255,0.18); letter-spacing: 1.5px; font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-ring1"></div>
+    <div class="hero-ring2"></div>
+    <div class="logo-row">
+      <div class="logo-mark">M</div>
+      <span class="logo-text">Marrywell</span>
+    </div>
+    <div class="hero-badge">Partner Program</div>
+    <h1 class="hero-title">소개만 해도<br><span class="accent">수익이 생깁니다.</span></h1>
+    <p class="hero-subtitle">메리웰을 업체에 소개하고, 고객이 구매할 때마다<br><strong>건당 최대 페이백</strong>을 받으세요.</p>
+    <span class="amount-pre">건당 최대</span>
+    <div class="amount-row">
+      <span class="amount-num">7만원</span>
+      <span class="amount-unit">&nbsp;/ 건</span>
+    </div>
+    <a href="https://partners.marrywell.co.kr" class="cta-btn">무료 파트너 신청하기 →</a>
+    <div class="tags">
+      <span class="tag">참여 비용 없음</span>
+      <span class="tag">최소 실적 조건 없음</span>
+      <span class="tag">언제든 탈퇴 가능</span>
+    </div>
+  </div>
+
+  <!-- STEPS -->
+  <div class="section">
+    <div class="section-label">How It Works · 3단계</div>
+    <div class="steps-row">
+      <div class="step">
+        <div class="step-num">STEP 01</div>
+        <div class="step-title">업체 소개</div>
+        <div class="step-desc">전용 코드로<br>업체에 소개</div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">STEP 02</div>
+        <div class="step-title">고객 구매</div>
+        <div class="step-desc">예비 신혼부부가<br>서비스 구매</div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step" style="padding-right:0;">
+        <div class="step-num">STEP 03</div>
+        <div class="step-title">페이백 지급</div>
+        <div class="step-desc">익월 15일<br>자동 정산</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLANS -->
+  <div class="section">
+    <div class="section-label">Payback Structure · 등급별 수익</div>
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-name">Basic</div>
+        <div class="plan-range">월 1–4건</div>
+        <div class="plan-amount">3만원</div>
+        <div class="plan-per">/ 건당 지급</div>
+        <div class="plan-min">39,900원 이상<br>결제 시 적용</div>
+      </div>
+      <div class="plan featured">
+        <div class="plan-badge">추천</div>
+        <div class="plan-name">Silver</div>
+        <div class="plan-range">월 5–9건</div>
+        <div class="plan-amount">5만원</div>
+        <div class="plan-per">/ 건당 지급</div>
+        <div class="plan-min">59,800원 이상<br>결제 시 적용</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Gold</div>
+        <div class="plan-range">월 10건 이상</div>
+        <div class="plan-amount">7만원</div>
+        <div class="plan-per">/ 건당 지급</div>
+        <div class="plan-min">99,000원 이상<br>결제 시 적용</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INDUSTRIES -->
+  <div class="section">
+    <div class="section-label">추천 파트너 업종</div>
+    <div class="industries">
+      <div class="industries-row">
+        <div class="industry"><span class="industry-icon">🏛️</span><span class="industry-name">웨딩홀</span></div>
+        <div class="industry"><span class="industry-icon">💍</span><span class="industry-name">웨딩플래너</span></div>
+        <div class="industry"><span class="industry-icon">📸</span><span class="industry-name">스튜디오</span></div>
+        <div class="industry"><span class="industry-icon">👗</span><span class="industry-name">드레스샵</span></div>
+      </div>
+      <div class="industries-row">
+        <div class="industry"><span class="industry-icon">✈️</span><span class="industry-name">허니문여행사</span></div>
+        <div class="industry"><span class="industry-icon">💌</span><span class="industry-name">청첩장업체</span></div>
+        <div class="industry"><span class="industry-icon">💄</span><span class="industry-name">뷰티샵</span></div>
+        <div class="industry"><span class="industry-icon">✨</span><span class="industry-name">기타 업종</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BENEFITS -->
+  <div class="section">
+    <div class="section-label">Partner Benefits · 파트너 혜택</div>
+    <div class="benefits-grid">
+      <div class="benefits-row">
+        <div class="benefit">
+          <span class="benefit-icon">📊</span>
+          <span class="benefit-title">실시간 대시보드</span>
+          <span class="benefit-desc">소개 현황과 수익 통계를 언제든 확인</span>
+        </div>
+        <div class="benefit">
+          <span class="benefit-icon">🎯</span>
+          <span class="benefit-title">전용 마케팅 자료</span>
+          <span class="benefit-desc">브로셔·링크·SNS 콘텐츠 무상 제공</span>
+        </div>
+      </div>
+      <div class="benefits-row">
+        <div class="benefit">
+          <span class="benefit-icon">🔒</span>
+          <span class="benefit-title">투명한 정산</span>
+          <span class="benefit-desc">구매 즉시 적립, 익월 15일 자동 지급</span>
+        </div>
+        <div class="benefit">
+          <span class="benefit-icon">🏆</span>
+          <span class="benefit-title">Gold 파트너 인증</span>
+          <span class="benefit-desc">우수 파트너 공식 인증 및 분기 보너스</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <p class="footer-title">지금 바로 파트너 신청하고<br><span class="accent">첫 소개부터 수익</span>을 시작하세요.</p>
+    <p class="footer-subtitle">참여 비용 없음 · 최소 실적 조건 없음 · 언제든 탈퇴 가능</p>
+    <br>
+    <a href="https://partners.marrywell.co.kr" class="footer-cta">파트너 신청하기 →</a>
+    <br>
+    <p class="footer-url">partners.marrywell.co.kr</p>
+  </div>
+
+</div>
+</body>
+</html>

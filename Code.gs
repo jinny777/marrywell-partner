@@ -87,6 +87,12 @@ function doPost(e) {
       return addMaterial(data);
     }
 
+    // 플라이어 이메일 발송 (관리자)
+    if (action === 'sendFlyer') {
+      if (data.token !== ADMIN_TOKEN) return jsonOut({ success: false, error: 'unauthorized' });
+      return sendFlyerEmail(data);
+    }
+
     return jsonOut({ success: false, error: 'unknown action' });
   } catch (err) {
     return jsonOut({ success: false, error: err.message });
@@ -453,6 +459,44 @@ function listSettlements(partnerCode) {
       })
       .sort((a, b) => String(b.month).localeCompare(String(a.month)))
   );
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  플라이어 이메일 발송
+// ─────────────────────────────────────────────────────────────────
+function sendFlyerEmail(data) {
+  const recipients = data.recipients || [];
+  const subject    = data.subject   || '[MARRYWELL] 파트너 제안서';
+  const flyerUrl   = data.flyerUrl;
+
+  if (!flyerUrl)            return jsonOut({ success: false, error: '플라이어 URL이 없습니다.' });
+  if (!recipients.length)   return jsonOut({ success: false, error: '수신자가 없습니다.' });
+
+  try {
+    const html = UrlFetchApp.fetch(flyerUrl + '?t=' + Date.now()).getContentText('UTF-8');
+    const sent = [];
+    const failed = [];
+
+    recipients.forEach(function(email) {
+      email = String(email).trim();
+      if (!email || !email.includes('@')) return;
+      try {
+        MailApp.sendEmail({
+          to:       email,
+          subject:  subject,
+          htmlBody: html,
+          name:     'MARRYWELL 파트너스'
+        });
+        sent.push(email);
+      } catch(e) {
+        failed.push(email);
+      }
+    });
+
+    return jsonOut({ success: true, sent: sent.length, failed: failed.length, failedList: failed });
+  } catch(e) {
+    return jsonOut({ success: false, error: e.message });
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────
