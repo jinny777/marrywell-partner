@@ -3944,44 +3944,44 @@ async function sendFlyerEmail() {
     const html = `<!DOCTYPE html>
 <html lang="ko">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f0ede8;font-family:'Apple SD Gothic Neo',Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0ede8;padding:32px 0;">
+<body style="margin:0;padding:0;background:#f0ebe4;font-family:'Apple SD Gothic Neo',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0ebe4;padding:32px 0;">
 <tr><td align="center">
-<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
 
   <!-- 헤더 -->
-  <tr><td style="background:#0f0f1a;padding:40px 40px 36px;text-align:center;">
-    <div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:4px;text-transform:uppercase;margin-bottom:16px;">MARRYWELL · PARTNER PROGRAM</div>
-    <div style="font-size:30px;font-weight:900;color:#ffffff;line-height:1.3;margin-bottom:10px;">소개만 해도<br><span style="color:#d4af64;">수익이 생깁니다.</span></div>
-    <div style="font-size:13px;color:rgba(255,255,255,0.55);line-height:1.7;">메리웰을 업체에 소개하고, 고객이 구매할 때마다<br><strong style="color:rgba(255,255,255,0.85);">건당 최대 페이백</strong>을 받으세요.</div>
+  <tr><td style="background:#f0ebe4;padding:40px 40px 32px;text-align:center;border-bottom:2px solid rgba(212,175,100,0.3);">
+    <div style="display:inline-block;border:1.5px solid rgba(212,175,100,0.5);border-radius:100px;padding:4px 16px;font-size:10px;color:#8a7a5a;letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;">MARRYWELL · PARTNER PROGRAM</div>
+    <div style="font-size:32px;font-weight:900;color:#1a1208;line-height:1.3;margin-bottom:12px;">소개만 해도<br><span style="color:#b8912a;">수익이 생깁니다.</span></div>
+    <div style="font-size:13px;color:#6a5a40;line-height:1.8;">메리웰을 업체에 소개하고, 고객이 구매할 때마다<br><strong style="color:#1a1208;">건당 최대 페이백</strong>을 받으세요.</div>
   </td></tr>
 
   <!-- 핵심 수치 -->
-  <tr><td style="background:#1a1428;padding:28px 40px;">
+  <tr><td style="background:#faf7f2;padding:28px 40px;border-bottom:1px solid #ece6da;">
     <table width="100%" cellpadding="0" cellspacing="0">
       <tr>
-        <td align="center" style="padding:0 10px;border-right:1px solid rgba(255,255,255,0.08);">
-          <div style="font-size:11px;color:rgba(212,175,100,0.7);letter-spacing:1.5px;margin-bottom:8px;">건당 최대</div>
-          <div style="font-size:44px;font-weight:900;color:#d4af64;line-height:1;">7만원</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">/ 건 지급</div>
+        <td align="center" style="padding:0 10px;border-right:1px solid #ddd5c4;">
+          <div style="font-size:11px;color:#b8912a;letter-spacing:1.5px;font-weight:700;margin-bottom:8px;">건당 최대</div>
+          <div style="font-size:44px;font-weight:900;color:#b8912a;line-height:1;">7만원</div>
+          <div style="font-size:11px;color:#9a8a6a;margin-top:4px;">/ 건 지급</div>
         </td>
-        <td align="center" style="padding:0 10px;border-right:1px solid rgba(255,255,255,0.08);">
-          <div style="font-size:11px;color:rgba(212,175,100,0.7);letter-spacing:1.5px;margin-bottom:8px;">참여 비용</div>
-          <div style="font-size:36px;font-weight:900;color:#ffffff;line-height:1;">무료</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">최소 조건 없음</div>
+        <td align="center" style="padding:0 10px;border-right:1px solid #ddd5c4;">
+          <div style="font-size:11px;color:#b8912a;letter-spacing:1.5px;font-weight:700;margin-bottom:8px;">참여 비용</div>
+          <div style="font-size:36px;font-weight:900;color:#1a1208;line-height:1;">무료</div>
+          <div style="font-size:11px;color:#9a8a6a;margin-top:4px;">최소 조건 없음</div>
         </td>
         <td align="center" style="padding:0 10px;">
-          <div style="font-size:11px;color:rgba(212,175,100,0.7);letter-spacing:1.5px;margin-bottom:8px;">정산 주기</div>
-          <div style="font-size:36px;font-weight:900;color:#ffffff;line-height:1;">익월 15일</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">자동 정산</div>
+          <div style="font-size:11px;color:#b8912a;letter-spacing:1.5px;font-weight:700;margin-bottom:8px;">정산 주기</div>
+          <div style="font-size:32px;font-weight:900;color:#1a1208;line-height:1;">익월 15일</div>
+          <div style="font-size:11px;color:#9a8a6a;margin-top:4px;">자동 정산</div>
         </td>
       </tr>
     </table>
   </td></tr>
 
   <!-- 수익 구조 -->
-  <tr><td style="padding:32px 40px 20px;">
-    <div style="font-size:11px;font-weight:700;color:#4B3BC7;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">💰 등급별 페이백 구조</div>
+  <tr><td style="padding:32px 40px 20px;background:#fff;">
+    <div style="font-size:11px;font-weight:700;color:#b8912a;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">💰 등급별 페이백 구조</div>
     <table width="100%" cellpadding="0" cellspacing="0">
       <tr>
         <td style="padding:4px 6px;">
@@ -3995,7 +3995,7 @@ async function sendFlyerEmail() {
           </table>
         </td>
         <td style="padding:4px 6px;">
-          <table width="100%" cellpadding="0" cellspacing="0" style="background:#0f0f1a;border-radius:10px;padding:16px;border:2px solid #d4af64;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1208;border-radius:10px;padding:16px;border:2px solid #b8912a;">
             <tr>
               <td><div style="font-size:10px;font-weight:700;color:#d4af64;letter-spacing:1px;">SILVER ✦ 추천</div>
               <div style="font-size:11px;color:rgba(255,255,255,0.4);margin:2px 0;">월 5~9건</div>
@@ -4019,29 +4019,29 @@ async function sendFlyerEmail() {
   </td></tr>
 
   <!-- 3단계 프로세스 -->
-  <tr><td style="padding:20px 40px 24px;">
-    <div style="font-size:11px;font-weight:700;color:#4B3BC7;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">⚡ 3단계로 수익 발생</div>
+  <tr><td style="padding:20px 40px 24px;background:#fff;">
+    <div style="font-size:11px;font-weight:700;color:#b8912a;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">⚡ 3단계로 수익 발생</div>
     <table width="100%" cellpadding="0" cellspacing="0">
       <tr>
         <td align="center" style="padding:0 6px;">
-          <div style="background:#f0efff;border-radius:10px;padding:16px 12px;text-align:center;">
-            <div style="font-size:10px;font-weight:700;color:#4B3BC7;letter-spacing:1px;margin-bottom:6px;">STEP 01</div>
+          <div style="background:#f5f0e8;border-radius:10px;padding:16px 12px;text-align:center;">
+            <div style="font-size:10px;font-weight:700;color:#b8912a;letter-spacing:1px;margin-bottom:6px;">STEP 01</div>
             <div style="font-size:14px;font-weight:800;color:#2c2c54;margin-bottom:4px;">업체 소개</div>
             <div style="font-size:11px;color:#666;line-height:1.5;">전용 코드로<br>업체에 소개</div>
           </div>
         </td>
-        <td align="center" style="font-size:18px;color:#4B3BC7;font-weight:700;width:24px;">→</td>
+        <td align="center" style="font-size:18px;color:#b8912a;font-weight:700;width:24px;">→</td>
         <td align="center" style="padding:0 6px;">
-          <div style="background:#f0efff;border-radius:10px;padding:16px 12px;text-align:center;">
-            <div style="font-size:10px;font-weight:700;color:#4B3BC7;letter-spacing:1px;margin-bottom:6px;">STEP 02</div>
+          <div style="background:#f5f0e8;border-radius:10px;padding:16px 12px;text-align:center;">
+            <div style="font-size:10px;font-weight:700;color:#b8912a;letter-spacing:1px;margin-bottom:6px;">STEP 02</div>
             <div style="font-size:14px;font-weight:800;color:#2c2c54;margin-bottom:4px;">고객 구매</div>
             <div style="font-size:11px;color:#666;line-height:1.5;">예비 신혼부부가<br>서비스 구매</div>
           </div>
         </td>
-        <td align="center" style="font-size:18px;color:#4B3BC7;font-weight:700;width:24px;">→</td>
+        <td align="center" style="font-size:18px;color:#b8912a;font-weight:700;width:24px;">→</td>
         <td align="center" style="padding:0 6px;">
-          <div style="background:#f0efff;border-radius:10px;padding:16px 12px;text-align:center;">
-            <div style="font-size:10px;font-weight:700;color:#4B3BC7;letter-spacing:1px;margin-bottom:6px;">STEP 03</div>
+          <div style="background:#f5f0e8;border-radius:10px;padding:16px 12px;text-align:center;">
+            <div style="font-size:10px;font-weight:700;color:#b8912a;letter-spacing:1px;margin-bottom:6px;">STEP 03</div>
             <div style="font-size:14px;font-weight:800;color:#2c2c54;margin-bottom:4px;">페이백 지급</div>
             <div style="font-size:11px;color:#666;line-height:1.5;">익월 15일<br>자동 정산</div>
           </div>
@@ -4051,8 +4051,8 @@ async function sendFlyerEmail() {
   </td></tr>
 
   <!-- 추천 업종 -->
-  <tr><td style="padding:0 40px 24px;">
-    <div style="font-size:11px;font-weight:700;color:#4B3BC7;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">🏢 추천 파트너 업종</div>
+  <tr><td style="padding:0 40px 24px;background:#fff;">
+    <div style="font-size:11px;font-weight:700;color:#b8912a;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">🏢 추천 파트너 업종</div>
     <div style="font-size:13px;color:#444;line-height:2;">
       💒 웨딩홀 &nbsp;|&nbsp; 👗 웨딩드레스 &nbsp;|&nbsp; 📸 스튜디오 &nbsp;|&nbsp; 💃 드레스샵<br>
       ✍️ 혼인신고사무소 &nbsp;|&nbsp; 📬 청첩장업체 &nbsp;|&nbsp; 💅 뷰티샵 &nbsp;|&nbsp; ✨ 기타 웨딩 업종
@@ -4060,8 +4060,8 @@ async function sendFlyerEmail() {
   </td></tr>
 
   <!-- 참여 조건 -->
-  <tr><td style="padding:0 40px 28px;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f7ff;border-radius:10px;padding:16px 20px;">
+  <tr><td style="padding:0 40px 28px;background:#fff;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f0e8;border-radius:10px;padding:16px 20px;">
       <tr>
         <td style="font-size:13px;color:#333;line-height:2.2;">
           ✅ &nbsp;참여 비용 없음 (완전 무료)<br>
@@ -4074,21 +4074,21 @@ async function sendFlyerEmail() {
   </td></tr>
 
   <!-- CTA 버튼 -->
-  <tr><td style="padding:0 40px 36px;text-align:center;">
+  <tr><td style="padding:0 40px 36px;text-align:center;background:#fff;">
     <a href="${flyerUrl}" target="_blank"
-      style="display:inline-block;background:#4B3BC7;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:100px;font-size:14px;font-weight:800;margin-bottom:12px;">
+      style="display:inline-block;background:#1a1208;color:#d4af64;text-decoration:none;padding:14px 32px;border-radius:100px;font-size:14px;font-weight:800;margin-bottom:12px;border:1.5px solid #b8912a;">
       📋 상세 내용 보기 →
     </a>
     <br>
     <a href="https://partners.marrywell.co.kr/apply.html" target="_blank"
-      style="display:inline-block;background:#F4C430;color:#2c2c54;text-decoration:none;padding:16px 44px;border-radius:100px;font-size:15px;font-weight:900;">
+      style="display:inline-block;background:#d4af64;color:#1a1208;text-decoration:none;padding:16px 44px;border-radius:100px;font-size:15px;font-weight:900;">
       무료로 파트너 신청하기 →
     </a>
   </td></tr>
 
   <!-- 푸터 -->
-  <tr><td style="background:#0f0f1a;padding:20px 40px;text-align:center;">
-    <p style="font-size:11px;color:rgba(255,255,255,0.3);margin:0;">© MARRYWELL · AI Wedding Studio · partners.marrywell.co.kr</p>
+  <tr><td style="background:#f0ebe4;padding:20px 40px;text-align:center;border-top:1px solid #ddd5c4;">
+    <p style="font-size:11px;color:#9a8a6a;margin:0;">© MARRYWELL · AI Wedding Studio · partners.marrywell.co.kr</p>
   </td></tr>
 
 </table>
