@@ -3919,7 +3919,14 @@ function importFlyerRecipients() {
 }
 
 async function sendFlyerEmail() {
-  const raw = document.getElementById('flyer-recipients').value;
+  const tplId = localStorage.getItem('emailjs_template_id') || '';
+  if (!tplId) {
+    alert('EmailJS 템플릿 ID가 없습니다.\n이메일 발송 페이지에서 템플릿 ID를 먼저 저장해주세요.');
+    showPage('email-send');
+    return;
+  }
+
+  const raw        = document.getElementById('flyer-recipients').value;
   const recipients = raw.split(/[\n,]+/).map(e=>e.trim()).filter(e=>e.includes('@'));
   const subject    = document.getElementById('flyer-subject').value.trim() || '[MARRYWELL] 파트너 수익 프로그램 안내';
   const resultEl   = document.getElementById('flyer-send-result');
@@ -3927,42 +3934,47 @@ async function sendFlyerEmail() {
   const btn        = document.getElementById('flyer-send-btn');
 
   if (!recipients.length) { alert('수신자 이메일을 입력해주세요.'); return; }
-
   if (!confirm(`총 ${recipients.length}명에게 플라이어 이메일을 발송합니다.\n계속하시겠습니까?`)) return;
 
   btn.disabled = true;
   btn.textContent = '📤 발송 중...';
   resultEl.style.display = 'none';
+  logEl.innerHTML = '<span style="color:var(--gray)">발송 준비 중...</span>';
 
   try {
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        action:     'sendFlyer',
-        token:      'mw_admin_2025',
-        flyerUrl:   FLYER_URLS[selectedFlyer],
-        recipients: recipients,
-        subject:    subject,
-      })
-    });
-    const data = await res.json();
+    // 플라이어 HTML 불러오기 (같은 도메인)
+    const html = await fetch(FLYER_URLS[selectedFlyer] + '?t=' + Date.now()).then(r => r.text());
 
-    if (data.success) {
-      resultEl.style.cssText = 'display:block;padding:12px 16px;border-radius:12px;font-size:13px;background:#DCFCE7;color:#16A34A;font-weight:700;';
-      resultEl.textContent = `✅ ${data.sent}명 발송 완료${data.failed ? ` · 실패 ${data.failed}명` : ''}`;
-      logEl.innerHTML = `<b style="color:var(--ok)">✅ 발송 완료 (${new Date().toLocaleTimeString('ko-KR')})</b><br>` +
-        `제목: ${subject}<br>` +
-        `수신자 ${data.sent}명 성공` +
-        (data.failedList?.length ? `<br><span style="color:var(--err)">실패: ${data.failedList.join(', ')}</span>` : '');
-      toast(`플라이어 ${data.sent}명 발송 완료!`);
-    } else {
-      resultEl.style.cssText = 'display:block;padding:12px 16px;border-radius:12px;font-size:13px;background:#FEE2E2;color:#DC2626;font-weight:700;';
-      resultEl.textContent = `❌ 발송 실패: ${data.error}`;
-      logEl.innerHTML = `<span style="color:var(--err)">❌ 오류: ${data.error}</span>`;
+    let sent = 0, failed = 0, failedList = [];
+
+    for (const email of recipients) {
+      try {
+        await emailjs.send('service_2qnpx8i', tplId, {
+          to_email:  email,
+          subject:   subject,
+          html_body: html,
+        });
+        sent++;
+        logEl.innerHTML = `<span style="color:var(--ok)">✅ 발송 중... ${sent}/${recipients.length}</span>`;
+      } catch(e) {
+        failed++;
+        failedList.push(email);
+      }
+      // EmailJS 속도 제한 방지
+      await new Promise(r => setTimeout(r, 300));
     }
+
+    resultEl.style.cssText = 'display:block;padding:12px 16px;border-radius:12px;font-size:13px;background:#DCFCE7;color:#16A34A;font-weight:700;';
+    resultEl.textContent = `✅ ${sent}명 발송 완료${failed ? ` · 실패 ${failed}명` : ''}`;
+    logEl.innerHTML = `<b style="color:var(--ok)">✅ 발송 완료 (${new Date().toLocaleTimeString('ko-KR')})</b><br>` +
+      `제목: ${subject}<br>수신자 ${sent}명 성공` +
+      (failedList.length ? `<br><span style="color:var(--err)">실패: ${failedList.join(', ')}</span>` : '');
+    toast(`플라이어 ${sent}명 발송 완료!`);
+
   } catch(e) {
     resultEl.style.cssText = 'display:block;padding:12px 16px;border-radius:12px;font-size:13px;background:#FEE2E2;color:#DC2626;';
     resultEl.textContent = `❌ 오류: ${e.message}`;
+    logEl.innerHTML = `<span style="color:var(--err)">❌ 오류: ${e.message}</span>`;
   } finally {
     btn.disabled = false;
     btn.textContent = '📤 플라이어 이메일 발송';
