@@ -3944,53 +3944,153 @@ async function sendFlyerEmail() {
     const html = `<!DOCTYPE html>
 <html lang="ko">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f4f4f4;font-family:'Apple SD Gothic Neo',Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:32px 0;">
+<body style="margin:0;padding:0;background:#f0ede8;font-family:'Apple SD Gothic Neo',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0ede8;padding:32px 0;">
 <tr><td align="center">
-<table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;">
+
   <!-- 헤더 -->
-  <tr><td style="background:linear-gradient(135deg,#1a0a30,#4B3BC7);padding:36px 40px;text-align:center;">
-    <div style="font-size:13px;color:rgba(255,255,255,0.5);letter-spacing:4px;text-transform:uppercase;margin-bottom:10px;">MARRYWELL</div>
-    <div style="font-size:26px;font-weight:900;color:#ffffff;line-height:1.3;">소개만 해도<br><span style="color:#F4C430;">수익이 생깁니다.</span></div>
+  <tr><td style="background:#0f0f1a;padding:40px 40px 36px;text-align:center;">
+    <div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:4px;text-transform:uppercase;margin-bottom:16px;">MARRYWELL · PARTNER PROGRAM</div>
+    <div style="font-size:30px;font-weight:900;color:#ffffff;line-height:1.3;margin-bottom:10px;">소개만 해도<br><span style="color:#d4af64;">수익이 생깁니다.</span></div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.55);line-height:1.7;">메리웰을 업체에 소개하고, 고객이 구매할 때마다<br><strong style="color:rgba(255,255,255,0.85);">건당 최대 페이백</strong>을 받으세요.</div>
   </td></tr>
-  <!-- 본문 -->
-  <tr><td style="padding:36px 40px;">
-    <p style="font-size:15px;color:#333;line-height:1.8;margin:0 0 24px;">안녕하세요,<br>MARRYWELL 파트너 프로그램을 소개해드립니다.</p>
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f7ff;border-radius:10px;padding:20px;margin-bottom:24px;">
+
+  <!-- 핵심 수치 -->
+  <tr><td style="background:#1a1428;padding:28px 40px;">
+    <table width="100%" cellpadding="0" cellspacing="0">
       <tr>
-        <td align="center" style="padding:10px;">
-          <div style="font-size:12px;color:#6c5ce7;font-weight:700;letter-spacing:1px;margin-bottom:6px;">건당 최대 페이백</div>
-          <div style="font-size:42px;font-weight:900;color:#2c2c54;line-height:1;">7<span style="font-size:22px;">만원</span></div>
-          <div style="font-size:12px;color:#888;margin-top:4px;">/ 건</div>
+        <td align="center" style="padding:0 10px;border-right:1px solid rgba(255,255,255,0.08);">
+          <div style="font-size:11px;color:rgba(212,175,100,0.7);letter-spacing:1.5px;margin-bottom:8px;">건당 최대</div>
+          <div style="font-size:44px;font-weight:900;color:#d4af64;line-height:1;">7만원</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">/ 건 지급</div>
         </td>
-        <td align="center" style="padding:10px;">
-          <div style="font-size:12px;color:#6c5ce7;font-weight:700;letter-spacing:1px;margin-bottom:6px;">참여 비용</div>
-          <div style="font-size:36px;font-weight:900;color:#2c2c54;line-height:1;">무료</div>
+        <td align="center" style="padding:0 10px;border-right:1px solid rgba(255,255,255,0.08);">
+          <div style="font-size:11px;color:rgba(212,175,100,0.7);letter-spacing:1.5px;margin-bottom:8px;">참여 비용</div>
+          <div style="font-size:36px;font-weight:900;color:#ffffff;line-height:1;">무료</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">최소 조건 없음</div>
         </td>
-        <td align="center" style="padding:10px;">
-          <div style="font-size:12px;color:#6c5ce7;font-weight:700;letter-spacing:1px;margin-bottom:6px;">정산 주기</div>
-          <div style="font-size:28px;font-weight:900;color:#2c2c54;line-height:1;">익월<br>15일</div>
+        <td align="center" style="padding:0 10px;">
+          <div style="font-size:11px;color:rgba(212,175,100,0.7);letter-spacing:1.5px;margin-bottom:8px;">정산 주기</div>
+          <div style="font-size:36px;font-weight:900;color:#ffffff;line-height:1;">익월 15일</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">자동 정산</div>
         </td>
       </tr>
     </table>
-    <p style="font-size:14px;color:#555;line-height:1.8;margin:0 0 28px;">아래 버튼을 클릭하면 상세 안내 플라이어를 확인하실 수 있습니다.</p>
-    <div style="text-align:center;margin-bottom:28px;">
-      <a href="${flyerUrl}" target="_blank"
-        style="display:inline-block;background:#4B3BC7;color:#ffffff;text-decoration:none;padding:16px 40px;border-radius:100px;font-size:15px;font-weight:800;letter-spacing:0.5px;">
-        📄 플라이어 보기 →
-      </a>
-    </div>
-    <div style="text-align:center;">
-      <a href="https://partners.marrywell.co.kr/apply.html" target="_blank"
-        style="display:inline-block;background:#F4C430;color:#2c2c54;text-decoration:none;padding:14px 36px;border-radius:100px;font-size:14px;font-weight:800;">
-        무료로 파트너 신청하기 →
-      </a>
+  </td></tr>
+
+  <!-- 수익 구조 -->
+  <tr><td style="padding:32px 40px 20px;">
+    <div style="font-size:11px;font-weight:700;color:#4B3BC7;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">💰 등급별 페이백 구조</div>
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="padding:4px 6px;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border-radius:10px;padding:16px;">
+            <tr>
+              <td><div style="font-size:10px;font-weight:700;color:#636e72;letter-spacing:1px;">BASIC</div>
+              <div style="font-size:11px;color:#888;margin:2px 0;">월 1~4건</div>
+              <div style="font-size:22px;font-weight:900;color:#636e72;">3만원</div>
+              <div style="font-size:10px;color:#aaa;">39,900원↑ 결제 시</div></td>
+            </tr>
+          </table>
+        </td>
+        <td style="padding:4px 6px;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#0f0f1a;border-radius:10px;padding:16px;border:2px solid #d4af64;">
+            <tr>
+              <td><div style="font-size:10px;font-weight:700;color:#d4af64;letter-spacing:1px;">SILVER ✦ 추천</div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.4);margin:2px 0;">월 5~9건</div>
+              <div style="font-size:22px;font-weight:900;color:#d4af64;">5만원</div>
+              <div style="font-size:10px;color:rgba(255,255,255,0.3);">59,800원↑ 결제 시</div></td>
+            </tr>
+          </table>
+        </td>
+        <td style="padding:4px 6px;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border-radius:10px;padding:16px;">
+            <tr>
+              <td><div style="font-size:10px;font-weight:700;color:#d68910;letter-spacing:1px;">GOLD ⭐</div>
+              <div style="font-size:11px;color:#888;margin:2px 0;">월 10건↑</div>
+              <div style="font-size:22px;font-weight:900;color:#e17055;">7만원</div>
+              <div style="font-size:10px;color:#aaa;">99,000원↑ 결제 시</div></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+
+  <!-- 3단계 프로세스 -->
+  <tr><td style="padding:20px 40px 24px;">
+    <div style="font-size:11px;font-weight:700;color:#4B3BC7;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">⚡ 3단계로 수익 발생</div>
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center" style="padding:0 6px;">
+          <div style="background:#f0efff;border-radius:10px;padding:16px 12px;text-align:center;">
+            <div style="font-size:10px;font-weight:700;color:#4B3BC7;letter-spacing:1px;margin-bottom:6px;">STEP 01</div>
+            <div style="font-size:14px;font-weight:800;color:#2c2c54;margin-bottom:4px;">업체 소개</div>
+            <div style="font-size:11px;color:#666;line-height:1.5;">전용 코드로<br>업체에 소개</div>
+          </div>
+        </td>
+        <td align="center" style="font-size:18px;color:#4B3BC7;font-weight:700;width:24px;">→</td>
+        <td align="center" style="padding:0 6px;">
+          <div style="background:#f0efff;border-radius:10px;padding:16px 12px;text-align:center;">
+            <div style="font-size:10px;font-weight:700;color:#4B3BC7;letter-spacing:1px;margin-bottom:6px;">STEP 02</div>
+            <div style="font-size:14px;font-weight:800;color:#2c2c54;margin-bottom:4px;">고객 구매</div>
+            <div style="font-size:11px;color:#666;line-height:1.5;">예비 신혼부부가<br>서비스 구매</div>
+          </div>
+        </td>
+        <td align="center" style="font-size:18px;color:#4B3BC7;font-weight:700;width:24px;">→</td>
+        <td align="center" style="padding:0 6px;">
+          <div style="background:#f0efff;border-radius:10px;padding:16px 12px;text-align:center;">
+            <div style="font-size:10px;font-weight:700;color:#4B3BC7;letter-spacing:1px;margin-bottom:6px;">STEP 03</div>
+            <div style="font-size:14px;font-weight:800;color:#2c2c54;margin-bottom:4px;">페이백 지급</div>
+            <div style="font-size:11px;color:#666;line-height:1.5;">익월 15일<br>자동 정산</div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+
+  <!-- 추천 업종 -->
+  <tr><td style="padding:0 40px 24px;">
+    <div style="font-size:11px;font-weight:700;color:#4B3BC7;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">🏢 추천 파트너 업종</div>
+    <div style="font-size:13px;color:#444;line-height:2;">
+      💒 웨딩홀 &nbsp;|&nbsp; 👗 웨딩드레스 &nbsp;|&nbsp; 📸 스튜디오 &nbsp;|&nbsp; 💃 드레스샵<br>
+      ✍️ 혼인신고사무소 &nbsp;|&nbsp; 📬 청첩장업체 &nbsp;|&nbsp; 💅 뷰티샵 &nbsp;|&nbsp; ✨ 기타 웨딩 업종
     </div>
   </td></tr>
+
+  <!-- 참여 조건 -->
+  <tr><td style="padding:0 40px 28px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f7ff;border-radius:10px;padding:16px 20px;">
+      <tr>
+        <td style="font-size:13px;color:#333;line-height:2.2;">
+          ✅ &nbsp;참여 비용 없음 (완전 무료)<br>
+          ✅ &nbsp;최소 실적 조건 없음<br>
+          ✅ &nbsp;언제든 자유롭게 탈퇴 가능<br>
+          ✅ &nbsp;24시간 내 전용 코드 발급
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+
+  <!-- CTA 버튼 -->
+  <tr><td style="padding:0 40px 36px;text-align:center;">
+    <a href="${flyerUrl}" target="_blank"
+      style="display:inline-block;background:#4B3BC7;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:100px;font-size:14px;font-weight:800;margin-bottom:12px;">
+      📋 상세 내용 보기 →
+    </a>
+    <br>
+    <a href="https://partners.marrywell.co.kr/apply.html" target="_blank"
+      style="display:inline-block;background:#F4C430;color:#2c2c54;text-decoration:none;padding:16px 44px;border-radius:100px;font-size:15px;font-weight:900;">
+      무료로 파트너 신청하기 →
+    </a>
+  </td></tr>
+
   <!-- 푸터 -->
-  <tr><td style="background:#1a0a30;padding:20px 40px;text-align:center;">
-    <p style="font-size:11px;color:rgba(255,255,255,0.35);margin:0;">© MARRYWELL · partners.marrywell.co.kr</p>
+  <tr><td style="background:#0f0f1a;padding:20px 40px;text-align:center;">
+    <p style="font-size:11px;color:rgba(255,255,255,0.3);margin:0;">© MARRYWELL · AI Wedding Studio · partners.marrywell.co.kr</p>
   </td></tr>
+
 </table>
 </td></tr>
 </table>
