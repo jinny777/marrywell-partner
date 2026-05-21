@@ -3953,13 +3953,13 @@ async function sendFlyerEmail() {
       try {
         logEl.innerHTML = `<span style="color:var(--gray)">📤 ${email} 발송 중...</span>`;
         console.log('[Flyer] sending to:', email);
-        await emailjs.send('service_2qnpx8i', tplId, {
+        await emailjs.send('fkzWaCQ71hVots0UrCsSX', tplId, {
           to_email:  email,
           subject:   subject,
           html_body: html,
           email:     'noreply@marrywell.co.kr',
           name:      'MARRYWELL 파트너스',
-        });
+        }, { publicKey: 'gvKOOg0rjbwEg5okJ' });
         sent++;
         logEl.innerHTML = `<span style="color:var(--ok)">✅ 발송 중... ${sent}/${recipients.length}</span>`;
         console.log('[Flyer] sent to:', email);
