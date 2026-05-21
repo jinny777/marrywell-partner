@@ -3953,13 +3953,26 @@ async function sendFlyerEmail() {
       try {
         logEl.innerHTML = `<span style="color:var(--gray)">📤 ${email} 발송 중...</span>`;
         console.log('[Flyer] sending to:', email);
-        await emailjs.send('service_lq3rtgf', tplId, {
-          to_email:  email,
-          subject:   subject,
-          html_body: html,
-          email:     'noreply@marrywell.co.kr',
-          name:      'MARRYWELL 파트너스',
-        }, { publicKey: 'gvKOOg0rjbwEg5okJ' });
+        const ejsRes = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            service_id:  'service_lq3rtgf',
+            template_id: tplId,
+            user_id:     'gvKOOg0rjbwEg5okJ',
+            template_params: {
+              to_email:  email,
+              subject:   subject,
+              html_body: html,
+              email:     'noreply@marrywell.co.kr',
+              name:      'MARRYWELL 파트너스',
+            }
+          })
+        });
+        if (!ejsRes.ok) {
+          const errText = await ejsRes.text();
+          throw new Error(errText);
+        }
         sent++;
         logEl.innerHTML = `<span style="color:var(--ok)">✅ 발송 중... ${sent}/${recipients.length}</span>`;
         console.log('[Flyer] sent to:', email);
