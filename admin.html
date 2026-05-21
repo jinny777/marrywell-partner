@@ -3937,13 +3937,22 @@ async function sendFlyerEmail() {
   logEl.innerHTML = '<span style="color:var(--gray)">발송 준비 중...</span>';
 
   try {
-    // 플라이어 HTML 불러오기 (같은 도메인)
-    const html = await fetch(FLYER_URLS[selectedFlyer] + '?t=' + Date.now()).then(r => r.text());
+    // 플라이어 HTML 불러오기
+    logEl.innerHTML = '<span style="color:var(--gray)">플라이어 HTML 로딩 중...</span>';
+    const flyerUrl = FLYER_URLS[selectedFlyer] + '?t=' + Date.now();
+    console.log('[Flyer] fetching:', flyerUrl);
+    const resp = await fetch(flyerUrl);
+    if (!resp.ok) throw new Error(`플라이어 파일 로드 실패 (${resp.status}): ${flyerUrl}`);
+    const html = await resp.text();
+    console.log('[Flyer] HTML length:', html.length);
+    if (html.length < 100) throw new Error('플라이어 파일이 비어 있거나 너무 짧습니다.');
 
     let sent = 0, failed = 0, failedList = [];
 
     for (const email of recipients) {
       try {
+        logEl.innerHTML = `<span style="color:var(--gray)">📤 ${email} 발송 중...</span>`;
+        console.log('[Flyer] sending to:', email);
         await emailjs.send('service_2qnpx8i', tplId, {
           to_email:  email,
           subject:   subject,
@@ -3951,9 +3960,11 @@ async function sendFlyerEmail() {
         });
         sent++;
         logEl.innerHTML = `<span style="color:var(--ok)">✅ 발송 중... ${sent}/${recipients.length}</span>`;
+        console.log('[Flyer] sent to:', email);
       } catch(e) {
+        console.error('[Flyer] failed for', email, e);
         failed++;
-        failedList.push(email);
+        failedList.push(`${email}(${e.text||e.message||e.status||'unknown'})`);
       }
       // EmailJS 속도 제한 방지
       await new Promise(r => setTimeout(r, 300));
