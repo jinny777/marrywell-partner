@@ -3957,6 +3957,8 @@ async function sendFlyerEmail() {
           to_email:  email,
           subject:   subject,
           html_body: html,
+          email:     'noreply@marrywell.co.kr',
+          name:      'MARRYWELL 파트너스',
         });
         sent++;
         logEl.innerHTML = `<span style="color:var(--ok)">✅ 발송 중... ${sent}/${recipients.length}</span>`;
