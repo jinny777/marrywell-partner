@@ -4207,7 +4207,7 @@ async function sendFlyerEmail() {
       let ok=0, fail=0;
       for (const email of recipients) {
         try {
-          await emailjs.send('service_marrywell', 'template_2d0td1l', { to_email: email, subject, html_body: uploadedHtmlContent });
+          await emailjs.send('service_2qnpx8i', 'template_2d0td1l', { to_email: email, subject, html_body: uploadedHtmlContent });
           logEl.innerHTML += `<div style="color:var(--ok)">✓ ${email}</div>`;
           ok++;
         } catch(e) {
