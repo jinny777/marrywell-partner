@@ -1220,7 +1220,7 @@ tr:hover td{background:#FAFAFF;}
 
             <!-- 플라이어 선택 -->
             <div class="card">
-              <div class="card-header"><div class="card-title">📄 플라이어 선택</div></div>
+              <div class="card-header"><div class="card-title">📄 이메일 콘텐츠 선택</div></div>
               <div style="display:flex;flex-direction:column;gap:10px;">
                 <label id="flyer-opt-1" onclick="selectFlyer(1)" style="display:flex;align-items:flex-start;gap:12px;padding:14px;border:2px solid var(--p);border-radius:12px;cursor:pointer;background:var(--pale);">
                   <input type="radio" name="flyer" value="1" checked style="margin-top:3px;accent-color:var(--p);">
@@ -1236,6 +1236,28 @@ tr:hover td{background:#FAFAFF;}
                     <div style="font-size:11px;color:var(--gray);">등급표·혜택·참여 방법 상세 · 인쇄용 A4 디자인</div>
                   </div>
                 </label>
+                <!-- HTML 파일 업로드 옵션 -->
+                <label id="flyer-opt-3" onclick="selectFlyer(3)" style="display:flex;align-items:flex-start;gap:12px;padding:14px;border:2px solid #E0E0F0;border-radius:12px;cursor:pointer;background:#fff;">
+                  <input type="radio" name="flyer" value="3" style="margin-top:3px;accent-color:var(--p);">
+                  <div style="flex:1;">
+                    <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:3px;">📁 HTML 파일 직접 업로드</div>
+                    <div style="font-size:11px;color:var(--gray);margin-bottom:10px;">직접 만든 HTML 파일을 업로드하여 이메일로 발송</div>
+                    <div id="html-upload-area" style="display:none;">
+                      <div id="html-drop-zone"
+                        ondragover="event.preventDefault();this.style.borderColor='var(--p)';this.style.background='var(--pale)'"
+                        ondragleave="this.style.borderColor='#E0E0F0';this.style.background='#fafafa'"
+                        ondrop="handleHtmlDrop(event)"
+                        style="border:2px dashed #E0E0F0;border-radius:10px;padding:20px;text-align:center;background:#fafafa;cursor:pointer;"
+                        onclick="document.getElementById('html-file-input').click()">
+                        <div style="font-size:24px;margin-bottom:6px;">📄</div>
+                        <div style="font-size:12px;font-weight:700;color:var(--gray);">클릭 또는 드래그하여 HTML 파일 업로드</div>
+                        <div style="font-size:11px;color:#bbb;margin-top:4px;">.html 파일만 지원</div>
+                      </div>
+                      <input type="file" id="html-file-input" accept=".html,.htm" style="display:none" onchange="handleHtmlFileSelect(this)">
+                      <div id="html-file-status" style="margin-top:8px;font-size:12px;color:var(--gray);"></div>
+                    </div>
+                  </div>
+                </label>
               </div>
             </div>
 
@@ -1243,11 +1265,29 @@ tr:hover td{background:#FAFAFF;}
             <div class="card">
               <div class="card-header">
                 <div class="card-title">👥 수신자 설정</div>
-                <button onclick="importFlyerRecipients()" class="btn-sm btn-view">파트너 목록에서 가져오기</button>
+                <div style="display:flex;gap:6px;">
+                  <button onclick="importFlyerRecipients()" class="btn-sm btn-view">파트너 목록</button>
+                  <button onclick="document.getElementById('excel-recipient-input').click()" class="btn-sm btn-code">📊 엑셀 업로드</button>
+                </div>
               </div>
+
+              <!-- 엑셀 업로드 영역 -->
+              <div id="excel-upload-area"
+                ondragover="event.preventDefault();this.style.borderColor='var(--p)';this.style.background='var(--pale)'"
+                ondragleave="this.style.borderColor='#E0E0F0';this.style.background='#fafafa'"
+                ondrop="handleExcelDrop(event)"
+                style="border:2px dashed #E0E0F0;border-radius:10px;padding:16px;text-align:center;background:#fafafa;margin-bottom:12px;cursor:pointer;"
+                onclick="document.getElementById('excel-recipient-input').click()">
+                <div style="font-size:20px;margin-bottom:4px;">📊</div>
+                <div style="font-size:12px;font-weight:700;color:var(--gray);">엑셀 파일 업로드 (클릭 또는 드래그)</div>
+                <div style="font-size:11px;color:#bbb;margin-top:2px;">.xlsx · .xls 지원 · 이메일/팩스번호 컬럼 자동 인식</div>
+              </div>
+              <input type="file" id="excel-recipient-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelRecipient(this)">
+              <div id="excel-parse-status" style="display:none;margin-bottom:10px;padding:10px 12px;border-radius:10px;font-size:12px;"></div>
+
               <div style="margin-bottom:10px;">
-                <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:5px;">이메일 주소 입력 <span style="color:var(--gray);font-weight:400;">(쉼표 또는 줄바꿈으로 구분)</span></label>
-                <textarea id="flyer-recipients" rows="6" placeholder="예시:&#10;hong@example.com&#10;kim@naver.com, lee@gmail.com"
+                <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:5px;">이메일 주소 직접 입력 <span style="color:var(--gray);font-weight:400;">(쉼표 또는 줄바꿈으로 구분)</span></label>
+                <textarea id="flyer-recipients" rows="5" placeholder="예시:&#10;hong@example.com&#10;kim@naver.com, lee@gmail.com"
                   style="width:100%;padding:10px 12px;border:1.5px solid #E0E0F0;border-radius:10px;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;resize:vertical;line-height:1.7;"
                   onfocus="this.style.borderColor='var(--pl)'" onblur="this.style.borderColor='#E0E0F0'"
                   oninput="updateFlyerRecipientCount()"></textarea>
@@ -3963,12 +4003,159 @@ const FLYER_URLS = {
 };
 let selectedFlyer = 1;
 
+// ── HTML 파일 업로드 ─────────────────────────────────
+let uploadedHtmlContent = '';
+
+function handleHtmlDrop(e) {
+  e.preventDefault();
+  e.currentTarget.style.borderColor = '#E0E0F0';
+  e.currentTarget.style.background  = '#fafafa';
+  const file = e.dataTransfer.files[0];
+  if (file) readHtmlFile(file);
+}
+
+function handleHtmlFileSelect(input) {
+  if (input.files[0]) readHtmlFile(input.files[0]);
+}
+
+function readHtmlFile(file) {
+  if (!file.name.match(/\.html?$/i)) { alert('.html 파일만 업로드 가능합니다.'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    uploadedHtmlContent = e.target.result;
+    document.getElementById('html-file-status').innerHTML =
+      `<span style="color:var(--ok);font-weight:700;">✓ ${file.name} (${(file.size/1024).toFixed(1)}KB) 업로드 완료</span>`;
+    // 미리보기 업데이트
+    const frame = document.getElementById('flyer-preview-frame');
+    frame.srcdoc = uploadedHtmlContent;
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// ── 엑셀 수신자 업로드 ──────────────────────────────
+function handleExcelDrop(e) {
+  e.preventDefault();
+  e.currentTarget.style.borderColor = '#E0E0F0';
+  e.currentTarget.style.background  = '#fafafa';
+  const file = e.dataTransfer.files[0];
+  if (file) parseExcelRecipients(file);
+}
+
+function handleExcelRecipient(input) {
+  if (input.files[0]) parseExcelRecipients(input.files[0]);
+}
+
+function parseExcelRecipients(file) {
+  const statusEl = document.getElementById('excel-parse-status');
+  statusEl.style.display = 'block';
+  statusEl.style.background = '#FEF3C7';
+  statusEl.style.color = '#92400E';
+  statusEl.innerHTML = '⏳ 파일 읽는 중...';
+
+  // CSV 파일 처리
+  if (file.name.match(/\.csv$/i)) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const lines = e.target.result.split('\n').filter(l => l.trim());
+      const emails = [];
+      lines.forEach(line => {
+        const cols = line.split(',').map(c => c.replace(/"/g,'').trim());
+        cols.forEach(c => { if (c.includes('@') && c.includes('.')) emails.push(c); });
+      });
+      applyExcelEmails(emails, statusEl);
+    };
+    reader.readAsText(file, 'UTF-8');
+    return;
+  }
+
+  // xlsx 처리 - SheetJS 동적 로드
+  if (!window.XLSX) {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    script.onload = () => processXlsx(file, statusEl);
+    script.onerror = () => {
+      statusEl.style.background = '#FEE2E2';
+      statusEl.style.color = '#DC2626';
+      statusEl.innerHTML = '❌ 라이브러리 로드 실패. CSV 파일로 변환 후 시도해주세요.';
+    };
+    document.head.appendChild(script);
+  } else {
+    processXlsx(file, statusEl);
+  }
+}
+
+function processXlsx(file, statusEl) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+      const emails = [];
+      // 헤더 행에서 이메일 컬럼 찾기
+      let emailColIdx = -1;
+      if (rows.length > 0) {
+        const header = rows[0].map(h => String(h).toLowerCase());
+        emailColIdx = header.findIndex(h => h.includes('이메일') || h.includes('email') || h.includes('mail') || h.includes('e-mail'));
+      }
+
+      rows.forEach((row, i) => {
+        if (i === 0) return; // 헤더 스킵
+        if (emailColIdx >= 0) {
+          const v = String(row[emailColIdx] || '').trim();
+          if (v.includes('@')) emails.push(v);
+        } else {
+          // 컬럼 없으면 전체 셀에서 이메일 찾기
+          row.forEach(cell => {
+            const v = String(cell || '').trim();
+            if (v.includes('@') && v.includes('.')) emails.push(v);
+          });
+        }
+      });
+
+      applyExcelEmails(emails, statusEl);
+    } catch(err) {
+      statusEl.style.background = '#FEE2E2';
+      statusEl.style.color = '#DC2626';
+      statusEl.innerHTML = '❌ 파일 파싱 오류: ' + err.message;
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function applyExcelEmails(emails, statusEl) {
+  const unique = [...new Set(emails)];
+  if (!unique.length) {
+    statusEl.style.background = '#FEE2E2';
+    statusEl.style.color = '#DC2626';
+    statusEl.innerHTML = '❌ 이메일 주소를 찾을 수 없습니다. 헤더에 "이메일" 또는 "email" 컬럼이 있는지 확인해주세요.';
+    return;
+  }
+  const ta = document.getElementById('flyer-recipients');
+  const existing = ta.value.trim();
+  ta.value = existing ? existing + '\n' + unique.join('\n') : unique.join('\n');
+  updateFlyerRecipientCount();
+  statusEl.style.background = '#DCFCE7';
+  statusEl.style.color = '#14532D';
+  statusEl.innerHTML = `✓ ${unique.length}개 이메일 주소 불러오기 완료`;
+  toast(`엑셀에서 ${unique.length}개 이메일을 불러왔습니다.`);
+}
+
 function selectFlyer(num) {
   selectedFlyer = num;
   document.getElementById('flyer-opt-1').style.borderColor = num===1 ? 'var(--p)' : '#E0E0F0';
   document.getElementById('flyer-opt-1').style.background  = num===1 ? 'var(--pale)' : '#fff';
   document.getElementById('flyer-opt-2').style.borderColor = num===2 ? 'var(--p)' : '#E0E0F0';
   document.getElementById('flyer-opt-2').style.background  = num===2 ? 'var(--pale)' : '#fff';
+  document.getElementById('flyer-opt-3').style.borderColor = num===3 ? 'var(--p)' : '#E0E0F0';
+  document.getElementById('flyer-opt-3').style.background  = num===3 ? 'var(--pale)' : '#fff';
+  document.getElementById('html-upload-area').style.display = num===3 ? 'block' : 'none';
+  if (num !== 3) {
+    const frame = document.getElementById('flyer-preview-frame');
+    frame.srcdoc = '';
+    frame.src = FLYER_URLS[num] + '?t=' + Date.now();
+  }
   document.getElementById('flyer-preview-frame').src = FLYER_URLS[num];
 }
 
@@ -4012,8 +4199,34 @@ async function sendFlyerEmail() {
   logEl.innerHTML = '<span style="color:var(--gray)">발송 준비 중...</span>';
 
   try {
-    // 플라이어 링크 이메일 HTML 생성
     logEl.innerHTML = '<span style="color:var(--gray)">발송 준비 중...</span>';
+
+    // HTML 업로드 모드
+    if (selectedFlyer === 3) {
+      if (!uploadedHtmlContent) { alert('HTML 파일을 먼저 업로드해주세요.'); btn.disabled=false; btn.textContent='📤 플라이어 이메일 발송'; return; }
+      let ok=0, fail=0;
+      for (const email of recipients) {
+        try {
+          await emailjs.send('service_marrywell', 'template_2d0td1l', { to_email: email, subject, html_body: uploadedHtmlContent });
+          logEl.innerHTML += `<div style="color:var(--ok)">✓ ${email}</div>`;
+          ok++;
+        } catch(e) {
+          logEl.innerHTML += `<div style="color:var(--err)">✗ ${email} — ${e.text||e.message||'실패'}</div>`;
+          fail++;
+        }
+        await new Promise(r=>setTimeout(r,400));
+      }
+      btn.disabled=false; btn.textContent='📤 플라이어 이메일 발송';
+      resultEl.style.display='block';
+      resultEl.style.background = fail===0 ? 'var(--ok-pale)' : 'var(--warn-pale)';
+      resultEl.style.color = fail===0 ? 'var(--ok)' : 'var(--warn)';
+      resultEl.textContent = `발송 완료: 성공 ${ok}건 / 실패 ${fail}건`;
+      saveFlyerHistory('HTML 업로드 파일', subject, recipients.length, ok, fail, recipients);
+      logHistory('email_sent', `HTML 업로드 이메일 발송 (${ok}/${recipients.length}건 성공)`, { subject, count: ok });
+      return;
+    }
+
+    // 기존 플라이어 모드
     const flyerUrl  = FLYER_URLS[selectedFlyer];
     const flyerName = selectedFlyer === 1 ? '파트너 모집 플라이어 (다크 ver.)' : '파트너 모집 플라이어 (A4 ver.)';
     const html = `<!DOCTYPE html>
