@@ -3967,22 +3967,29 @@ function saveFlyerHistory(entry) {
 }
 
 function renderFlyerHistory() {
-  const history = loadFlyerHistory();
+  const raw = loadFlyerHistory();
   const tbody = document.getElementById('flyer-history-body');
   if (!tbody) return;
+
+  // 유효한 데이터만 필터 (undefined 필드 있는 구형 데이터 제거)
+  const history = raw.filter(h => h && typeof h === 'object' && h.sentAt && h.flyerName);
+
   if (!history.length) {
+    // 구형 데이터만 있었다면 초기화
+    if (raw.length > 0) localStorage.removeItem(FLYER_HISTORY_KEY);
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:24px;">발송 이력이 없습니다.</td></tr>';
     return;
   }
-  tbody.innerHTML = history.map((h, i) => `
+
+  tbody.innerHTML = history.map(h => `
     <tr>
-      <td style="white-space:nowrap;font-size:12px;">${h.sentAt}</td>
-      <td style="font-size:12px;">${h.flyerName}</td>
-      <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${h.subject}</td>
-      <td style="text-align:center;font-weight:700;">${h.total}</td>
-      <td style="text-align:center;color:var(--ok);font-weight:700;">${h.sent}</td>
-      <td style="text-align:center;color:${h.failed > 0 ? 'var(--err)' : 'var(--gray)'};font-weight:700;">${h.failed}</td>
-      <td style="font-size:11px;color:var(--gray);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(h.recipients||[]).join(', ')}">${(h.recipients||[]).join(', ')}</td>
+      <td style="white-space:nowrap;font-size:12px;">${h.sentAt || '-'}</td>
+      <td style="font-size:12px;">${h.flyerName || '-'}</td>
+      <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${h.subject||''}">${h.subject || '-'}</td>
+      <td style="text-align:center;font-weight:700;">${h.total ?? '-'}</td>
+      <td style="text-align:center;color:var(--ok);font-weight:700;">${h.sent ?? '-'}</td>
+      <td style="text-align:center;color:${(h.failed||0) > 0 ? 'var(--err)' : 'var(--gray)'};font-weight:700;">${h.failed ?? 0}</td>
+      <td style="font-size:11px;color:var(--gray);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(h.recipients||[]).join(', ')}">${(h.recipients||[]).slice(0,3).join(', ')}${(h.recipients||[]).length > 3 ? ` 외 ${(h.recipients||[]).length-3}명` : ''}</td>
     </tr>
   `).join('');
 }
