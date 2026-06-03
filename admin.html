@@ -4238,7 +4238,15 @@ async function sendFlyerEmail() {
       resultEl.style.background = fail===0 ? 'var(--ok-pale)' : 'var(--warn-pale)';
       resultEl.style.color = fail===0 ? 'var(--ok)' : 'var(--warn)';
       resultEl.textContent = `발송 완료: 성공 ${ok}건 / 실패 ${fail}건`;
-      saveFlyerHistory('HTML 업로드 파일', subject, recipients.length, ok, fail, recipients);
+      saveFlyerHistory({
+        sentAt:     new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
+        flyerName:  'HTML 업로드 파일',
+        subject:    subject,
+        total:      recipients.length,
+        sent:       ok,
+        failed:     fail,
+        recipients: recipients,
+      });
       logHistory('email_sent', `HTML 업로드 이메일 발송 (${ok}/${recipients.length}건 성공)`, { subject, count: ok });
       return;
     }
