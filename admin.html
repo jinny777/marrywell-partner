@@ -3952,7 +3952,7 @@ async function submitAddPartner(){
 // ══════════════════════════════════════════════════════
 //  플라이어 발송 이력
 // ══════════════════════════════════════════════════════
-const FLYER_HISTORY_KEY = 'mw_flyer_history';
+const FLYER_HISTORY_KEY = 'mw_flyer_history_v2';
 
 function loadFlyerHistory() {
   try { return JSON.parse(localStorage.getItem(FLYER_HISTORY_KEY) || '[]'); }
