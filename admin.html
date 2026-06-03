@@ -1331,17 +1331,19 @@ tr:hover td{background:#FAFAFF;}
         <!-- ③ 발송 이력 -->
         <div class="card" style="margin-top:20px;">
           <div class="card-header">
-            <div class="card-title">📋 플라이어 발송 이력</div>
+            <div class="card-title">📋 전체 이메일 발송 이력</div>
             <div class="card-actions">
+              <span id="flyer-hist-count" style="font-size:12px;color:var(--gray);padding:0 8px;"></span>
+              <button onclick="exportFlyerHistoryCSV()" class="btn-sm btn-view">⬇ CSV</button>
               <button onclick="clearFlyerHistory()" class="btn-sm btn-reject">🗑 이력 삭제</button>
             </div>
           </div>
           <div class="table-wrap">
-            <table id="flyer-history-table">
+            <table>
               <thead>
                 <tr>
                   <th>발송 일시</th>
-                  <th>플라이어</th>
+                  <th>구분</th>
                   <th>제목</th>
                   <th style="text-align:center;">수신자 수</th>
                   <th style="text-align:center;">성공</th>
@@ -3950,9 +3952,9 @@ async function submitAddPartner(){
 }
 
 // ══════════════════════════════════════════════════════
-//  플라이어 발송 이력
+//  이메일 발송 이력 (통합)
 // ══════════════════════════════════════════════════════
-const FLYER_HISTORY_KEY = 'mw_flyer_history_v2';
+const FLYER_HISTORY_KEY = 'mw_email_history_v3';
 
 function loadFlyerHistory() {
   try { return JSON.parse(localStorage.getItem(FLYER_HISTORY_KEY) || '[]'); }
@@ -3960,45 +3962,72 @@ function loadFlyerHistory() {
 }
 
 function saveFlyerHistory(entry) {
+  if (!entry || typeof entry !== 'object') return;
   const history = loadFlyerHistory();
-  history.unshift(entry); // 최신순
-  if (history.length > 200) history.splice(200); // 최대 200건
+  const record = {
+    sentAt:     entry.sentAt     || new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
+    flyerName:  entry.flyerName  || '-',
+    subject:    entry.subject    || '-',
+    total:      entry.total      ?? 0,
+    sent:       entry.sent       ?? 0,
+    failed:     entry.failed     ?? 0,
+    recipients: Array.isArray(entry.recipients) ? entry.recipients : [],
+  };
+  history.unshift(record);
+  if (history.length > 300) history.splice(300);
   localStorage.setItem(FLYER_HISTORY_KEY, JSON.stringify(history));
 }
 
 function renderFlyerHistory() {
-  const raw = loadFlyerHistory();
+  const history = loadFlyerHistory();
   const tbody = document.getElementById('flyer-history-body');
   if (!tbody) return;
 
-  // 유효한 데이터만 필터 (undefined 필드 있는 구형 데이터 제거)
-  const history = raw.filter(h => h && typeof h === 'object' && h.sentAt && h.flyerName);
+  const countEl = document.getElementById('flyer-hist-count');
+  if (countEl) countEl.textContent = `총 ${history.length}건`;
 
   if (!history.length) {
-    // 구형 데이터만 있었다면 초기화
-    if (raw.length > 0) localStorage.removeItem(FLYER_HISTORY_KEY);
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:24px;">발송 이력이 없습니다.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:32px;">발송 이력이 없습니다.</td></tr>';
     return;
   }
 
-  tbody.innerHTML = history.map(h => `
-    <tr>
-      <td style="white-space:nowrap;font-size:12px;">${h.sentAt || '-'}</td>
-      <td style="font-size:12px;">${h.flyerName || '-'}</td>
-      <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${h.subject||''}">${h.subject || '-'}</td>
-      <td style="text-align:center;font-weight:700;">${h.total ?? '-'}</td>
-      <td style="text-align:center;color:var(--ok);font-weight:700;">${h.sent ?? '-'}</td>
-      <td style="text-align:center;color:${(h.failed||0) > 0 ? 'var(--err)' : 'var(--gray)'};font-weight:700;">${h.failed ?? 0}</td>
-      <td style="font-size:11px;color:var(--gray);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(h.recipients||[]).join(', ')}">${(h.recipients||[]).slice(0,3).join(', ')}${(h.recipients||[]).length > 3 ? ` 외 ${(h.recipients||[]).length-3}명` : ''}</td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = history.map(h => {
+    const rcpt = Array.isArray(h.recipients) ? h.recipients : [];
+    const rcptText = rcpt.length > 3
+      ? rcpt.slice(0,3).join(', ') + ` 외 ${rcpt.length - 3}명`
+      : rcpt.join(', ') || '-';
+    const failColor = (h.failed || 0) > 0 ? 'var(--err)' : 'var(--gray)';
+    return `<tr>
+      <td style="white-space:nowrap;font-size:12px;">${h.sentAt}</td>
+      <td><span style="background:var(--pale);color:var(--p);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">${h.flyerName}</span></td>
+      <td style="font-size:13px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${h.subject}">${h.subject}</td>
+      <td style="text-align:center;font-weight:700;">${h.total}</td>
+      <td style="text-align:center;color:var(--ok);font-weight:800;">${h.sent}</td>
+      <td style="text-align:center;color:${failColor};font-weight:700;">${h.failed}</td>
+      <td style="font-size:11px;color:var(--gray);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${rcpt.join(', ')}">${rcptText}</td>
+    </tr>`;
+  }).join('');
 }
 
 function clearFlyerHistory() {
-  if (!confirm('발송 이력을 모두 삭제하시겠습니까?')) return;
+  if (!confirm('전체 발송 이력을 삭제하시겠습니까?')) return;
   localStorage.removeItem(FLYER_HISTORY_KEY);
   renderFlyerHistory();
   toast('발송 이력이 삭제되었습니다.');
+}
+
+function exportFlyerHistoryCSV() {
+  const history = loadFlyerHistory();
+  if (!history.length) { alert('내보낼 이력이 없습니다.'); return; }
+  const rows = [['발송일시','구분','제목','수신자수','성공','실패','수신자목록']];
+  history.forEach(h => {
+    rows.push([h.sentAt, h.flyerName, h.subject, h.total, h.sent, h.failed, (h.recipients||[]).join(' | ')]);
+  });
+  const csv = '﻿' + rows.map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = `발송이력_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
 }
 
 // ══════════════════════════════════════════════════════
