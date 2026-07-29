@@ -464,20 +464,107 @@ function listSettlements(partnerCode) {
 // ─────────────────────────────────────────────────────────────────
 //  플라이어 이메일 발송
 // ─────────────────────────────────────────────────────────────────
+function buildFlyerHtml(flyerUrl) {
+  var u = flyerUrl || 'https://partners.marrywell.co.kr';
+  return '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' +
+  '<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /></head>' +
+  '<body style="margin:0;padding:0;" bgcolor="#EEF0FF">' +
+  '<table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#EEF0FF"><tr><td align="center" style="padding:32px 0;">' +
+  '<table border="0" cellpadding="0" cellspacing="0" width="580" bgcolor="#ffffff">' +
+
+  '<tr><td bgcolor="#2c2c54" align="center" style="padding:40px;">' +
+  '<p style="margin:0 0 8px 0;font-family:Arial,sans-serif;font-size:10px;color:#F4C430;letter-spacing:3px;">MARRYWELL · PARTNER PROGRAM</p>' +
+  '<p style="margin:0 0 12px 0;font-family:Arial,sans-serif;font-size:26px;font-weight:bold;color:#ffffff;line-height:1.4;">소개만 해도<br /><span style="color:#F4C430;">수익이 생깁니다.</span></p>' +
+  '<p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#cccccc;line-height:1.8;">메리웰을 업체에 소개하고, 고객이 구매할 때마다<br /><b style="color:#ffffff;">건당 최대 페이백</b>을 받으세요.</p>' +
+  '</td></tr>' +
+
+  '<tr><td bgcolor="#f8f7ff" style="padding:24px 40px;">' +
+  '<table border="0" cellpadding="8" cellspacing="0" width="100%"><tr>' +
+  '<td align="center" width="33%" style="border-right:1px solid #ddd8f8;">' +
+  '<p style="margin:0 0 4px 0;font-family:Arial,sans-serif;font-size:10px;color:#6C5CE7;font-weight:bold;">건당 최대</p>' +
+  '<p style="margin:0;font-family:Arial,sans-serif;font-size:34px;font-weight:bold;color:#2c2c54;">7만원</p>' +
+  '</td>' +
+  '<td align="center" width="33%" style="border-right:1px solid #ddd8f8;">' +
+  '<p style="margin:0 0 4px 0;font-family:Arial,sans-serif;font-size:10px;color:#6C5CE7;font-weight:bold;">참여 비용</p>' +
+  '<p style="margin:0;font-family:Arial,sans-serif;font-size:28px;font-weight:bold;color:#2c2c54;">무료</p>' +
+  '</td>' +
+  '<td align="center" width="33%">' +
+  '<p style="margin:0 0 4px 0;font-family:Arial,sans-serif;font-size:10px;color:#6C5CE7;font-weight:bold;">정산 주기</p>' +
+  '<p style="margin:0;font-family:Arial,sans-serif;font-size:20px;font-weight:bold;color:#2c2c54;">익월 15일</p>' +
+  '</td>' +
+  '</tr></table>' +
+  '</td></tr>' +
+
+  '<tr><td bgcolor="#ffffff" style="padding:28px 40px;">' +
+  '<p style="margin:0 0 14px 0;font-family:Arial,sans-serif;font-size:11px;font-weight:bold;color:#4B3BC7;">💰 등급별 페이백 구조</p>' +
+  '<table border="0" cellpadding="12" cellspacing="4" width="100%"><tr>' +
+  '<td bgcolor="#f8f9fa" align="center" width="33%">' +
+  '<p style="margin:0;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;color:#636e72;">BASIC</p>' +
+  '<p style="margin:2px 0 0;font-family:Arial,sans-serif;font-size:10px;color:#888888;">월 1~4건</p>' +
+  '<p style="margin:6px 0 0;font-family:Arial,sans-serif;font-size:22px;font-weight:bold;color:#636e72;">3만원</p>' +
+  '<p style="margin:4px 0 0;font-family:Arial,sans-serif;font-size:10px;color:#aaaaaa;">39,900원↑ 결제 시</p>' +
+  '</td>' +
+  '<td bgcolor="#2c2c54" align="center" width="33%">' +
+  '<p style="margin:0;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;color:#F4C430;">SILVER ✦ 추천</p>' +
+  '<p style="margin:2px 0 0;font-family:Arial,sans-serif;font-size:10px;color:#aaaaaa;">월 5~9건</p>' +
+  '<p style="margin:6px 0 0;font-family:Arial,sans-serif;font-size:22px;font-weight:bold;color:#F4C430;">5만원</p>' +
+  '<p style="margin:4px 0 0;font-family:Arial,sans-serif;font-size:10px;color:#888888;">59,800원↑ 결제 시</p>' +
+  '</td>' +
+  '<td bgcolor="#f8f9fa" align="center" width="33%">' +
+  '<p style="margin:0;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;color:#d68910;">GOLD ⭐</p>' +
+  '<p style="margin:2px 0 0;font-family:Arial,sans-serif;font-size:10px;color:#888888;">월 10건↑</p>' +
+  '<p style="margin:6px 0 0;font-family:Arial,sans-serif;font-size:22px;font-weight:bold;color:#e17055;">7만원</p>' +
+  '<p style="margin:4px 0 0;font-family:Arial,sans-serif;font-size:10px;color:#aaaaaa;">99,000원↑ 결제 시</p>' +
+  '</td>' +
+  '</tr></table>' +
+  '</td></tr>' +
+
+  '<tr><td bgcolor="#f0efff" style="padding:24px 40px;">' +
+  '<p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#333333;line-height:2.2;">' +
+  '✅ &nbsp;참여 비용 없음 (완전 무료)<br />' +
+  '✅ &nbsp;최소 실적 조건 없음<br />' +
+  '✅ &nbsp;언제든 자유롭게 탈퇴 가능<br />' +
+  '✅ &nbsp;24시간 내 전용 코드 발급' +
+  '</p>' +
+  '</td></tr>' +
+
+  '<tr><td bgcolor="#ffffff" align="center" style="padding:28px 40px;">' +
+  '<p style="margin:0 0 14px 0;">' +
+  '<a href="' + u + '" style="font-family:Arial,sans-serif;font-size:14px;font-weight:bold;color:#ffffff;background-color:#4B3BC7;text-decoration:none;padding:12px 28px;display:inline-block;">📋 상세 내용 보기 →</a>' +
+  '</p>' +
+  '<p style="margin:0;">' +
+  '<a href="https://partners.marrywell.co.kr/apply.html" style="font-family:Arial,sans-serif;font-size:15px;font-weight:bold;color:#2c2c54;background-color:#F4C430;text-decoration:none;padding:14px 40px;display:inline-block;">무료로 파트너 신청하기 →</a>' +
+  '</p>' +
+  '</td></tr>' +
+
+  '<tr><td bgcolor="#2c2c54" align="center" style="padding:16px 40px;">' +
+  '<p style="margin:0;font-family:Arial,sans-serif;font-size:11px;color:#888888;">© MARRYWELL · AI Wedding Studio · partners.marrywell.co.kr</p>' +
+  '</td></tr>' +
+
+  '</table></td></tr></table></body></html>';
+}
+
 function sendFlyerEmail(data) {
   const recipients = data.recipients || [];
   const subject    = data.subject   || '[MARRYWELL] 파트너 제안서';
   const flyerUrl   = data.flyerUrl;
-  const htmlBody   = data.htmlBody;  // 직접 HTML 전달 지원
+  const flyerType  = data.flyerType;
+  const htmlBody   = data.htmlBody;
 
-  if (!flyerUrl && !htmlBody) return jsonOut({ success: false, error: '플라이어 URL 또는 HTML이 없습니다.' });
-  if (!recipients.length)     return jsonOut({ success: false, error: '수신자가 없습니다.' });
+  if (!recipients.length) return jsonOut({ success: false, error: '수신자가 없습니다.' });
 
   try {
-    const html = htmlBody || UrlFetchApp.fetch(flyerUrl + '?t=' + Date.now()).getContentText('UTF-8');
-    const sent = [];
-    const failed = [];
+    var html;
+    if (htmlBody) {
+      html = htmlBody;
+    } else {
+      var url = flyerUrl || (flyerType == 2
+        ? 'https://jinny777.github.io/marrywell-partner/materials/MARRYWELL_partner_flyer_A4.html'
+        : 'https://jinny777.github.io/marrywell-partner/materials/MARRYWELL_partners_flyer.html');
+      html = buildFlyerHtml(url);
+    }
 
+    const sent = [], failed = [];
     recipients.forEach(function(email) {
       email = String(email).trim();
       if (!email || !email.includes('@')) return;
@@ -485,6 +572,7 @@ function sendFlyerEmail(data) {
         MailApp.sendEmail({
           to:       email,
           subject:  subject,
+          body:     '파트너 수익 프로그램 안내입니다. HTML 이메일을 지원하는 클라이언트에서 확인해주세요.',
           htmlBody: html,
           name:     'MARRYWELL 파트너스'
         });
@@ -493,7 +581,6 @@ function sendFlyerEmail(data) {
         failed.push(email);
       }
     });
-
     return jsonOut({ success: true, sent: sent.length, failed: failed.length, failedList: failed });
   } catch(e) {
     return jsonOut({ success: false, error: e.message });
