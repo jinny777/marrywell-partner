@@ -468,12 +468,13 @@ function sendFlyerEmail(data) {
   const recipients = data.recipients || [];
   const subject    = data.subject   || '[MARRYWELL] 파트너 제안서';
   const flyerUrl   = data.flyerUrl;
+  const htmlBody   = data.htmlBody;  // 직접 HTML 전달 지원
 
-  if (!flyerUrl)            return jsonOut({ success: false, error: '플라이어 URL이 없습니다.' });
-  if (!recipients.length)   return jsonOut({ success: false, error: '수신자가 없습니다.' });
+  if (!flyerUrl && !htmlBody) return jsonOut({ success: false, error: '플라이어 URL 또는 HTML이 없습니다.' });
+  if (!recipients.length)     return jsonOut({ success: false, error: '수신자가 없습니다.' });
 
   try {
-    const html = UrlFetchApp.fetch(flyerUrl + '?t=' + Date.now()).getContentText('UTF-8');
+    const html = htmlBody || UrlFetchApp.fetch(flyerUrl + '?t=' + Date.now()).getContentText('UTF-8');
     const sent = [];
     const failed = [];
 

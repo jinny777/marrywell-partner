@@ -4217,7 +4217,8 @@ function importFlyerRecipients() {
 }
 
 async function sendFlyerEmail() {
-  const tplId = 'template_z904kd6'; // 플라이어 전용 HTML 템플릿
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzsO0XJV6ZYMsbqYmYS4m2VGEn29ZKSPV5QwgKgzIdXQKORg1Qo1_P5bKlxt5SfoFk8/exec';
+  const ADMIN_TOKEN = 'mw_admin_2025';
 
   const raw        = document.getElementById('flyer-recipients').value;
   const recipients = raw.split(/[\n,]+/).map(e=>e.trim()).filter(e=>e.includes('@'));
@@ -4227,286 +4228,59 @@ async function sendFlyerEmail() {
   const btn        = document.getElementById('flyer-send-btn');
 
   if (!recipients.length) { alert('수신자 이메일을 입력해주세요.'); return; }
+
+  // HTML 업로드 모드 유효성 검사
+  if (selectedFlyer === 3 && !uploadedHtmlContent) {
+    alert('HTML 파일을 먼저 업로드해주세요.'); return;
+  }
+
   if (!confirm(`총 ${recipients.length}명에게 플라이어 이메일을 발송합니다.\n계속하시겠습니까?`)) return;
 
   btn.disabled = true;
   btn.textContent = '📤 발송 중...';
   resultEl.style.display = 'none';
-  logEl.innerHTML = '<span style="color:var(--gray)">발송 준비 중...</span>';
+  logEl.innerHTML = '<span style="color:var(--gray)">GAS 서버로 발송 요청 중...</span>';
 
   try {
-    logEl.innerHTML = '<span style="color:var(--gray)">발송 준비 중...</span>';
+    const flyerName = selectedFlyer === 1 ? '다크 ver.' : selectedFlyer === 2 ? 'A4 ver.' : 'HTML 업로드 파일';
 
-    // HTML 업로드 모드
+    // GAS 요청 페이로드
+    const payload = {
+      action:     'sendFlyer',
+      token:      ADMIN_TOKEN,
+      recipients: recipients,
+      subject:    subject,
+    };
+
     if (selectedFlyer === 3) {
-      if (!uploadedHtmlContent) { alert('HTML 파일을 먼저 업로드해주세요.'); btn.disabled=false; btn.textContent='📤 플라이어 이메일 발송'; return; }
-      let ok=0, fail=0;
-      for (const email of recipients) {
-        try {
-          logEl.innerHTML = `<span style="color:var(--gray)">📤 ${email} 발송 중...</span>`;
-          const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              service_id:  'service_2qnpx8i',
-              template_id: 'template_z904kd6',
-              user_id:     '_J5MvthpGTIyRcr0y',
-              template_params: {
-                to_email:  email,
-                subject:   subject,
-                html_body: uploadedHtmlContent,
-                email:     'noreply@marrywell.co.kr',
-                name:      'MARRYWELL 파트너스',
-              }
-            })
-          });
-          if (!res.ok) { const t = await res.text(); throw new Error(t); }
-          logEl.innerHTML += `<div style="color:var(--ok)">✓ ${email}</div>`;
-          ok++;
-        } catch(e) {
-          logEl.innerHTML += `<div style="color:var(--err)">✗ ${email} — ${e.message||'실패'}</div>`;
-          fail++;
-        }
-        await new Promise(r=>setTimeout(r,400));
-      }
-      btn.disabled=false; btn.textContent='📤 플라이어 이메일 발송';
-      resultEl.style.display='block';
-      resultEl.style.background = fail===0 ? 'var(--ok-pale)' : 'var(--warn-pale)';
-      resultEl.style.color = fail===0 ? 'var(--ok)' : 'var(--warn)';
-      resultEl.textContent = `발송 완료: 성공 ${ok}건 / 실패 ${fail}건`;
-      saveFlyerHistory({
-        sentAt:     new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
-        flyerName:  'HTML 업로드 파일',
-        subject:    subject,
-        total:      recipients.length,
-        sent:       ok,
-        failed:     fail,
-        recipients: recipients,
-      });
-      logHistory('email_sent', `HTML 업로드 이메일 발송 (${ok}/${recipients.length}건 성공)`, { subject, count: ok });
-      return;
+      payload.htmlBody = uploadedHtmlContent;
+    } else {
+      payload.flyerUrl = FLYER_URLS[selectedFlyer];
     }
 
-    // 기존 플라이어 모드
-    const flyerUrl  = FLYER_URLS[selectedFlyer];
-    const flyerName = selectedFlyer === 1 ? '파트너 모집 플라이어 (다크 ver.)' : '파트너 모집 플라이어 (A4 ver.)';
-    const html = `<!DOCTYPE html>
-<html lang="ko">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#EEF0FF;font-family:'Apple SD Gothic Neo',Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#EEF0FF" style="background-color:#EEF0FF;">
-<tr><td bgcolor="#EEF0FF" align="center" style="background-color:#EEF0FF;padding:32px 0;">
-<table width="580" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(75,59,199,0.12);">
+    const res = await fetch(GAS_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body:    JSON.stringify(payload),
+    });
 
-  <!-- 헤더 -->
-  <tr><td bgcolor="#2c2c54" style="background:#2c2c54 linear-gradient(135deg,#2c2c54 0%,#4B3BC7 100%);padding:40px 40px 36px;text-align:center;">
-    <div style="display:inline-block;border:1px solid rgba(244,196,48,0.5);border-radius:100px;padding:4px 16px;font-size:10px;color:#F4C430;letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;">MARRYWELL · PARTNER PROGRAM</div>
-    <div style="font-size:32px;font-weight:900;color:#ffffff;line-height:1.3;margin-bottom:12px;">소개만 해도<br><span style="color:#F4C430;">수익이 생깁니다.</span></div>
-    <div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.8;">메리웰을 업체에 소개하고, 고객이 구매할 때마다<br><strong style="color:#ffffff;">건당 최대 페이백</strong>을 받으세요.</div>
-  </td></tr>
+    const json = await res.json();
 
-  <!-- 핵심 수치 -->
-  <tr><td bgcolor="#f8f7ff" style="background:#f8f7ff;padding:28px 40px;border-bottom:1px solid #e8e4ff;">
-    <table width="100%" cellpadding="0" cellspacing="0">
-      <tr>
-        <td align="center" style="padding:0 10px;border-right:1px solid #ddd8f8;">
-          <div style="font-size:11px;color:#6C5CE7;letter-spacing:1.5px;font-weight:700;margin-bottom:8px;">건당 최대</div>
-          <div style="font-size:44px;font-weight:900;color:#2c2c54;line-height:1;">7만원</div>
-          <div style="font-size:11px;color:#9990c0;margin-top:4px;">/ 건 지급</div>
-        </td>
-        <td align="center" style="padding:0 10px;border-right:1px solid #ddd8f8;">
-          <div style="font-size:11px;color:#6C5CE7;letter-spacing:1.5px;font-weight:700;margin-bottom:8px;">참여 비용</div>
-          <div style="font-size:36px;font-weight:900;color:#2c2c54;line-height:1;">무료</div>
-          <div style="font-size:11px;color:#9990c0;margin-top:4px;">최소 조건 없음</div>
-        </td>
-        <td align="center" style="padding:0 10px;">
-          <div style="font-size:11px;color:#6C5CE7;letter-spacing:1.5px;font-weight:700;margin-bottom:8px;">정산 주기</div>
-          <div style="font-size:32px;font-weight:900;color:#2c2c54;line-height:1;">익월 15일</div>
-          <div style="font-size:11px;color:#9990c0;margin-top:4px;">자동 정산</div>
-        </td>
-      </tr>
-    </table>
-  </td></tr>
+    if (!json.success) throw new Error(json.error || '발송 실패');
 
-  <!-- 수익 구조 -->
-  <tr><td bgcolor="#ffffff" style="padding:32px 40px 20px;background:#fff;">
-    <div style="font-size:11px;font-weight:700;color:#4B3BC7;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">💰 등급별 페이백 구조</div>
-    <table width="100%" cellpadding="0" cellspacing="0">
-      <tr>
-        <td style="padding:4px 6px;">
-          <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f8f9fa" style="background:#f8f9fa;border-radius:10px;padding:16px;">
-            <tr>
-              <td><div style="font-size:10px;font-weight:700;color:#636e72;letter-spacing:1px;">BASIC</div>
-              <div style="font-size:11px;color:#888;margin:2px 0;">월 1~4건</div>
-              <div style="font-size:22px;font-weight:900;color:#636e72;">3만원</div>
-              <div style="font-size:10px;color:#aaa;">39,900원↑ 결제 시</div></td>
-            </tr>
-          </table>
-        </td>
-        <td style="padding:4px 6px;">
-          <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#2c2c54" style="background:#2c2c54;border-radius:10px;padding:16px;border:2px solid #F4C430;">
-            <tr>
-              <td><div style="font-size:10px;font-weight:700;color:#F4C430;letter-spacing:1px;">SILVER ✦ 추천</div>
-              <div style="font-size:11px;color:rgba(255,255,255,0.4);margin:2px 0;">월 5~9건</div>
-              <div style="font-size:22px;font-weight:900;color:#F4C430;">5만원</div>
-              <div style="font-size:10px;color:rgba(255,255,255,0.3);">59,800원↑ 결제 시</div></td>
-            </tr>
-          </table>
-        </td>
-        <td style="padding:4px 6px;">
-          <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f8f9fa" style="background:#f8f9fa;border-radius:10px;padding:16px;">
-            <tr>
-              <td><div style="font-size:10px;font-weight:700;color:#d68910;letter-spacing:1px;">GOLD ⭐</div>
-              <div style="font-size:11px;color:#888;margin:2px 0;">월 10건↑</div>
-              <div style="font-size:22px;font-weight:900;color:#e17055;">7만원</div>
-              <div style="font-size:10px;color:#aaa;">99,000원↑ 결제 시</div></td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </td></tr>
+    const sent   = json.sent   ?? recipients.length;
+    const failed = json.failed ?? 0;
 
-  <!-- 3단계 프로세스 -->
-  <tr><td bgcolor="#ffffff" style="padding:20px 40px 24px;background:#fff;">
-    <div style="font-size:11px;font-weight:700;color:#4B3BC7;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">⚡ 3단계로 수익 발생</div>
-    <table width="100%" cellpadding="0" cellspacing="0">
-      <tr>
-        <td align="center" style="padding:0 6px;">
-          <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f0efff" style="background:#f0efff;border-radius:10px;">
-            <tr><td style="padding:16px 12px;text-align:center;">
-              <div style="font-size:10px;font-weight:700;color:#4B3BC7;letter-spacing:1px;margin-bottom:6px;">STEP 01</div>
-              <div style="font-size:14px;font-weight:800;color:#2c2c54;margin-bottom:4px;">업체 소개</div>
-              <div style="font-size:11px;color:#666;line-height:1.5;">전용 코드로<br>업체에 소개</div>
-            </td></tr>
-          </table>
-        </td>
-        <td align="center" style="font-size:18px;color:#6C5CE7;font-weight:700;width:24px;">→</td>
-        <td align="center" style="padding:0 6px;">
-          <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f0efff" style="background:#f0efff;border-radius:10px;">
-            <tr><td style="padding:16px 12px;text-align:center;">
-              <div style="font-size:10px;font-weight:700;color:#4B3BC7;letter-spacing:1px;margin-bottom:6px;">STEP 02</div>
-              <div style="font-size:14px;font-weight:800;color:#2c2c54;margin-bottom:4px;">고객 구매</div>
-              <div style="font-size:11px;color:#666;line-height:1.5;">예비 신혼부부가<br>서비스 구매</div>
-            </td></tr>
-          </table>
-        </td>
-        <td align="center" style="font-size:18px;color:#6C5CE7;font-weight:700;width:24px;">→</td>
-        <td align="center" style="padding:0 6px;">
-          <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f0efff" style="background:#f0efff;border-radius:10px;">
-            <tr><td style="padding:16px 12px;text-align:center;">
-              <div style="font-size:10px;font-weight:700;color:#4B3BC7;letter-spacing:1px;margin-bottom:6px;">STEP 03</div>
-              <div style="font-size:14px;font-weight:800;color:#2c2c54;margin-bottom:4px;">페이백 지급</div>
-              <div style="font-size:11px;color:#666;line-height:1.5;">익월 15일<br>자동 정산</div>
-            </td></tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </td></tr>
-
-  <!-- 추천 업종 -->
-  <tr><td bgcolor="#ffffff" style="padding:0 40px 24px;background:#fff;">
-    <div style="font-size:11px;font-weight:700;color:#4B3BC7;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">🏢 추천 파트너 업종</div>
-    <div style="font-size:13px;color:#444;line-height:2;">
-      💒 웨딩홀 &nbsp;|&nbsp; 👗 웨딩드레스 &nbsp;|&nbsp; 📸 스튜디오 &nbsp;|&nbsp; 💃 드레스샵<br>
-      ✍️ 혼인신고사무소 &nbsp;|&nbsp; 📬 청첩장업체 &nbsp;|&nbsp; 💅 뷰티샵 &nbsp;|&nbsp; ✨ 기타 웨딩 업종
-    </div>
-  </td></tr>
-
-  <!-- 참여 조건 -->
-  <tr><td bgcolor="#ffffff" style="padding:0 40px 28px;background:#fff;">
-    <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f0efff" style="background:#f0efff;border-radius:10px;padding:16px 20px;">
-      <tr>
-        <td style="font-size:13px;color:#333;line-height:2.2;">
-          ✅ &nbsp;참여 비용 없음 (완전 무료)<br>
-          ✅ &nbsp;최소 실적 조건 없음<br>
-          ✅ &nbsp;언제든 자유롭게 탈퇴 가능<br>
-          ✅ &nbsp;24시간 내 전용 코드 발급
-        </td>
-      </tr>
-    </table>
-  </td></tr>
-
-  <!-- CTA 버튼 -->
-  <tr><td bgcolor="#ffffff" style="padding:0 40px 36px;text-align:center;background:#fff;">
-    <table cellpadding="0" cellspacing="0" align="center" style="margin:0 auto 12px;"><tr>
-      <td bgcolor="#4B3BC7" style="background:#4B3BC7;border-radius:100px;">
-        <a href="${flyerUrl}" target="_blank"
-          style="display:inline-block;color:#ffffff;text-decoration:none;padding:14px 32px;font-size:14px;font-weight:800;">
-          📋 상세 내용 보기 →
-        </a>
-      </td>
-    </tr></table>
-    <table cellpadding="0" cellspacing="0" align="center" style="margin:0 auto;"><tr>
-      <td bgcolor="#F4C430" style="background:#F4C430;border-radius:100px;">
-        <a href="https://partners.marrywell.co.kr/apply.html" target="_blank"
-          style="display:inline-block;color:#2c2c54;text-decoration:none;padding:16px 44px;font-size:15px;font-weight:900;">
-          무료로 파트너 신청하기 →
-        </a>
-      </td>
-    </tr></table>
-  </td></tr>
-
-  <!-- 푸터 -->
-  <tr><td bgcolor="#2c2c54" style="background:#2c2c54;padding:20px 40px;text-align:center;">
-    <p style="font-size:11px;color:rgba(255,255,255,0.35);margin:0;">© MARRYWELL · AI Wedding Studio · partners.marrywell.co.kr</p>
-  </td></tr>
-
-</table>
-</td></tr>
-</table>
-</body></html>`;
-
-    let sent = 0, failed = 0, failedList = [];
-
-    for (const email of recipients) {
-      try {
-        logEl.innerHTML = `<span style="color:var(--gray)">📤 ${email} 발송 중...</span>`;
-        console.log('[Flyer] sending to:', email);
-        const ejsRes = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            service_id:  'service_2qnpx8i',
-            template_id: tplId,
-            user_id:     '_J5MvthpGTIyRcr0y',
-            template_params: {
-              to_email:  email,
-              subject:   subject,
-              html_body: html,
-              email:     'noreply@marrywell.co.kr',
-              name:      'MARRYWELL 파트너스',
-            }
-          })
-        });
-        if (!ejsRes.ok) {
-          const errText = await ejsRes.text();
-          throw new Error(errText);
-        }
-        sent++;
-        logEl.innerHTML = `<span style="color:var(--ok)">✅ 발송 중... ${sent}/${recipients.length}</span>`;
-        console.log('[Flyer] sent to:', email);
-      } catch(e) {
-        console.error('[Flyer] failed for', email, e);
-        failed++;
-        failedList.push(`${email}(${e.text||e.message||e.status||'unknown'})`);
-      }
-      // EmailJS 속도 제한 방지
-      await new Promise(r => setTimeout(r, 300));
-    }
-
-    resultEl.style.cssText = 'display:block;padding:12px 16px;border-radius:12px;font-size:13px;background:#DCFCE7;color:#16A34A;font-weight:700;';
+    resultEl.style.cssText = `display:block;padding:12px 16px;border-radius:12px;font-size:13px;background:${failed===0?'#DCFCE7':'#FEF9C3'};color:${failed===0?'#16A34A':'#92400E'};font-weight:700;`;
     resultEl.textContent = `✅ ${sent}명 발송 완료${failed ? ` · 실패 ${failed}명` : ''}`;
     logEl.innerHTML = `<b style="color:var(--ok)">✅ 발송 완료 (${new Date().toLocaleTimeString('ko-KR')})</b><br>` +
       `제목: ${subject}<br>수신자 ${sent}명 성공` +
-      (failedList.length ? `<br><span style="color:var(--err)">실패: ${failedList.join(', ')}</span>` : '');
+      (json.failedList?.length ? `<br><span style="color:var(--err)">실패: ${json.failedList.join(', ')}</span>` : '');
     toast(`플라이어 ${sent}명 발송 완료!`);
 
-    // 발송 이력 저장
     saveFlyerHistory({
       sentAt:     new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
-      flyerName:  selectedFlyer === 1 ? '다크 ver.' : 'A4 ver.',
+      flyerName:  flyerName,
       subject:    subject,
       total:      recipients.length,
       sent:       sent,
@@ -4514,6 +4288,7 @@ async function sendFlyerEmail() {
       recipients: recipients,
     });
     renderFlyerHistory();
+    logHistory('email_sent', `플라이어 이메일 발송 (${sent}/${recipients.length}건 성공)`, { subject, count: sent });
 
   } catch(e) {
     resultEl.style.cssText = 'display:block;padding:12px 16px;border-radius:12px;font-size:13px;background:#FEE2E2;color:#DC2626;';
