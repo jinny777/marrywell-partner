@@ -4303,62 +4303,47 @@ async function sendFlyerEmail() {
   resultEl.style.display = 'none';
   logEl.innerHTML = '<span style="color:var(--gray)">이메일 발송 중...</span>';
 
-  const GAS_URL    = 'https://script.google.com/macros/s/AKfycbwdSfxaB6nyaNYMrR_tlOQUg38iKC3gipUhXxq8p575hJae-b_4Us_dB44oEBESkRtv/exec';
-  const ADMIN_TOKEN = 'mw_admin_2025';
-  const flyerName  = selectedFlyer === 1 ? '다크 ver.' : selectedFlyer === 2 ? 'A4 ver.' : 'HTML 업로드 파일';
+  const flyerName = selectedFlyer === 1 ? '다크 ver.' : selectedFlyer === 2 ? 'A4 ver.' : 'HTML 업로드 파일';
+  const html = selectedFlyer === 3 ? uploadedHtmlContent : buildFlyerHtml(FLYER_URLS[selectedFlyer]);
 
-  const payload = {
-    action:     'sendFlyer',
-    token:      ADMIN_TOKEN,
-    recipients: recipients,
-    subject:    subject,
-  };
-  if (selectedFlyer === 3) {
-    payload.htmlBody = uploadedHtmlContent;
-  } else {
-    payload.flyerType = selectedFlyer;
-    payload.flyerUrl  = FLYER_URLS[selectedFlyer];
+  const sent = [], failed = [];
+  for (const email of recipients) {
+    try {
+      await emailjs.send('service_2qnpx8i', 'template_z904kd6', {
+        to_email: email,
+        subject:  subject,
+        html_body: html
+      });
+      sent.push(email);
+    } catch(e) {
+      failed.push(email);
+    }
   }
 
-  try {
-    const res  = await fetch(GAS_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body:    JSON.stringify(payload),
-    });
-    const json = await res.json();
-    if (!json.success) throw new Error(json.error || '발송 실패');
+  const sentCount   = sent.length;
+  const failedCount = failed.length;
 
-    const sent   = json.sent   ?? recipients.length;
-    const failed = json.failed ?? 0;
+  resultEl.style.cssText = `display:block;padding:12px 16px;border-radius:12px;font-size:13px;background:${failedCount===0?'#DCFCE7':'#FEF9C3'};color:${failedCount===0?'#16A34A':'#92400E'};font-weight:700;`;
+  resultEl.textContent = `✅ ${sentCount}명 발송 완료${failedCount ? ` · 실패 ${failedCount}명` : ''}`;
+  logEl.innerHTML = `<b style="color:var(--ok)">✅ 발송 완료 (${new Date().toLocaleTimeString('ko-KR')})</b><br>` +
+    `제목: ${subject}<br>수신자 ${sentCount}명 성공` +
+    (failed.length ? `<br><span style="color:var(--err)">실패: ${failed.join(', ')}</span>` : '');
+  toast(`플라이어 ${sentCount}명 발송 완료!`);
 
-    resultEl.style.cssText = `display:block;padding:12px 16px;border-radius:12px;font-size:13px;background:${failed===0?'#DCFCE7':'#FEF9C3'};color:${failed===0?'#16A34A':'#92400E'};font-weight:700;`;
-    resultEl.textContent = `✅ ${sent}명 발송 완료${failed ? ` · 실패 ${failed}명` : ''}`;
-    logEl.innerHTML = `<b style="color:var(--ok)">✅ 발송 완료 (${new Date().toLocaleTimeString('ko-KR')})</b><br>` +
-      `제목: ${subject}<br>수신자 ${sent}명 성공` +
-      (json.failedList?.length ? `<br><span style="color:var(--err)">실패: ${json.failedList.join(', ')}</span>` : '');
-    toast(`플라이어 ${sent}명 발송 완료!`);
+  saveFlyerHistory({
+    sentAt:     new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
+    flyerName,
+    subject,
+    total:      recipients.length,
+    sent:       sentCount,
+    failed:     failedCount,
+    recipients,
+  });
+  renderFlyerHistory();
+  logHistory('email_sent', `플라이어 이메일 발송 (${sentCount}/${recipients.length}건 성공)`, { subject, count: sentCount });
 
-    saveFlyerHistory({
-      sentAt:     new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
-      flyerName,
-      subject,
-      total:      recipients.length,
-      sent,
-      failed,
-      recipients,
-    });
-    renderFlyerHistory();
-    logHistory('email_sent', `플라이어 이메일 발송 (${sent}/${recipients.length}건 성공)`, { subject, count: sent });
-
-  } catch(e) {
-    resultEl.style.cssText = 'display:block;padding:12px 16px;border-radius:12px;font-size:13px;background:#FEE2E2;color:#DC2626;';
-    resultEl.textContent = `❌ 오류: ${e.message}`;
-    logEl.innerHTML = `<span style="color:var(--err)">❌ 오류: ${e.message}</span>`;
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '📤 플라이어 이메일 발송';
-  }
+  btn.disabled = false;
+  btn.textContent = '📤 플라이어 이메일 발송';
 }
 </script>
 
