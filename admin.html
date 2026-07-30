@@ -900,7 +900,7 @@ tr:hover td{background:#FAFAFF;}
                 <tr>
                   <th>#</th><th>파트너</th><th>고객명</th><th>연락처</th>
                   <th>이메일</th><th>업체 유형</th><th>메모</th>
-                  <th>제출일</th><th>상태</th><th>상태 변경</th><th>삭제</th>
+                  <th>제출일</th><th>상태</th><th>부여횟수</th><th>생성횟수</th><th>상태 변경</th><th>삭제</th>
                 </tr>
               </thead>
               <tbody id="referrals-tbody"></tbody>
@@ -2920,7 +2920,7 @@ function renderReferralsTable(){
 
   const tbody = document.getElementById('referrals-tbody');
   if(!list.length){
-    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="ico">📋</div><p>명단이 없습니다.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="12"><div class="empty-state"><div class="ico">📋</div><p>명단이 없습니다.</p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = list.map((r,i)=>`
@@ -2937,6 +2937,16 @@ function renderReferralsTable(){
       <td style="font-size:11px;color:var(--gray);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.memo||''}">${r.memo||'-'}</td>
       <td style="font-size:12px;color:var(--gray)">${(r.submittedAt||'').slice(0,10)}</td>
       <td><span class="status ${RF_STATUS_CLS[r.status]||'s-pending'}">${RF_STATUS_MAP[r.status]||r.status}</span></td>
+      <td style="text-align:center;">
+        <div style="display:flex;align-items:center;gap:4px;justify-content:center;">
+          <button onclick="changeInviteQuota('${r.id}',${(r.inviteQuota||2)-1})" style="width:22px;height:22px;border:1px solid #ddd;border-radius:4px;background:#fff;cursor:pointer;font-size:13px;line-height:1;">-</button>
+          <span style="min-width:24px;text-align:center;font-size:13px;font-weight:700;">${r.inviteQuota??2}</span>
+          <button onclick="changeInviteQuota('${r.id}',${(r.inviteQuota||2)+1})" style="width:22px;height:22px;border:1px solid #ddd;border-radius:4px;background:#fff;cursor:pointer;font-size:13px;line-height:1;">+</button>
+        </div>
+      </td>
+      <td style="text-align:center;font-size:13px;font-weight:700;color:${(r.inviteUsed||0)>=(r.inviteQuota||2)?'var(--err)':'var(--ok)'};">
+        ${r.inviteUsed??'-'}
+      </td>
       <td>
         <select onchange="changeReferralStatus('${r.id}',this.value)"
           style="padding:5px 8px;border:1.5px solid #E0E0F0;border-radius:8px;font-size:11px;font-family:'Noto Sans KR',sans-serif;background:#FAFAFF;">
@@ -2951,13 +2961,14 @@ function renderReferralsTable(){
 }
 
 function exportReferralsCSV(){
-  const header = ['#','파트너명','파트너코드','고객명','연락처','이메일','업체유형','메모','제출일','상태'];
+  const header = ['#','파트너명','파트너코드','고객명','연락처','이메일','업체유형','메모','제출일','상태','부여횟수','생성횟수'];
   const rows = allReferrals.map((r,i)=>[
     i+1, r.partnerName||'', r.partnerCode||'',
     r.customerName||'', r.customerPhone||'', r.customerEmail||'',
     r.bizType||'', r.memo||'',
     (r.submittedAt||'').slice(0,10),
-    RF_STATUS_MAP[r.status]||r.status
+    RF_STATUS_MAP[r.status]||r.status,
+    r.inviteQuota??2, r.inviteUsed??'-'
   ]);
   const csv = [header,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
   const blob = new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
@@ -3138,6 +3149,33 @@ async function changeReferralStatus(id, status){
     renderReferralsStats();
     renderReferralsTable();
     toast('서버 연결 오류로 상태 변경에 실패했습니다.', 'err');
+  }
+}
+
+async function changeInviteQuota(id, newQuota){
+  if(newQuota < 0) return;
+  const r = allReferrals.find(x => String(x.id) === String(id));
+  if(!r) return;
+  const prev = r.inviteQuota ?? 2;
+  r.inviteQuota = newQuota;
+  renderReferralsTable();
+  try{
+    const res = await fetch(`${API_BASE}/api/partners/referrals/${id}`, {
+      method: 'PATCH',
+      headers: {'Content-Type':'application/json','x-admin-token':'mw_admin_2025'},
+      body: JSON.stringify({inviteQuota: newQuota})
+    });
+    if(!res.ok){
+      r.inviteQuota = prev;
+      renderReferralsTable();
+      toast(`부여횟수 변경 실패 (${res.status})`, 'err');
+      return;
+    }
+    toast(`${r.customerName} 고객 청첩장 부여횟수가 ${newQuota}회로 변경됐습니다.`);
+  }catch(e){
+    r.inviteQuota = prev;
+    renderReferralsTable();
+    toast('서버 연결 오류로 변경에 실패했습니다.', 'err');
   }
 }
 
