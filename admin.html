@@ -4215,6 +4215,57 @@ function importFlyerRecipients() {
   toast(`파트너 ${emails.length}명의 이메일을 불러왔습니다.`);
 }
 
+function buildLinkEmailHtml(flyerUrl) {
+  return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#EEF0FF;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#EEF0FF"><tr><td align="center" style="padding:32px 0;">
+<table width="580" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="border-radius:12px;overflow:hidden;">
+  <tr><td bgcolor="#2c2c54" align="center" style="padding:40px 40px 32px;">
+    <p style="margin:0 0 8px;font-size:11px;color:#F4C430;letter-spacing:3px;">MARRYWELL · PARTNER PROGRAM</p>
+    <p style="margin:0 0 12px;font-size:26px;font-weight:bold;color:#ffffff;line-height:1.4;">소개만 해도<br><span style="color:#F4C430;">수익이 생깁니다.</span></p>
+    <p style="margin:0;font-size:13px;color:#cccccc;line-height:1.8;">메리웰을 업체에 소개하고, 고객이 구매할 때마다<br><b style="color:#ffffff;">건당 최대 7만원 페이백</b>을 받으세요.</p>
+  </td></tr>
+  <tr><td bgcolor="#f8f7ff" align="center" style="padding:28px 40px;">
+    <table width="100%" cellpadding="8" cellspacing="0"><tr>
+      <td align="center" width="33%" style="border-right:1px solid #ddd8f8;">
+        <p style="margin:0 0 4px;font-size:10px;color:#6C5CE7;font-weight:bold;">건당 최대</p>
+        <p style="margin:0;font-size:32px;font-weight:bold;color:#2c2c54;">7만원</p>
+      </td>
+      <td align="center" width="33%" style="border-right:1px solid #ddd8f8;">
+        <p style="margin:0 0 4px;font-size:10px;color:#6C5CE7;font-weight:bold;">참여 비용</p>
+        <p style="margin:0;font-size:28px;font-weight:bold;color:#2c2c54;">무료</p>
+      </td>
+      <td align="center" width="33%">
+        <p style="margin:0 0 4px;font-size:10px;color:#6C5CE7;font-weight:bold;">정산 주기</p>
+        <p style="margin:0;font-size:20px;font-weight:bold;color:#2c2c54;">익월 15일</p>
+      </td>
+    </tr></table>
+  </td></tr>
+  <tr><td bgcolor="#f0efff" align="center" style="padding:20px 40px;">
+    <p style="margin:0;font-size:13px;color:#333;line-height:2.2;">
+      ✅ 참여 비용 없음 (완전 무료)<br>
+      ✅ 최소 실적 조건 없음<br>
+      ✅ 언제든 자유롭게 탈퇴 가능<br>
+      ✅ 24시간 내 전용 코드 발급
+    </p>
+  </td></tr>
+  <tr><td bgcolor="#ffffff" align="center" style="padding:32px 40px;">
+    <p style="margin:0 0 16px;">
+      <a href="${flyerUrl}" style="background:#4B3BC7;color:#ffffff;padding:14px 32px;text-decoration:none;font-size:14px;font-weight:bold;display:inline-block;">📋 파트너 제안서 전체 보기 →</a>
+    </p>
+    <p style="margin:0;">
+      <a href="https://partners.marrywell.co.kr/apply.html" style="background:#F4C430;color:#2c2c54;padding:14px 40px;text-decoration:none;font-size:15px;font-weight:bold;display:inline-block;">무료로 파트너 신청하기 →</a>
+    </p>
+  </td></tr>
+  <tr><td bgcolor="#2c2c54" align="center" style="padding:16px 40px;">
+    <p style="margin:0;font-size:11px;color:#888;">© MARRYWELL · AI Wedding Studio · partners.marrywell.co.kr</p>
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>`;
+}
+
 function buildFlyerHtml(flyerUrl) {
   var u = flyerUrl || 'https://partners.marrywell.co.kr';
   return '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' +
@@ -4304,7 +4355,8 @@ async function sendFlyerEmail() {
   logEl.innerHTML = '<span style="color:var(--gray)">이메일 발송 중...</span>';
 
   const flyerName = selectedFlyer === 1 ? '다크 ver.' : selectedFlyer === 2 ? 'A4 ver.' : 'HTML 업로드 파일';
-  const html = selectedFlyer === 3 ? uploadedHtmlContent : buildFlyerHtml(FLYER_URLS[selectedFlyer]);
+  const flyerLink = FLYER_URLS[selectedFlyer] || 'https://partners.marrywell.co.kr';
+  const html = selectedFlyer === 3 ? uploadedHtmlContent : buildLinkEmailHtml(flyerLink);
 
   const sent = [], failed = [];
   for (const email of recipients) {
