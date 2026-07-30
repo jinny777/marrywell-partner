@@ -4189,7 +4189,7 @@ function selectFlyer(num) {
   document.getElementById('html-upload-area').style.display = num===3 ? 'block' : 'none';
   if (num !== 3) {
     const frame = document.getElementById('flyer-preview-frame');
-    frame.srcdoc = '';
+    frame.removeAttribute('srcdoc');
     frame.src = FLYER_URLS[num] + '?t=' + Date.now();
   }
 }
