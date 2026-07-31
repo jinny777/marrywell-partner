@@ -1792,9 +1792,9 @@ async function pushStatusToSheet(id, status, code) {
 // ── 서버 DB 파트너 업데이트 ────────────────────────
 async function syncPartnerToDB(id, updates) {
   try {
-    const res = await fetch(`${API_BASE}/api/partners/${id}?token=mw_admin_2025`, {
+    const res = await fetch(`${API_BASE}/api/partners/${id}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-admin-token': 'mw_admin_2025' },
       body: JSON.stringify(updates),
     });
     if (!res.ok) console.warn('[Admin] 서버 파트너 업데이트 실패:', await res.text());
@@ -1829,7 +1829,7 @@ function doLogout(){
 // ── 서버 DB에서 파트너 목록 불러오기 ─────────────
 async function fetchPartnersFromServer(){
   try {
-    const res = await fetch(`${API_BASE}/api/partners/list?token=mw_admin_2025`);
+    const res = await fetch(`${API_BASE}/api/partners/list`, { headers: { 'x-admin-token': 'mw_admin_2025' } });
     if(!res.ok) return;
     const data = await res.json();
     if(!Array.isArray(data) || data.length === 0) return;
@@ -1963,8 +1963,8 @@ async function loadReviews(){
   try {
     const filterEl = document.getElementById('review-partner-filter');
     const partnerCode = filterEl ? filterEl.value : '';
-    const url = `${API_BASE}/api/admin/reviews?token=mw_admin_2025${partnerCode ? '&partnerCode='+partnerCode : ''}`;
-    const res = await fetch(url);
+    const url = `${API_BASE}/api/admin/reviews${partnerCode ? '?partnerCode='+partnerCode : ''}`;
+    const res = await fetch(url, { headers: { 'x-admin-token': 'mw_admin_2025' } });
     const list = await res.json();
 
     // 파트너 목록 드롭다운 갱신 (전체 조회 시에만)
@@ -2870,7 +2870,7 @@ async function reloadReferrals(){
 
 async function fetchReferrals(){
   try{
-    const res  = await fetch(`${API_BASE}/api/partners/referrals?token=mw_admin_2025`);
+    const res  = await fetch(`${API_BASE}/api/partners/referrals`, { headers: { 'x-admin-token': 'mw_admin_2025' } });
     const data = await res.json();
     if(Array.isArray(data)){ allReferrals = data; }
   }catch(e){
