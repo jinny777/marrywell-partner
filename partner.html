@@ -1015,7 +1015,11 @@ async function doLogin(){
 
   // 1) 서버 API 시도 (항상 우선)
   try {
-    const res  = await fetch(`${API_BASE}/api/partners/login?code=${encodeURIComponent(code)}&pw=${encodeURIComponent(pw)}`);
+    const res  = await fetch(`${API_BASE}/api/partners/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, pw }),
+    });
     const data = await res.json();
     if(data.success){
       setSession({...data.partner, isReal: true});
