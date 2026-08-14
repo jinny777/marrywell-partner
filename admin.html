@@ -4345,19 +4345,18 @@ async function sendFlyerEmail() {
   const flyerLink = FLYER_URLS[selectedFlyer] || 'https://partners.marrywell.co.kr';
   const html = selectedFlyer === 3 ? uploadedHtmlContent : buildFlyerHtml(flyerLink);
 
-  let sent = [], failed = [];
-  try {
-    const res = await fetch(`${API_BASE}/api/admin/send-flyer-email`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-token': 'mw_admin_2025' },
-      body: JSON.stringify({ recipients, subject, html })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || '발송 실패');
-    sent = data.sent || [];
-    failed = data.failed || [];
-  } catch (e) {
-    failed = recipients;
+  const sent = [], failed = [];
+  for (const email of recipients) {
+    try {
+      await emailjs.send('service_2qnpx8i', 'template_z904kd6', {
+        to_email: email,
+        subject:  subject,
+        html_body: html
+      });
+      sent.push(email);
+    } catch(e) {
+      failed.push(email);
+    }
   }
 
   const sentCount   = sent.length;
