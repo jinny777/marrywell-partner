@@ -4394,7 +4394,7 @@ async function sendFlyerEmail() {
 
   const flyerName = selectedFlyer === 1 ? '다크 ver.' : selectedFlyer === 2 ? 'A4 ver.' : 'HTML 업로드 파일';
   const flyerLink = FLYER_URLS[selectedFlyer] || 'https://partners.marrywell.co.kr';
-  const html = selectedFlyer === 3 ? uploadedHtmlContent : buildLinkEmailHtml(flyerLink);
+  const html = selectedFlyer === 3 ? uploadedHtmlContent : buildFlyerHtml(flyerLink);
 
   const sent = [], failed = [];
   for (const email of recipients) {
