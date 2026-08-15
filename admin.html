@@ -4394,7 +4394,15 @@ async function sendFlyerEmail() {
 
   const flyerName = selectedFlyer === 1 ? '다크 ver.' : selectedFlyer === 2 ? 'A4 ver.' : 'HTML 업로드 파일';
   const flyerLink = FLYER_URLS[selectedFlyer] || 'https://partners.marrywell.co.kr';
-  const html = selectedFlyer === 3 ? uploadedHtmlContent : buildLinkEmailHtml(flyerLink);
+  // 다우오피스/네이버에서는 옵션 3(실제 .html 파일 업로드)만 안정적으로 렌더링됨.
+  // 옵션 1/2도 손으로 만든 문자열 대신 같은 실제 플라이어 파일을 그대로 가져와 보낸다.
+  let html;
+  if (selectedFlyer === 3) {
+    html = uploadedHtmlContent;
+  } else {
+    const fileRes = await fetch(flyerLink);
+    html = await fileRes.text();
+  }
 
   // emailjs.send() (SDK) HTML-escapes template params by default, which breaks
   // full-HTML flyer rendering. Call the EmailJS REST API directly instead —
