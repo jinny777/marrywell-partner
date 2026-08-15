@@ -4396,14 +4396,23 @@ async function sendFlyerEmail() {
   const flyerLink = FLYER_URLS[selectedFlyer] || 'https://partners.marrywell.co.kr';
   const html = selectedFlyer === 3 ? uploadedHtmlContent : buildFlyerHtml(flyerLink);
 
+  // emailjs.send() (SDK) HTML-escapes template params by default, which breaks
+  // full-HTML flyer rendering. Call the EmailJS REST API directly instead —
+  // it does not escape, matching what actually renders as real HTML in inboxes.
   const sent = [], failed = [];
   for (const email of recipients) {
     try {
-      await emailjs.send('service_2qnpx8i', 'template_z904kd6', {
-        to_email: email,
-        subject:  subject,
-        html_body: html
+      const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_id: 'service_2qnpx8i',
+          template_id: 'template_z904kd6',
+          user_id: '_J5MvthpGTIyRcr0y',
+          template_params: { to_email: email, subject: subject, html_body: html }
+        })
       });
+      if (!res.ok) throw new Error(await res.text());
       sent.push(email);
     } catch(e) {
       failed.push(email);
