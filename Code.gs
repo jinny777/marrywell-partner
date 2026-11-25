@@ -10,7 +10,11 @@ const SHEET_REFERRALS   = 'Referrals';
 const SHEET_SETTLEMENTS = 'Settlements';
 
 // ── 관리자 토큰 (admin.html에서 자료 등록/삭제 시 사용) ─────────
-const ADMIN_TOKEN = 'mw_admin_2025';
+// 값은 코드에 적지 않고 Apps Script > 프로젝트 설정 > 스크립트 속성의 ADMIN_TOKEN 에 저장
+function isAdminToken(token) {
+  const saved = PropertiesService.getScriptProperties().getProperty('ADMIN_TOKEN');
+  return !!saved && token === saved;
+}
 
 // ─────────────────────────────────────────────────────────────────
 //  GET 라우터
@@ -36,7 +40,7 @@ function doGet(e) {
 
   // 전체 고객 명단 조회 (관리자)
   if (action === 'allReferrals') {
-    if (p.token !== ADMIN_TOKEN) return jsonOut({ error: 'unauthorized' });
+    if (!isAdminToken(p.token)) return jsonOut({ error: 'unauthorized' });
     return listAllReferrals();
   }
 
@@ -45,19 +49,19 @@ function doGet(e) {
 
   // 고객 명단 상태 업데이트 (관리자)
   if (action === 'updateReferral') {
-    if (p.token !== ADMIN_TOKEN) return jsonOut({ error: 'unauthorized' });
+    if (!isAdminToken(p.token)) return jsonOut({ error: 'unauthorized' });
     return updateReferralStatus(p.id, p.status);
   }
 
   // 자료 노출 토글 (관리자)
   if (action === 'toggleMaterial') {
-    if (p.token !== ADMIN_TOKEN) return jsonOut({ error: 'unauthorized' });
+    if (!isAdminToken(p.token)) return jsonOut({ error: 'unauthorized' });
     return toggleMaterial(p.id, p.active === 'true');
   }
 
   // 자료 삭제 (관리자)
   if (action === 'deleteMaterial') {
-    if (p.token !== ADMIN_TOKEN) return jsonOut({ error: 'unauthorized' });
+    if (!isAdminToken(p.token)) return jsonOut({ error: 'unauthorized' });
     return deleteMaterial(p.id);
   }
 
@@ -83,13 +87,13 @@ function doPost(e) {
 
     // 마케팅 자료 등록 (관리자)
     if (action === 'addMaterial') {
-      if (data.token !== ADMIN_TOKEN) return jsonOut({ success: false, error: 'unauthorized' });
+      if (!isAdminToken(data.token)) return jsonOut({ success: false, error: 'unauthorized' });
       return addMaterial(data);
     }
 
     // 플라이어 이메일 발송 (관리자)
     if (action === 'sendFlyer') {
-      if (data.token !== ADMIN_TOKEN) return jsonOut({ success: false, error: 'unauthorized' });
+      if (!isAdminToken(data.token)) return jsonOut({ success: false, error: 'unauthorized' });
       return sendFlyerEmail(data);
     }
 
