@@ -1,21 +1,14 @@
 [
   {
+    "code": "MW-V68F",
+    "pw": "6bee6773aed1dd0be63186f579976e4fab348b393d3931c4c51803264b165f95",
+    "name": "김미미",
+    "tier": "5-9",
+    "email": "khjyeon@naver.com"
+  },
+  {
     "code": "MW-QX3J",
-    "pw": "MW-QX3J",
-    "name": "김지연",
-    "tier": "5-9",
-    "email": "khjyeon@naver.com"
-  },
-  {
-    "code": "MW-LMII",
-    "pw": "715fa132e79610646a287db02423adf52f70b3f1dec55524cef86e15403c62b0",
-    "name": "이정이",
-    "tier": "5-9",
-    "email": "khjyeon@naver.com"
-  },
-  {
-    "code": "MW-266D",
-    "pw": "14503d49b0bbdd21f93f4cb2751a3584bf4e80e5e9e07269bed719019e47a4b7",
+    "pw": "fb10a3ac91476eeb0b5f437f4319560a778a1673bf278ceb8259aff64e1778ab",
     "name": "김지연",
     "tier": "5-9",
     "email": "khjyeon@naver.com"
@@ -28,24 +21,10 @@
     "email": ""
   },
   {
-    "code": "MW-IYBE",
-    "pw": "e658d8b1bcf6ce9ada9b0c381e7f591fa047de74e7ea8510f7e51192cb18bd63",
-    "name": "김지연",
-    "tier": "5-9",
-    "email": "khjyeon@naver.com"
-  },
-  {
     "code": "MW-FRAZ",
     "pw": "1f0b6d2fb30d4db1ae53f99dc5248ff18ebe3644ac5a361e067eddcdfcb8b381",
-    "name": "최영환",
+    "name": "웨딩그룹 위더스",
     "tier": "5-9",
     "email": ""
-  },
-  {
-    "code": "MW-IEFI",
-    "pw": "c89ac3e912c271ad4c5faeee5dd43089882447332187f646378f933ad5a39aad",
-    "name": "이정민",
-    "tier": "5-9",
-    "email": "khjyeon@naver.com"
   }
 ]
