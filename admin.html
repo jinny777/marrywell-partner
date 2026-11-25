@@ -414,15 +414,11 @@ tr:hover td{background:#FAFAFF;}
     <div class="login-logo">MARRY<span>WELL</span></div>
     <div class="login-sub">서비스 관리자 시스템</div>
     <div class="login-field">
-      <label>관리자 ID</label>
-      <input type="text" id="login-id" placeholder="admin" value="admin">
-    </div>
-    <div class="login-field">
       <label>비밀번호</label>
-      <input type="password" id="login-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="password" id="login-pw" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <button class="login-btn" onclick="doLogin()">로그인</button>
-    <div class="login-err" id="login-err">아이디 또는 비밀번호가 틀렸습니다.</div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">로그인</button>
+    <div class="login-err" id="login-err"></div>
   </div>
 </div>
 
@@ -494,18 +490,6 @@ tr:hover td{background:#FAFAFF;}
       </a>
     </nav>
     <div class="sb-footer" style="display:flex;flex-direction:column;gap:8px;">
-      <!-- GitHub Token 설정 -->
-      <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:10px;">
-        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:1px;margin-bottom:6px;">🔑 GITHUB TOKEN</div>
-        <div style="display:flex;gap:5px;">
-          <input id="gh-token-input" type="password" placeholder="ghp_xxxx..."
-            style="flex:1;padding:6px 8px;background:rgba(255,255,255,.08);border:1px solid rgba(162,155,254,.2);border-radius:6px;color:#fff;font-size:11px;outline:none;width:0;"
-            value="">
-          <button onclick="saveGhToken()" style="padding:6px 8px;background:rgba(162,155,254,.25);border:none;border-radius:6px;color:var(--ac);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">저장</button>
-        </div>
-        <div id="gh-sync-status" style="font-size:10px;margin-top:5px;color:rgba(255,255,255,.3);min-height:14px;"></div>
-      </div>
-      <button onclick="exportPartnersAuth()" style="width:100%;padding:8px;background:rgba(162,155,254,.15);border:1px solid rgba(162,155,254,.3);border-radius:8px;color:var(--ac);font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">📤 인증 파일 수동 내보내기</button>
       <span style="font-size:10px;color:rgba(255,255,255,.2);">v1.0 · MARRYWELL © 2025</span>
     </div>
   </aside>
@@ -599,7 +583,6 @@ tr:hover td{background:#FAFAFF;}
                 <span class="search-ico">🔍</span>
                 <input type="text" id="search-input" placeholder="이름, 이메일 검색..." oninput="searchPartners()">
               </div>
-              <button class="btn-outline" onclick="restoreFromGitHub()" style="white-space:nowrap;flex-shrink:0;" title="GitHub partners-auth.json에서 복원">↩ GitHub 복원</button>
               <button class="btn-primary" onclick="openAddPartnerModal()" style="white-space:nowrap;flex-shrink:0;">+ 파트너 추가</button>
             </div>
           </div>
@@ -1627,118 +1610,15 @@ async function decryptJSON(raw){
   } catch(e){ return null; }
 }
 
-async function sha256hex(str){
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-
 async function savePartners(){
   const enc = await encryptJSON(partners);
   localStorage.setItem('mw_partners', enc);
-  // pushPartnersAuth는 명시적으로 필요할 때만 호출 (자동 호출 제거 - GitHub 로그인 팝업 방지)
 }
 
 async function loadPartners(){
   const raw = localStorage.getItem('mw_partners') || '[]';
   const data = await decryptJSON(raw);
   partners = Array.isArray(data) ? data : [];
-}
-
-// ── GitHub API로 partners-auth.json 자동 업데이트 ────
-const GH_REPO = 'jinny777/marrywell-partner';
-const GH_FILE = 'partners-auth.json';
-
-function getGhToken(){ return localStorage.getItem('mw_gh_token') || ''; }
-
-async function pushPartnersAuth(){
-  const token = getGhToken();
-  if(!token) return;
-
-  // 비밀번호는 SHA-256 해시로 저장
-  const rawList = partners.filter(p => p.code);
-  const list = await Promise.all(rawList.map(async p => ({
-    code:  p.code,
-    pw:    await sha256hex(p.pw || p.code),
-    name:  p.name,
-    tier:  p.tier || '5-9',
-    email: p.email || ''
-  })));
-
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(list, null, 2))));
-
-  try {
-    // 현재 파일 SHA 조회
-    const getRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`, {
-      headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
-    });
-    const getData = await getRes.json();
-    const sha = getData.sha || '';
-
-    // 파일 업데이트
-    const putRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`, {
-      method: 'PUT',
-      headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
-      body: JSON.stringify({ message: '파트너 인증 자동 업데이트', content, sha })
-    });
-    if(putRes.ok){
-      const ind = document.getElementById('gh-sync-status');
-      if(ind){ ind.textContent = '✓ 인증 동기화됨'; ind.style.color = 'var(--ok)'; setTimeout(()=>{ ind.textContent=''; }, 3000); }
-      logHistory('data_sync', 'GitHub 인증 파일 동기화 완료', { file: 'partners-auth.json', count: rawList.length });
-    }
-  } catch(e){ /* 실패 시 무시 — 로컬에는 이미 저장됨 */ }
-}
-
-// ── GitHub에서 파트너 목록 복원 ─────────────────────
-async function restoreFromGitHub(){
-  const token = getGhToken();
-  if(!token){
-    alert('GitHub 토큰이 설정되지 않았습니다.\n설정 > GitHub 토큰 입력 후 다시 시도하세요.\n\n토큰 없이도 공개 파일로 시도합니다...');
-  }
-  try {
-    const headers = { 'Accept': 'application/vnd.github.v3+json' };
-    if(token) headers['Authorization'] = 'token ' + token;
-    const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`, { headers });
-    if(!res.ok) throw new Error('GitHub 파일 조회 실패: ' + res.status);
-    const data = await res.json();
-    const decoded = JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g,'')))));
-    if(!Array.isArray(decoded) || decoded.length === 0){
-      alert('GitHub에 저장된 파트너 데이터가 없습니다.');
-      return;
-    }
-    let added = 0;
-    for(const p of decoded){
-      const exists = partners.find(x => x.code === p.code);
-      if(!exists){
-        partners.push({
-          id:        Date.now() + Math.random(),
-          name:      p.name  || '',
-          email:     p.email || '',
-          phone:     p.phone || '',
-          sns:       '',
-          biz:       '',
-          tier:      p.tier  || 'basic',
-          channel:   '',
-          msg:       '',
-          date:      new Date().toISOString().slice(0,10),
-          status:    'active',
-          code:      p.code  || '',
-          referrals: 0,
-          payback:   0
-        });
-        added++;
-      }
-    }
-    if(added === 0){
-      alert(`GitHub에서 ${decoded.length}명을 확인했으나 이미 목록에 있는 파트너입니다.`);
-      return;
-    }
-    await savePartners();
-    updateStats(); renderPartnerTable();
-    logHistory('restore', `GitHub에서 파트너 ${added}명 복원`, { count: added });
-    alert(`✅ ${added}명의 파트너 데이터를 복원했습니다.`);
-  } catch(e) {
-    alert('복원 실패: ' + e.message + '\n\nGitHub 토큰이 필요하거나 네트워크 오류입니다.');
-  }
 }
 
 // ── 구글 시트 연동 ──────────────────────────────────
@@ -1792,9 +1672,9 @@ async function pushStatusToSheet(id, status, code) {
 // ── 서버 DB 파트너 업데이트 ────────────────────────
 async function syncPartnerToDB(id, updates) {
   try {
-    const res = await fetch(`${API_BASE}/api/partners/${id}`, {
+    const res = await adminFetch(`${API_BASE}/api/partners/${id}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'x-admin-token': 'mw_admin_2025' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates),
     });
     if (!res.ok) console.warn('[Admin] 서버 파트너 업데이트 실패:', await res.text());
@@ -1805,31 +1685,95 @@ async function syncPartnerToDB(id, updates) {
 }
 
 // ── 로그인 ────────────────────────────────────────
-async function doLogin(){
-  const id = document.getElementById('login-id').value;
-  const pw = document.getElementById('login-pw').value;
-  if(id==='admin' && pw==='marrywell2025'){
-    // 암호화 키 파생 (로그인 비밀번호 기반)
-    _cryptoKey = await deriveCryptoKey(pw);
-    await loadPartners();
-    logHistory('login', '관리자 로그인', { time: new Date().toLocaleString('ko-KR') });
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app').style.display='block';
-    initApp();
-  } else {
-    document.getElementById('login-err').style.display='block';
-  }
+// 비밀번호는 서버에서만 확인한다. 이 파일은 공개되므로 비밀번호·토큰을 적지 말 것.
+// 세션 토큰은 메모리에만 두며 새로고침하면 다시 로그인해야 한다.
+let _adminToken = null;
+let _appStarted = false;
+
+// 예전 버전이 브라우저에 저장해 둔 GitHub 토큰 정리
+try { localStorage.removeItem('mw_gh_token'); } catch(e){}
+
+function showLoginError(msg){
+  const el = document.getElementById('login-err');
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
 }
-function doLogout(){
-  document.getElementById('app').style.display='none';
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('login-pw').value='';
+
+// 관리자 API 호출 (세션 토큰 첨부, 만료 시 로그인 화면으로)
+async function adminFetch(url, options){
+  const token = _adminToken;
+  if(!token) throw new Error('로그인이 필요합니다.');
+  const opts = options || {};
+  const res = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), 'x-admin-token': token } });
+  if(res.status === 401 && token === _adminToken) handleSessionExpired();
+  return res;
+}
+
+function handleSessionExpired(){
+  _adminToken = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-pw').value = '';
+  showLoginError('로그인이 만료되었습니다. 다시 로그인해 주세요.');
+}
+
+async function doLogin(){
+  const pwEl = document.getElementById('login-pw');
+  const btn  = document.getElementById('login-btn');
+  const pw   = pwEl.value.trim();
+  showLoginError('');
+  if(!pw){ showLoginError('비밀번호를 입력해 주세요.'); return; }
+  if(btn.disabled) return;
+  btn.disabled = true; btn.textContent = '확인 중...';
+  try {
+    const res  = await fetch(`${API_BASE}/api/partner-admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok || !data.token){
+      showLoginError(data.error || `로그인에 실패했습니다. (${res.status})`);
+      return;
+    }
+    _adminToken = data.token;
+  } catch(e){
+    showLoginError('서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.');
+    return;
+  } finally {
+    btn.disabled = false; btn.textContent = '로그인';
+  }
+
+  // 브라우저 저장 데이터 암호화 키 (로그인 비밀번호 기반)
+  _cryptoKey = await deriveCryptoKey(pw);
+  pwEl.value = '';
+  logHistory('login', '관리자 로그인', { time: new Date().toLocaleString('ko-KR') });
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  if(_appStarted){
+    // 만료 후 재로그인: 화면 상태는 유지하고 목록만 새로 받음
+    fetchPartnersFromServer();
+    return;
+  }
+  _appStarted = true;
+  await loadPartners();
+  initApp();
+}
+
+async function doLogout(){
+  const token = _adminToken;
+  _adminToken = null;
+  try {
+    if(token) await fetch(`${API_BASE}/api/partner-admin/logout`, { method: 'POST', headers: { 'x-admin-token': token } });
+  } catch(e){}
+  location.reload(); // 화면에 남은 개인정보와 타이머까지 정리
 }
 
 // ── 서버 DB에서 파트너 목록 불러오기 ─────────────
 async function fetchPartnersFromServer(){
+  if(!_adminToken) return;
   try {
-    const res = await fetch(`${API_BASE}/api/partners/list`, { headers: { 'x-admin-token': 'mw_admin_2025' } });
+    const res = await adminFetch(`${API_BASE}/api/partners/list`);
     if(!res.ok) return;
     const data = await res.json();
     if(!Array.isArray(data) || data.length === 0) return;
@@ -1851,7 +1795,6 @@ async function fetchPartnersFromServer(){
       referrals: parseInt(p.referralCount) || 0,
       payback:   parseInt(p.payback) || 0
     }));
-    // GitHub 자동 push 없이 로컬 저장만
     const enc = await encryptJSON(partners);
     localStorage.setItem('mw_partners', enc);
     updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
@@ -1863,7 +1806,6 @@ async function fetchPartnersFromServer(){
 // ── 초기화 ────────────────────────────────────────
 async function initApp(){
   document.getElementById('today-date').textContent = new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
-  restoreGhToken();
   updateStats();
   renderRecentTable();
   renderPartnerTable();
@@ -1938,9 +1880,9 @@ async function sendWelcomeEmailAdmin() {
   if (!email) return alert('이메일을 입력해 주세요.');
   if (!confirm(`${email} 에게 웰컴 이메일을 발송할까요?`)) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/send-welcome-email`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/send-welcome-email`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-token': 'mw_admin_2025' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, name }),
     });
     const data = await res.json();
@@ -1964,7 +1906,7 @@ async function loadReviews(){
     const filterEl = document.getElementById('review-partner-filter');
     const partnerCode = filterEl ? filterEl.value : '';
     const url = `${API_BASE}/api/admin/reviews${partnerCode ? '?partnerCode='+partnerCode : ''}`;
-    const res = await fetch(url, { headers: { 'x-admin-token': 'mw_admin_2025' } });
+    const res = await adminFetch(url);
     const list = await res.json();
 
     // 파트너 목록 드롭다운 갱신 (전체 조회 시에만)
@@ -2573,9 +2515,9 @@ async function resetPassword(id, code){
   if(newPw === null) return; // 취소
   const pw = newPw.trim() || code;
   try {
-    const res = await fetch(`${API_BASE}/api/partners/${id}`, {
+    const res = await adminFetch(`${API_BASE}/api/partners/${id}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'x-admin-token': 'mw_admin_2025' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pw }),
     });
     if(!res.ok) throw new Error((await res.json()).error || res.status);
@@ -2630,9 +2572,9 @@ let matAdminLoaded = false;
 async function saveMaterials(){
   localStorage.setItem('mw_materials', JSON.stringify(adminMaterials));
   try {
-    const res = await fetch(`${API_BASE}/api/admin/materials`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/materials`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'x-admin-token': 'mw_admin_2025' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ materials: adminMaterials }),
     });
     if(!res.ok){
@@ -2678,7 +2620,7 @@ async function loadAdminMaterials(){
   if(matAdminLoaded) return;
   // 서버에서 우선 로드
   try {
-    const res = await fetch(`${API_BASE}/api/admin/materials`, { headers: { 'x-admin-token': 'mw_admin_2025' } });
+    const res = await adminFetch(`${API_BASE}/api/admin/materials`);
     if(res.ok){
       const data = await res.json();
       if(Array.isArray(data) && data.length) adminMaterials = data;
@@ -2802,12 +2744,6 @@ async function saveMaterial(){
     uploadedAt: new Date().toISOString().slice(0,10), active: true
   };
 
-  if(SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL'){
-    try{
-      await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'addMaterial',token:'mw_admin_2025',...newItem})});
-    }catch(e){}
-  }
-
   adminMaterials.push(newItem);
   saveMaterials();
   renderAdminMaterials();
@@ -2832,9 +2768,6 @@ async function deleteAdminMaterial(id){
   adminMaterials.splice(idx,1);
   saveMaterials();
   renderAdminMaterials();
-  if(SCRIPT_URL && SCRIPT_URL !== 'YOUR_SCRIPT_URL'){
-    try{ await fetch(`${SCRIPT_URL}?action=deleteMaterial&id=${id}&token=mw_admin_2025`); }catch(e){}
-  }
   toast(`"${title}" 자료가 삭제되었습니다.`);
 }
 
@@ -2870,7 +2803,7 @@ async function reloadReferrals(){
 
 async function fetchReferrals(){
   try{
-    const res  = await fetch(`${API_BASE}/api/partners/referrals`, { headers: { 'x-admin-token': 'mw_admin_2025' } });
+    const res  = await adminFetch(`${API_BASE}/api/partners/referrals`);
     const data = await res.json();
     if(Array.isArray(data)){ allReferrals = data; }
   }catch(e){
@@ -2986,7 +2919,7 @@ let stLoaded = false;
 async function loadSettlements(force){
   if(stLoaded && !force) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/settlements`, { headers:{'x-admin-token':'mw_admin_2025'} });
+    const res = await adminFetch(`${API_BASE}/api/admin/settlements`);
     if(!res.ok) throw new Error(await res.text());
     const { pending, settled } = await res.json();
     renderSettlements(pending || [], settled || []);
@@ -3042,9 +2975,9 @@ async function processSettlement(code, name, month, count, amount){
   if(!payDate) return;
   const note = prompt('메모 (선택사항):') || '';
   try {
-    const res = await fetch(`${API_BASE}/api/admin/settlements`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/settlements`, {
       method:'POST',
-      headers:{'Content-Type':'application/json','x-admin-token':'mw_admin_2025'},
+      headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ partnerCode:code, partnerName:name, month, referralCount:count, amount, payDate, note }),
     });
     if(!res.ok) throw new Error((await res.json()).error || res.status);
@@ -3056,8 +2989,8 @@ async function processSettlement(code, name, month, count, amount){
 async function cancelSettlement(id){
   if(!confirm('정산 완료를 취소하시겠습니까?')) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/settlements/${id}`, {
-      method:'DELETE', headers:{'x-admin-token':'mw_admin_2025'},
+    const res = await adminFetch(`${API_BASE}/api/admin/settlements/${id}`, {
+      method:'DELETE',
     });
     if(!res.ok) throw new Error((await res.json()).error || res.status);
     toast('정산이 취소됐습니다.');
@@ -3068,9 +3001,8 @@ async function cancelSettlement(id){
 async function deleteReferral(id, name){
   if(!confirm(`"${decodeURIComponent(name)}" 고객 데이터를 삭제하시겠습니까?`)) return;
   try {
-    const res = await fetch(`${API_BASE}/api/partners/referrals/${id}`, {
+    const res = await adminFetch(`${API_BASE}/api/partners/referrals/${id}`, {
       method: 'DELETE',
-      headers: { 'x-admin-token': 'mw_admin_2025' },
     });
     if(!res.ok) throw new Error((await res.json()).error || res.status);
     allReferrals = allReferrals.filter(r => String(r.id) !== String(id));
@@ -3087,9 +3019,8 @@ async function deleteAllReferrals(){
   if(!count){ toast('삭제할 데이터가 없습니다.'); return; }
   if(!confirm(`고객 명단 전체 ${count}건을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
   try {
-    const res = await fetch(`${API_BASE}/api/partners/referrals`, {
+    const res = await adminFetch(`${API_BASE}/api/partners/referrals`, {
       method: 'DELETE',
-      headers: { 'x-admin-token': 'mw_admin_2025' },
     });
     if(!res.ok) throw new Error((await res.json()).error || res.status);
     allReferrals = [];
@@ -3105,9 +3036,8 @@ async function deletePartner(id, nameEnc){
   const name = decodeURIComponent(nameEnc);
   if(!confirm(`"${name}" 파트너를 삭제하시겠습니까?\n관련 고객 데이터도 함께 삭제됩니다.`)) return;
   try {
-    const res = await fetch(`${API_BASE}/api/partners/${id}`, {
+    const res = await adminFetch(`${API_BASE}/api/partners/${id}`, {
       method: 'DELETE',
-      headers: { 'x-admin-token': 'mw_admin_2025' },
     });
     if(!res.ok) throw new Error((await res.json()).error || res.status);
     partners = partners.filter(p => p.id !== id);
@@ -3127,9 +3057,9 @@ async function changeReferralStatus(id, status){
   renderReferralsStats();
   renderReferralsTable();
   try{
-    const res = await fetch(`${API_BASE}/api/partners/referrals/${id}`, {
+    const res = await adminFetch(`${API_BASE}/api/partners/referrals/${id}`, {
       method: 'PATCH',
-      headers: {'Content-Type':'application/json','x-admin-token':'mw_admin_2025'},
+      headers: {'Content-Type':'application/json'},
       body: JSON.stringify({status})
     });
     if(!res.ok){
@@ -3160,9 +3090,9 @@ async function changeInviteQuota(id, newQuota){
   r.inviteQuota = newQuota;
   renderReferralsTable();
   try{
-    const res = await fetch(`${API_BASE}/api/partners/referrals/${id}`, {
+    const res = await adminFetch(`${API_BASE}/api/partners/referrals/${id}`, {
       method: 'PATCH',
-      headers: {'Content-Type':'application/json','x-admin-token':'mw_admin_2025'},
+      headers: {'Content-Type':'application/json'},
       body: JSON.stringify({inviteQuota: newQuota})
     });
     if(!res.ok){
@@ -3206,49 +3136,6 @@ window.addEventListener('storage', e => {
     processNewApplication(e.newValue);
   }
 });
-
-function saveGhToken(){
-  const val = (document.getElementById('gh-token-input')||{}).value?.trim() || '';
-  localStorage.setItem('mw_gh_token', val);
-  const st = document.getElementById('gh-sync-status');
-  if(val){
-    if(st) { st.textContent = '✓ 토큰 저장됨 — 이제 자동 동기화됩니다'; st.style.color='var(--ok)'; }
-    toast('GitHub Token 저장 완료. 파트너 추가/코드 발급 시 자동 동기화됩니다.');
-    pushPartnersAuth(); // 즉시 동기화
-  } else {
-    if(st) { st.textContent = '토큰 없음 — 자동 동기화 비활성화'; st.style.color='rgba(255,255,255,.3)'; }
-  }
-}
-
-// 로그인 후 토큰 입력란 복원
-function restoreGhToken(){
-  const t = getGhToken();
-  const inp = document.getElementById('gh-token-input');
-  if(inp && t) inp.value = t;
-  const st = document.getElementById('gh-sync-status');
-  if(st) st.textContent = t ? '✓ 자동 동기화 활성화됨' : '토큰을 입력하면 자동 동기화됩니다';
-  if(st) st.style.color = t ? 'var(--ok)' : 'rgba(255,255,255,.3)';
-}
-
-// 파트너 인증 파일 내보내기 (partners-auth.json 용)
-function exportPartnersAuth(){
-  const list = partners
-    .filter(p => p.code)
-    .map(p => ({ code: p.code, pw: p.pw || p.code, name: p.name, tier: p.tier || '5-9', email: p.email || '' }));
-  if(!list.length){ toast('코드가 발급된 파트너가 없습니다.', 'err'); return; }
-  const json = JSON.stringify(list, null, 2);
-  // 클립보드 복사
-  navigator.clipboard.writeText(json).then(() => {
-    toast(`${list.length}명의 인증 데이터가 복사됐습니다. Claude에게 "파트너 인증 파일 배포해줘"라고 붙여넣기 하세요.`);
-  }).catch(() => {
-    // 복사 실패 시 다운로드
-    const blob = new Blob([json], {type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'partners-auth.json';
-    a.click();
-  });
-}
 
 // 페이지 로드 / 포커스 시 미처리 신청 체크 (admin보다 apply가 먼저 열린 경우)
 function checkPendingApplication() {
