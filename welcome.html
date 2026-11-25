@@ -201,8 +201,9 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 <script>
 // URL 파라미터에서 code, name, tier, msg 읽기
 const params = new URLSearchParams(window.location.search);
+const escHtml = v => String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const code  = (params.get('code')  || 'MW-????').toUpperCase();
-const name  = params.get('name')  || '';
+const name  = escHtml(params.get('name') || ''); // 링크에서 온 값을 HTML에 넣으므로 이스케이프
 const tier  = params.get('tier')  || '5-9';
 const msg   = params.get('msg')   || '';
 
@@ -267,12 +268,8 @@ function copyCode() {
   });
 }
 
-// 파트너 자격증명 localStorage 저장 (partner.html 자동 로그인용)
-if (code && code !== 'MW-????') {
-  try {
-    localStorage.setItem('mw_partner_auth', JSON.stringify({ code: code, pw: code }));
-  } catch(e) {}
-}
+// 예전 버전이 저장한 자격증명 정리
+try { localStorage.removeItem('mw_partner_auth'); } catch(e) {}
 
 function goPortal(e) {
   e.preventDefault();
