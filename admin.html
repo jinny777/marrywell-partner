@@ -1677,11 +1677,13 @@ async function syncPartnerToDB(id, updates) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates),
     });
-    if (!res.ok) console.warn('[Admin] 서버 파트너 업데이트 실패:', await res.text());
-    else console.log('[Admin] 서버 DB 업데이트 완료:', updates);
+    if (res.ok) return true;
+    const err = await res.json().catch(() => ({}));
+    toast('서버 저장 실패: ' + (err.error || res.status), 'err');
   } catch(e) {
-    console.warn('[Admin] 서버 동기화 실패 (오프라인):', e);
+    toast('서버 저장 실패: ' + e.message, 'err');
   }
+  return false;
 }
 
 // ── 로그인 ────────────────────────────────────────
@@ -1691,7 +1693,7 @@ let _adminToken = null;
 let _appStarted = false;
 
 // 예전 버전이 브라우저에 저장해 둔 GitHub 토큰 정리
-try { localStorage.removeItem('mw_gh_token'); } catch(e){}
+try { localStorage.removeItem('mw_gh_token'); localStorage.removeItem('mw_referrals'); } catch(e){}
 
 function showLoginError(msg){
   const el = document.getElementById('login-err');
@@ -1785,13 +1787,12 @@ async function fetchPartnersFromServer(){
       sns:       p.sns || '',
       bizName:   p.bizName || p.biz_name || '',
       biz:       p.biz || '',
-      tier:      p.tier || '5-9',
+      tier:      /^\d{1,2}[-+]\d{0,2}$/.test(p.tier || '') ? p.tier : '5-9',
       channel:   p.channel || '',
       msg:       p.msg || '',
       date:      p.createdAt ? p.createdAt.slice(0,10) : '',
       status:    p.status || 'pending',
       code:      p.code || '',
-      pw:        p.pw || '',
       referrals: parseInt(p.referralCount) || 0,
       payback:   parseInt(p.payback) || 0
     }));
@@ -1914,7 +1915,7 @@ async function loadReviews(){
       const codes = [...new Set(list.map(r => r.partner_code).filter(Boolean))];
       const current = filterEl.value;
       filterEl.innerHTML = '<option value="">전체 파트너</option>' +
-        codes.map(c => `<option value="${c}" ${c===current?'selected':''}>${c}</option>`).join('');
+        codes.map(c => `<option value="${escHtml(c)}" ${c===current?'selected':''}>${escHtml(c)}</option>`).join('');
     }
     document.getElementById('rev-total').textContent = list.length;
     if(list.length){
@@ -1932,13 +1933,13 @@ async function loadReviews(){
     tbody.innerHTML = list.map(r=>`
       <tr>
         <td style="white-space:nowrap;font-size:12px;">${(r.created_at||'').slice(0,10)}</td>
-        <td style="font-size:12px;font-weight:700;color:var(--p);">${r.partner_code||'—'}</td>
-        <td>${r.reviewer_name||'익명'}</td>
+        <td style="font-size:12px;font-weight:700;color:var(--p);">${escHtml(r.partner_code||'—')}</td>
+        <td>${escHtml(r.reviewer_name||'익명')}</td>
         <td style="color:#F4C430;font-size:15px;">${stars(r.rating)}</td>
-        <td style="max-width:220px;">${r.review_text||''}</td>
+        <td style="max-width:220px;">${escHtml(r.review_text||'')}</td>
         <td style="text-align:center;">${r.recommend==='yes'?'👍':r.recommend==='no'?'👎':'—'}</td>
-        <td style="font-size:12px;color:var(--gray);">${r.good_points||'—'}</td>
-        <td style="font-size:12px;color:var(--gray);max-width:160px;">${r.improvement||'—'}</td>
+        <td style="font-size:12px;color:var(--gray);">${escHtml(r.good_points||'—')}</td>
+        <td style="font-size:12px;color:var(--gray);max-width:160px;">${escHtml(r.improvement||'—')}</td>
       </tr>`).join('');
   } catch(e){
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--err);padding:24px;">불러오기 실패</td></tr>';
@@ -1973,7 +1974,7 @@ function actionBtns(p){
   if(p.status==='approved'&&code) btns += `<button class="btn-sm btn-code" onclick="changeStatus('${id}','active')">활성화</button>`;
   if(p.status!=='rejected'&&p.status!=='gold')
     btns += `<button class="btn-sm btn-reject" onclick="changeStatus('${id}','rejected')">거절</button>`;
-  btns += `<button class="btn-sm" style="background:#FEE2E2;color:#DC2626;border:1.5px solid #FCA5A5;" onclick="deletePartner('${id}','${encodeURIComponent(p.name||'')}')">🗑 삭제</button>`;
+  btns += `<button class="btn-sm" style="background:#FEE2E2;color:#DC2626;border:1.5px solid #FCA5A5;" onclick="deletePartner('${id}','${encArg(p.name)}')">🗑 삭제</button>`;
   return `<div class="actions">${btns}</div>`;
 }
 
@@ -2005,7 +2006,7 @@ function openMarketingModal(id){
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
         <div>
           <div style="font-size:18px;font-weight:800;color:#1A1A2E;">📢 마케팅 자료</div>
-          <div style="font-size:13px;color:#6C757D;margin-top:2px;">${p.name} (${code})</div>
+          <div style="font-size:13px;color:#6C757D;margin-top:2px;">${escHtml(p.name)} (${code})</div>
         </div>
         <button onclick="document.getElementById('marketing-modal').remove()"
           style="background:#F4F4FC;border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
@@ -2105,11 +2106,11 @@ function renderRecentTable(){
   }
   tbody.innerHTML = pending.map(p=>`
     <tr>
-      <td><div class="td-name">${p.name}</div><div class="td-sub">${p.email}</div></td>
-      <td style="font-size:12px;font-weight:600">${p.bizName||'—'}</td>
-      <td>${p.biz}</td>
+      <td><div class="td-name">${escHtml(p.name)}</div><div class="td-sub">${escHtml(p.email)}</div></td>
+      <td style="font-size:12px;font-weight:600">${escHtml(p.bizName||'—')}</td>
+      <td>${escHtml(p.biz)}</td>
       <td>${tierBadge(p.tier)}</td>
-      <td style="font-size:12px;color:var(--gray)">${p.date}</td>
+      <td style="font-size:12px;color:var(--gray)">${escHtml(p.date)}</td>
       <td>${statusBadge(p.status)}</td>
       <td>${actionBtns(p)}</td>
     </tr>`).join('');
@@ -2129,13 +2130,13 @@ function renderPartnerTable(){
   tbody.innerHTML = list.map((p,i)=>`
     <tr>
       <td style="color:var(--gray);font-size:12px">${i+1}</td>
-      <td><div class="td-name">${p.name}</div><div class="td-sub">${p.email}</div></td>
-      <td style="font-size:12px">${p.phone}</td>
-      <td style="font-size:12px;font-weight:600">${p.bizName||'—'}</td>
-      <td style="font-size:12px">${p.biz}</td>
+      <td><div class="td-name">${escHtml(p.name)}</div><div class="td-sub">${escHtml(p.email)}</div></td>
+      <td style="font-size:12px">${escHtml(p.phone)}</td>
+      <td style="font-size:12px;font-weight:600">${escHtml(p.bizName||'—')}</td>
+      <td style="font-size:12px">${escHtml(p.biz)}</td>
       <td>${tierBadge(p.tier)}</td>
       <td>${codeChip(p.code,p.id)}</td>
-      <td style="font-size:12px;color:var(--gray)">${p.date}</td>
+      <td style="font-size:12px;color:var(--gray)">${escHtml(p.date)}</td>
       <td>${statusBadge(p.status)}</td>
       <td>${actionBtns(p)}</td>
     </tr>`).join('');
@@ -2157,7 +2158,7 @@ function renderPaybackTable(){
   const statuses = {active:'<span class="status s-active">정산 예정</span>',gold:'<span class="status s-gold">Gold 정산</span>'};
   tbody.innerHTML = active.map(p=>`
     <tr>
-      <td><div class="td-name">${p.name}</div><div class="td-sub">${p.email}</div></td>
+      <td><div class="td-name">${escHtml(p.name)}</div><div class="td-sub">${escHtml(p.email)}</div></td>
       <td>${tierBadge(p.tier)}</td>
       <td><span class="code-chip">${p.code||'—'}</span></td>
       <td style="text-align:center;font-weight:700;color:var(--p)">${p.referrals||0}건</td>
@@ -2281,7 +2282,7 @@ function renderHistory(){
       const m = HIST_TYPE_META[h.type] || {icon:'📌', color:'#F4F4FC', label:h.type};
       const time = h.ts.slice(11,16);
       const detailHtml = h.detail
-        ? `<div class="hist-detail">${typeof h.detail === 'string' ? h.detail : JSON.stringify(h.detail, null, 2)}</div>`
+        ? `<div class="hist-detail">${escHtml(typeof h.detail === 'string' ? h.detail : JSON.stringify(h.detail, null, 2))}</div>`
         : '';
       return `<div class="hist-item">
         <div class="hist-icon" style="background:${m.color}">${m.icon}</div>
@@ -2311,7 +2312,20 @@ function formatHistDate(dateStr){
 }
 
 function escHtml(str){
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(str ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+// onclick="fn('...')" 안에 넣는 값 (encodeURIComponent 는 작은따옴표를 바꾸지 않음)
+function encArg(v){ return encodeURIComponent(v ?? '').replace(/'/g, '%27'); }
+
+// 파트너 임시 비밀번호 (헷갈리는 글자 제외, 12자)
+function generateTempPw(){
+  const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+  let out = '';
+  while(out.length < 12){
+    const b = crypto.getRandomValues(new Uint8Array(1))[0];
+    if(b < 248) out += chars[b % chars.length]; // 248 = 31 * 8, 치우침 방지
+  }
+  return out;
 }
 
 function exportHistory(){
@@ -2343,25 +2357,34 @@ function clearHistory(){
 async function approveAndSendEmail(id){
   const p = partners.find(p=>p.id===id);
   if(!p) return;
-  // 코드가 없으면 먼저 발급
-  if(!p.code){
-    const code = 'MW-' + Math.random().toString(36).substr(2,4).toUpperCase();
-    p.code = code;
-    p.pw   = code;
-  }
+  const code   = p.code || newPartnerCode();
+  const tempPw = generateTempPw(); // 파트너 코드는 공개 값이라 비밀번호로 쓰지 않음
+  if(!await syncPartnerToDB(p.id, { code, pw: tempPw, status: 'approved' })) return;
+  p.code   = code;
   p.status = 'approved';
   await savePartners();
   logHistory('status_change', `${p.name} 님 승인 + 이메일 발송`, { id: p.id, code: p.code });
   updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
   toast(`${p.name} 님 승인 완료`);
   pushStatusToSheet(p.id, p.status, p.code);
-  syncPartnerToDB(p.id, { code: p.code, pw: p.pw || p.code, status: p.status }); // 서버 DB 동기화
+  showTempPw(p, tempPw);
   // 편집된 안내 페이지 이메일 발송
   if(p.email){
-    sendApprovalEmail(p, '');
+    sendApprovalEmail(p, '', tempPw);
   } else {
     toast('이메일 주소가 없어 이메일을 발송할 수 없습니다.', 'err');
   }
+}
+
+function newPartnerCode(){
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  const bytes = crypto.getRandomValues(new Uint8Array(6));
+  return 'MW-' + Array.from(bytes, b => chars[b % chars.length]).join('');
+}
+
+// 임시 비밀번호는 저장하지 않으므로 이때 한 번만 볼 수 있음
+function showTempPw(p, pw){
+  prompt(`${p.name} 님의 임시 비밀번호입니다. 복사해서 전달해 주세요.\n(이 창을 닫으면 다시 볼 수 없습니다)`, pw);
 }
 
 async function changeStatus(id, status){
@@ -2387,7 +2410,7 @@ function issueCode(id){
   // 파트너 정보 표시
   const tierMap = {'1-4':'Basic','5-9':'Silver','10+':'Gold'};
   document.getElementById('issue-partner-info').innerHTML =
-    `<strong>${p.name}</strong> 님 &nbsp;·&nbsp; ${p.email} &nbsp;·&nbsp;
+    `<strong>${escHtml(p.name)}</strong> 님 &nbsp;·&nbsp; ${escHtml(p.email)} &nbsp;·&nbsp;
      <span style="color:var(--p);font-weight:700">${tierMap[p.tier]||p.tier} 등급</span>`;
 
   document.getElementById('issue-extra-msg').value = '';
@@ -2404,24 +2427,29 @@ async function confirmIssueCode(){
   if(!p) return;
 
   const extraMsg = document.getElementById('issue-extra-msg').value.trim();
-  const code = 'MW-' + Math.random().toString(36).substr(2,4).toUpperCase();
-  p.code = code;
-  p.pw   = code; // 초기 비밀번호 = 파트너 코드
-  if(p.status==='approved') p.status = 'active';
+  const code   = newPartnerCode();
+  const tempPw = generateTempPw(); // 파트너 코드는 공개 값이라 비밀번호로 쓰지 않음
+  const status = p.status==='approved' ? 'active' : p.status;
+  const updates = { code, pw: tempPw };
+  if(['pending','approved','rejected','active','gold'].includes(status)) updates.status = status;
+  if(!await syncPartnerToDB(p.id, updates)) return;
+  p.code   = code;
+  p.status = status;
   await savePartners();
   logHistory('code_issued', `${p.name} 님 파트너 코드 발급: ${code}`, { tier: p.tier, email: p.email||'없음' });
   updateStats(); renderRecentTable(); renderPartnerTable(); renderPaybackTable();
   pushStatusToSheet(p.id, p.status, code);
-  syncPartnerToDB(p.id, { code, pw: code, status: p.status }); // 서버 DB 동기화
   closeIssueModal();
   if(document.getElementById('modal-overlay').classList.contains('open')) closeModalDirect();
 
   toast(`${p.name} 님 코드 [${code}] 발급 완료`);
-  sendApprovalEmail(p, extraMsg);
+  showTempPw(p, tempPw);
+  sendApprovalEmail(p, extraMsg, tempPw);
 }
 
 // ── 파트너 승인 안내 이메일 발송 ─────────────────────
-function sendApprovalEmail(p, extraMsg) {
+// tempPw 는 새로 발급했을 때만 전달 (재발송 시에는 비밀번호를 안내하지 않음)
+function sendApprovalEmail(p, extraMsg, tempPw) {
   const tplId = localStorage.getItem('mw_email_tpl_id') || '';
   if (!tplId) {
     toast('이메일 발송 탭에서 EmailJS 템플릿 ID를 먼저 설정해 주세요.', 'err');
@@ -2434,10 +2462,10 @@ function sendApprovalEmail(p, extraMsg) {
     + '&tier=' + encodeURIComponent(p.tier)
     + (extraMsg ? '&msg=' + encodeURIComponent(extraMsg) : '');
 
-  const smsText = `[메리웰파트너스] ${p.name}님 파트너 승인 완료🎉\n파트너코드: ${p.code}\n초기 비밀번호: ${p.code}\n포털 로그인: https://partners.marrywell.co.kr/partner.html\n자료 안내: ${welcomeLink}`;
+  const smsText = `[메리웰파트너스] ${p.name}님 파트너 승인 완료🎉\n파트너코드: ${p.code}${tempPw ? '\n임시 비밀번호: ' + tempPw + ' (로그인 후 변경해 주세요)' : ''}\n포털 로그인: https://partners.marrywell.co.kr/partner.html\n자료 안내: ${welcomeLink}`;
 
   // welcome.html 디자인 그대로 HTML 이메일 생성
-  const htmlBody = generateEmailHTML(p.name, p.code, p.tier, extraMsg);
+  const htmlBody = generateEmailHTML(p.name, p.code, p.tier, extraMsg, tempPw);
 
   const wmSet = (() => { try { return JSON.parse(localStorage.getItem('wm_settings')||'{}'); } catch(e){ return {}; } })();
   const senderEmail = wmSet.email || 'partners@marrywell.co.kr';
@@ -2478,19 +2506,19 @@ function openModal(id){
   document.getElementById('modal-body').innerHTML = `
     <div class="modal-section">
       <h4>기본 정보</h4>
-      <div class="info-row"><span class="key">이름</span><span class="val">${p.name}</span></div>
-      <div class="info-row"><span class="key">이메일</span><span class="val">${p.email}</span></div>
-      <div class="info-row"><span class="key">연락처</span><span class="val">${p.phone}</span></div>
-      <div class="info-row"><span class="key">신청일</span><span class="val">${p.date}</span></div>
+      <div class="info-row"><span class="key">이름</span><span class="val">${escHtml(p.name)}</span></div>
+      <div class="info-row"><span class="key">이메일</span><span class="val">${escHtml(p.email)}</span></div>
+      <div class="info-row"><span class="key">연락처</span><span class="val">${escHtml(p.phone)}</span></div>
+      <div class="info-row"><span class="key">신청일</span><span class="val">${escHtml(p.date)}</span></div>
     </div>
     <div class="modal-section">
       <h4>파트너 정보</h4>
-      <div class="info-row"><span class="key">업체 유형</span><span class="val">${p.biz}</span></div>
+      <div class="info-row"><span class="key">업체 유형</span><span class="val">${escHtml(p.biz)}</span></div>
       <div class="info-row"><span class="key">예상 등급</span><span class="val">${TIER_MAP[p.tier]} (월 ${p.tier}건)</span></div>
-      <div class="info-row"><span class="key">소개 채널</span><span class="val">${p.channel||'—'}</span></div>
+      <div class="info-row"><span class="key">소개 채널</span><span class="val">${escHtml(p.channel||'—')}</span></div>
       <div class="info-row"><span class="key">현재 상태</span><span class="val">${statusBadge(p.status)}</span></div>
       <div class="info-row"><span class="key">파트너 코드</span><span class="val">${p.code?`<span class="code-chip" onclick="copyCode('${p.code}')">${p.code}</span>`:'미발급'}</span></div>
-      ${p.msg?`<div class="info-row"><span class="key">메시지</span><span class="val" style="max-width:280px;text-align:right">${p.msg}</span></div>`:''}
+      ${p.msg?`<div class="info-row"><span class="key">메시지</span><span class="val" style="max-width:280px;text-align:right">${escHtml(p.msg)}</span></div>`:''}
     </div>
     ${p.code?`<div class="modal-section"><h4>파트너 코드</h4><div class="code-display"><div class="code-val">${p.code}</div><div class="code-copy" onclick="copyCode('${p.code}')">클릭하여 복사</div></div></div>`:''}
     <div class="modal-section">
@@ -2502,7 +2530,7 @@ function openModal(id){
         ${p.status==='approved'||p.status==='review'?`<button class="sbt sbt-active" onclick="changeStatus('${p.id}','active');closeModalDirect()">▶ 활성화</button>`:''}
         ${p.status==='active'?`<button class="sbt sbt-gold" onclick="changeStatus('${p.id}','gold');closeModalDirect()">⭐ Gold 승격</button>`:''}
         ${p.status!=='rejected'?`<button class="sbt sbt-reject" onclick="changeStatus('${p.id}','rejected');closeModalDirect()">✕ 거절</button>`:''}
-        ${p.code?`<button class="sbt" style="background:#FEF3C7;color:#92400E;border-color:#FCD34D;" onclick="resetPassword('${p.id}','${p.code}')">🔑 비밀번호 재설정</button>`:''}
+        ${p.code?`<button class="sbt" style="background:#FEF3C7;color:#92400E;border-color:#FCD34D;" onclick="resetPassword('${p.id}')">🔑 비밀번호 재설정</button>`:''}
       </div>
     </div>`;
   document.getElementById('modal-overlay').classList.add('open');
@@ -2510,24 +2538,15 @@ function openModal(id){
 function closeModal(e){ if(e.target===document.getElementById('modal-overlay')) closeModalDirect(); }
 function closeModalDirect(){ document.getElementById('modal-overlay').classList.remove('open'); }
 
-async function resetPassword(id, code){
-  const newPw = prompt(`새 비밀번호를 입력하세요.\n(비워두면 파트너 코드(${code})로 초기화됩니다):`) ?? null;
-  if(newPw === null) return; // 취소
-  const pw = newPw.trim() || code;
-  try {
-    const res = await adminFetch(`${API_BASE}/api/partners/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pw }),
-    });
-    if(!res.ok) throw new Error((await res.json()).error || res.status);
-    const p = partners.find(x => x.id === id);
-    if(p) p.pw = pw;
-    toast(`비밀번호가 "${pw}"(으)로 변경됐습니다.`);
-    closeModalDirect();
-  } catch(e) {
-    toast('비밀번호 변경 실패: ' + e.message, 'err');
-  }
+async function resetPassword(id){
+  const p = partners.find(x => x.id === id);
+  if(!p || !confirm(`${p.name} 님의 비밀번호를 새 임시 비밀번호로 바꿀까요?\n지금 로그인되어 있는 기기는 모두 로그아웃됩니다.`)) return;
+  const tempPw = generateTempPw();
+  if(!await syncPartnerToDB(id, { pw: tempPw })) return;
+  logHistory('settings', `${p.name} 님 비밀번호 재설정`, { id });
+  closeModalDirect();
+  showTempPw(p, tempPw);
+  toast('임시 비밀번호가 발급되었습니다.');
 }
 
 // ── 유틸 ─────────────────────────────────────────
@@ -2807,8 +2826,7 @@ async function fetchReferrals(){
     const data = await res.json();
     if(Array.isArray(data)){ allReferrals = data; }
   }catch(e){
-    const stored = JSON.parse(localStorage.getItem('mw_referrals') || '[]');
-    allReferrals = stored.length ? stored : DEMO_REFERRALS;
+    toast('고객 명단을 불러오지 못했습니다.', 'err');
   }
   renderReferralsStats();
   renderReferralsTable();
@@ -2860,14 +2878,14 @@ function renderReferralsTable(){
     <tr>
       <td style="color:var(--gray);font-size:12px">${i+1}</td>
       <td>
-        <div class="td-name">${r.partnerName||'-'}</div>
-        <div class="td-sub">${r.partnerCode||''}</div>
+        <div class="td-name">${escHtml(r.partnerName||'-')}</div>
+        <div class="td-sub">${escHtml(r.partnerCode||'')}</div>
       </td>
-      <td class="td-name">${r.customerName||'-'}</td>
-      <td style="font-size:12px;font-weight:600;">${r.customerPhone||'-'}</td>
-      <td style="font-size:11px;color:var(--gray)">${r.customerEmail||'-'}</td>
-      <td style="font-size:12px">${r.bizType||'-'}</td>
-      <td style="font-size:11px;color:var(--gray);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.memo||''}">${r.memo||'-'}</td>
+      <td class="td-name">${escHtml(r.customerName||'-')}</td>
+      <td style="font-size:12px;font-weight:600;">${escHtml(r.customerPhone||'-')}</td>
+      <td style="font-size:11px;color:var(--gray)">${escHtml(r.customerEmail||'-')}</td>
+      <td style="font-size:12px">${escHtml(r.bizType||'-')}</td>
+      <td style="font-size:11px;color:var(--gray);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(r.memo||'')}">${escHtml(r.memo||'-')}</td>
       <td style="font-size:12px;color:var(--gray)">${(r.submittedAt||'').slice(0,10)}</td>
       <td><span class="status ${RF_STATUS_CLS[r.status]||'s-pending'}">${RF_STATUS_MAP[r.status]||r.status}</span></td>
       <td style="text-align:center;">
@@ -2889,7 +2907,7 @@ function renderReferralsTable(){
           <option value="settled"    ${r.status==='settled'   ?'selected':''}>정산완료</option>
         </select>
       </td>
-      <td><button class="btn-sm btn-reject" onclick="deleteReferral('${r.id}','${r.customerName||''}')">🗑 삭제</button></td>
+      <td><button class="btn-sm btn-reject" onclick="deleteReferral('${r.id}','${encArg(r.customerName)}')">🗑 삭제</button></td>
     </tr>`).join('');
 }
 
@@ -2943,12 +2961,12 @@ function renderSettlements(pending, settled){
   const pt = document.getElementById('st-pending-tbody');
   pt.innerHTML = pending.length ? pending.map(s=>`
     <tr>
-      <td><div class="td-name">${s.partnerName||s.partnerCode}</div><div class="td-sub">${s.partnerCode}</div></td>
-      <td>${s.month}</td>
+      <td><div class="td-name">${escHtml(s.partnerName||s.partnerCode)}</div><div class="td-sub">${escHtml(s.partnerCode)}</div></td>
+      <td>${escHtml(s.month)}</td>
       <td>${s.referralCount}건</td>
       <td style="font-weight:700;color:var(--warn);">${fmtMoney(s.amount)}</td>
       <td>
-        <button class="btn-sm btn-approve" onclick="processSettlement('${s.partnerCode}','${s.partnerName||''}','${s.month}',${s.referralCount},${s.amount})">
+        <button class="btn-sm btn-approve" onclick="processSettlement('${encArg(s.partnerCode)}','${encArg(s.partnerName)}','${encArg(s.month)}',${Number(s.referralCount)||0},${Number(s.amount)||0})">
           💸 입금 처리
         </button>
       </td>
@@ -2959,18 +2977,19 @@ function renderSettlements(pending, settled){
   const dt = document.getElementById('st-done-tbody');
   dt.innerHTML = settled.length ? settled.map(s=>`
     <tr>
-      <td><div class="td-name">${s.partnerName||s.partnerCode}</div><div class="td-sub">${s.partnerCode}</div></td>
-      <td>${s.month}</td>
+      <td><div class="td-name">${escHtml(s.partnerName||s.partnerCode)}</div><div class="td-sub">${escHtml(s.partnerCode)}</div></td>
+      <td>${escHtml(s.month)}</td>
       <td>${s.referralCount}건</td>
       <td style="font-weight:700;color:var(--ok);">${fmtMoney(s.amount)}</td>
-      <td>${s.payDate||'-'}</td>
-      <td style="font-size:11px;color:var(--gray);">${s.note||'-'}</td>
+      <td>${escHtml(s.payDate||'-')}</td>
+      <td style="font-size:11px;color:var(--gray);">${escHtml(s.note||'-')}</td>
       <td><button class="btn-sm btn-reject" onclick="cancelSettlement('${s.id}')">취소</button></td>
     </tr>`).join('')
     : `<tr><td colspan="7"><div class="empty-state"><div class="ico">💰</div><p>정산 완료 내역이 없습니다</p></div></td></tr>`;
 }
 
 async function processSettlement(code, name, month, count, amount){
+  code = decodeURIComponent(code); name = decodeURIComponent(name); month = decodeURIComponent(month);
   const payDate = prompt(`[${name||code}] ${month} 정산\n금액: ₩${Number(amount).toLocaleString()}\n\n입금일을 입력하세요 (예: 2026-05-15):`, new Date().toISOString().slice(0,10));
   if(!payDate) return;
   const note = prompt('메모 (선택사항):') || '';
@@ -3173,7 +3192,7 @@ function renderMaterialRows(){
     <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #F0F0F8;">
       <span style="font-size:18px;">${m.icon}</span>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.name}</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(m.name)}</div>
         <div style="font-size:11px;color:var(--gray);">${m.desc}</div>
       </div>
       <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--gray);">
@@ -3545,12 +3564,12 @@ function renderEmailPartnerList(){
       onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='transparent'">
       <input type="checkbox" class="email-chk" data-id="${p.id}" style="width:16px;height:16px;accent-color:var(--p);flex-shrink:0;cursor:pointer;" onchange="updateEmailSelectedCount()">
       <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;font-weight:700;color:var(--text);">${p.name}
+        <div style="font-size:13px;font-weight:700;color:var(--text);">${escHtml(p.name)}
           <span style="font-size:10px;background:var(--pale);color:var(--p);padding:2px 7px;border-radius:100px;margin-left:4px;">${TIER_LABEL[p.tier]||p.tier||'Basic'}</span>
           <span style="font-size:10px;color:${STATUS_COLOR[p.status]||'var(--gray)'};margin-left:4px;">● ${STATUS_LABEL[p.status]||p.status}</span>
         </div>
         <div style="font-size:11px;color:var(--gray);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-          ${p.email ? `✉ ${p.email}` : '<span style="color:#FCA5A5;">이메일 없음</span>'}
+          ${p.email ? `✉ ${escHtml(p.email)}` : '<span style="color:#FCA5A5;">이메일 없음</span>'}
           ${p.code ? ` &nbsp;·&nbsp; ${p.code}` : ''}
         </div>
       </div>
@@ -3614,11 +3633,17 @@ function replaceVars(text, p){
     .replace(/\{\{tier\}\}/g, TIER_LABEL[p.tier] || p.tier || 'Basic');
 }
 
-function generateEmailHTML(name, code, tier, msgBody) {
+function generateEmailHTML(name, code, tier, msgBody, tempPw) {
   const TIER_MAP = {'1-4':'Basic','5-9':'Silver','10+':'Gold'};
   const tierLabel = TIER_MAP[tier] || tier || 'Silver';
   const safeCode = code || 'MW-????';
-  const safeName = name || '파트너님';
+  const safeName = escHtml(name || '파트너님');
+  const pwBlock = tempPw ? `
+    <div style="margin-top:18px;padding-top:16px;border-top:1px solid #EEF0FF;">
+      <div style="font-size:11px;font-weight:700;color:#6C757D;margin-bottom:6px;">임시 비밀번호</div>
+      <div style="font-family:monospace;font-size:20px;font-weight:700;color:#1A1A2E;letter-spacing:1px;">${escHtml(tempPw)}</div>
+      <div style="font-size:11px;color:#6C757D;margin-top:6px;">로그인 후 '비밀번호 변경'에서 바꿔 주세요. 다른 사람에게 알려주지 마세요.</div>
+    </div>` : '';
   const extraBlock = msgBody && msgBody.trim() ? `
     <div style="background:#fffbea;border-left:4px solid #F4C430;border-radius:12px;padding:18px 20px;margin-bottom:20px;">
       <div style="font-size:11px;font-weight:700;color:#92400E;letter-spacing:1px;margin-bottom:8px;">담당자 안내</div>
@@ -3703,6 +3728,7 @@ function generateEmailHTML(name, code, tier, msgBody) {
     <div style="font-family:Montserrat,Arial,sans-serif;font-size:34px;font-weight:900;color:#4B3BC7;letter-spacing:4px;background:#EEF0FF;border-radius:12px;padding:14px 24px;display:inline-block;margin-bottom:12px;border:2px dashed #A29BFE;">${safeCode}</div>
     <br>
     <span style="display:inline-block;background:#4B3BC7;color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;margin-top:10px;">${tierLabel} 파트너</span>
+    ${pwBlock}
   </div>
 
   ${commonBlock}
@@ -3809,10 +3835,10 @@ async function sendBulkEmail(){
         html_body:  htmlBody,
       });
       ok++;
-      logEl.innerHTML += `<div>✅ <strong>${p.name}</strong> (${p.email}) — 발송 완료</div>`;
+      logEl.innerHTML += `<div>✅ <strong>${escHtml(p.name)}</strong> (${escHtml(p.email)}) — 발송 완료</div>`;
     } catch(e) {
       fail++;
-      logEl.innerHTML += `<div style="color:var(--err);">❌ <strong>${p.name}</strong> (${p.email}) — 실패: ${e?.text||e}</div>`;
+      logEl.innerHTML += `<div style="color:var(--err);">❌ <strong>${escHtml(p.name)}</strong> (${escHtml(p.email)}) — 실패: ${e?.text||e}</div>`;
     }
     await new Promise(r => setTimeout(r, 300));
   }
@@ -3867,7 +3893,7 @@ async function submitAddPartner(){
 
   partners.push({
     id: newId, name, email, phone, sns:'', biz, tier, channel:'직접추가',
-    msg, date: today, status, code, pw: code||'', referrals:0, payback:0
+    msg, date: today, status, code, referrals:0, payback:0
   });
   await savePartners();
   logHistory('partner_added', `직접 추가: ${name} (${email||'이메일 없음'})`, { tier, status: STATUS_MAP[status]||status, code: code||'미발급' });
